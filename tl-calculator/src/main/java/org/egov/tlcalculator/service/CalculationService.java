@@ -14,6 +14,7 @@ import org.egov.tlcalculator.web.models.*;
 import org.egov.tlcalculator.web.models.enums.CalculationType;
 import org.egov.tlcalculator.web.models.FeeAndBillingSlabIds;
 import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
+import org.egov.tlcalculator.web.models.tradelicense.TradeLicense.StatusEnum;
 import org.egov.tlcalculator.web.models.demand.Category;
 import org.egov.tlcalculator.web.models.demand.TaxHeadEstimate;
 import org.egov.tlcalculator.web.models.tradelicense.TradeUnit;
@@ -23,11 +24,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.jayway.jsonpath.JsonPath;
+
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
-
+import org.egov.tlcalculator.web.models.tradelicense.TradeLicense;
 
 @Service
 @Slf4j
@@ -62,22 +66,33 @@ public class CalculationService {
     private TLRenewalCalculation tlRenewal;
 
     /**
-     * Calculates tax estimates and creates demand
+     * Calculates tax estimates and creates demand 
      * @param calculationReq The calculationCriteria request
      * @return List of calculations for all applicationNumbers or tradeLicenses in calculationReq
+     * Changes : In the application status is INITIATED or PENDINGAPPLFEE then it demand will be generated only for application fee otherwise it will be for TL tax ( license fee )
      */
    public List<Calculation> calculate(CalculationReq calculationReq){
-       String tenantId = calculationReq.getCalulationCriteria().get(0).getTenantId();
+	    String tenantId = calculationReq.getCalulationCriteria().get(0).getTenantId();
+       StatusEnum status = calculationReq.getCalulationCriteria().get(0).getTradelicense().getStatus();
        Object mdmsData = mdmsService.mDMSCall(calculationReq.getRequestInfo(),tenantId);
+       
        List<Calculation> calculations = getCalculation(calculationReq.getRequestInfo(),
                calculationReq.getCalulationCriteria(),mdmsData);
+       
+       if(status==TradeLicense.StatusEnum.INITIATED  || status==TradeLicense.StatusEnum.PENDINGAPPLFEE) {
+    	   for (Calculation calculation : calculations) {
+    		   calculation.setTaxHeadEstimates(  calculation.getTaxHeadEstimates().stream().filter(
+        			   taxheadEst -> taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead())).collect(Collectors.toList()));
+		}
+       }
        demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData,businessService_TL);
        CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
        producer.push(config.getSaveTopic(),calculationRes);
        return calculations;
    }
 
-
+   
+   
     /***
      * Calculates tax estimates
      * @param requestInfo The requestInfo of the calculation request
@@ -90,8 +105,10 @@ public class CalculationService {
           TradeLicense license;
           if (criteria.getTradelicense()==null && criteria.getApplicationNumber() != null) {
               license = utils.getTradeLicense(requestInfo, criteria.getApplicationNumber(), criteria.getTenantId());
+             
               criteria.setTradelicense(license);
-          }
+          } 
+          
           EstimatesAndSlabs estimatesAndSlabs = getTaxHeadEstimates(criteria,requestInfo,mdmsData);
           List<TaxHeadEstimate> taxHeadEstimates = estimatesAndSlabs.getEstimates();
           FeeAndBillingSlabIds tradeTypeFeeAndBillingSlabIds = estimatesAndSlabs.getTradeTypeFeeAndBillingSlabIds();
@@ -119,18 +136,17 @@ public class CalculationService {
      * @param requestInfo The requestInfo of the calculation request
      * @return TaxHeadEstimates and the billingSlabs used to calculate it
      */
-    private EstimatesAndSlabs getTaxHeadEstimates(CalulationCriteria calulationCriteria, RequestInfo requestInfo,Object mdmsData){
+    private EstimatesAndSlabs getTaxHeadEstimates(CalulationCriteria calulationCriteria, RequestInfo requestInfo,Object mdmsData ){
       List<TaxHeadEstimate> estimates = new LinkedList<>();
       EstimatesAndSlabs  estimatesAndSlabs = getBaseTax(calulationCriteria,requestInfo,mdmsData);
 
       estimates.addAll(estimatesAndSlabs.getEstimates());
-
       if(calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdhocPenalty()!=null)
           estimates.add(getAdhocPenalty(calulationCriteria));
 
       if(calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdhocExemption()!=null)
           estimates.add(getAdhocExemption(calulationCriteria));
-
+      
       estimatesAndSlabs.setEstimates(estimates);
 
       return estimatesAndSlabs;
@@ -159,6 +175,7 @@ public class CalculationService {
       FeeAndBillingSlabIds tradeTypeFeeAndBillingSlabIds = getTradeUnitFeeAndBillingSlabIds(license,CalculationType
               .fromValue(tradeUnitCalculationType));
       BigDecimal tradeUnitFee = tradeTypeFeeAndBillingSlabIds.getFee();
+      BigDecimal tradeAppFee = tradeTypeFeeAndBillingSlabIds.getApplicationFee();
 
       estimatesAndSlabs.setTradeTypeFeeAndBillingSlabIds(tradeTypeFeeAndBillingSlabIds);
       BigDecimal accessoryFee = new BigDecimal(0);
@@ -187,9 +204,12 @@ public class CalculationService {
           estimate.setTaxHeadCode(config.getBaseTaxHead());
           estimateList.add(estimate);
       }
-
+      TaxHeadEstimate estimateAppfee = new TaxHeadEstimate();
+      estimateAppfee.setEstimateAmount(tradeAppFee);
+      estimateAppfee.setCategory(Category.FEE);
+      estimateAppfee.setTaxHeadCode(config.getAppFeeTaxHead());
+      estimateList.add(estimateAppfee);
       estimatesAndSlabs.setEstimates(estimateList);
-
       return estimatesAndSlabs;
   }
 
@@ -208,6 +228,7 @@ public class CalculationService {
       return estimate;
   }
 
+ 
 
     /**
      *  Creates taxHeadEstimates for AdhocRebate
@@ -228,10 +249,12 @@ public class CalculationService {
      * @param license TradeLicense for which fee has to be calculated
      * @param calculationType Calculation logic to be used
      * @return TradeUnit Fee and billingSlab used to calculate it
+     * Changes : Added Applicatino fee taxhead
      */
-  private FeeAndBillingSlabIds getTradeUnitFeeAndBillingSlabIds(TradeLicense license, CalculationType calculationType){
+  private FeeAndBillingSlabIds getTradeUnitFeeAndBillingSlabIds(TradeLicense license, CalculationType calculationType ){
 
       List<BigDecimal> tradeUnitFees = new LinkedList<>();
+      List<BigDecimal> tradeAppFees = new LinkedList<>();
       List<TradeUnit> tradeUnits = license.getTradeLicenseDetail().getTradeUnits();
       List<String> billingSlabIds = new LinkedList<>();
       int i = 0;
@@ -254,7 +277,7 @@ public class CalculationService {
               log.info("query "+query);
               log.info("preparedStmtList "+preparedStmtList.toString());
               List<BillingSlab> billingSlabs = repository.getDataFromDB(query, preparedStmtList);
-
+              
               if(billingSlabs.size()>1)
                   throw new CustomException("BILLINGSLAB ERROR","Found multiple BillingSlabs for the given TradeType");
               if(CollectionUtils.isEmpty(billingSlabs))
@@ -263,23 +286,28 @@ public class CalculationService {
 
              billingSlabIds.add(billingSlabs.get(0).getId()+"|"+i+"|"+tradeUnit.getId());
 
-             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.FLAT))
-                 tradeUnitFees.add(billingSlabs.get(0).getRate());
-        //         tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate());
-
-             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.RATE)){
-                 BigDecimal uomVal = new BigDecimal(tradeUnit.getUomValue());
-                 tradeUnitFees.add(billingSlabs.get(0).getRate().multiply(uomVal));
-                 //tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate().multiply(uomVal));
-             }
+            	 
+	             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.FLAT))
+	                 tradeUnitFees.add(billingSlabs.get(0).getRate());
+	             	 
+	        //         tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate());
+	
+	             if(billingSlabs.get(0).getType().equals(BillingSlab.TypeEnum.RATE)){
+	                 BigDecimal uomVal = new BigDecimal(tradeUnit.getUomValue());
+	                 tradeUnitFees.add(billingSlabs.get(0).getRate().multiply(uomVal));
+	                 //tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate().multiply(uomVal));
+	             }
+	             tradeAppFees.add(billingSlabs.get(0).getApplicationFee());
            i++;
          }
       }
-
+       
       BigDecimal tradeUnitTotalFee = getTotalFee(tradeUnitFees,calculationType);
+      BigDecimal tradeAppTotalFee = getTotalFee(tradeAppFees,calculationType);
 
       FeeAndBillingSlabIds feeAndBillingSlabIds = new FeeAndBillingSlabIds();
       feeAndBillingSlabIds.setFee(tradeUnitTotalFee);
+      feeAndBillingSlabIds.setApplicationFee(tradeAppTotalFee);
       feeAndBillingSlabIds.setBillingSlabIds(billingSlabIds);
       feeAndBillingSlabIds.setId(UUID.randomUUID().toString());
 

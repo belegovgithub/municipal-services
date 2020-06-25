@@ -65,6 +65,10 @@ public class BillingSlab {
 	@JsonProperty("rate")
 	private BigDecimal rate = null;
 	
+	@JsonProperty("applicationFee")
+	private BigDecimal applicationFee = null;
+	
+	
 	private AuditDetails auditDetails;
 
 	

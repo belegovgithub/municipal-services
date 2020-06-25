@@ -83,6 +83,9 @@ public class TLCalculatorConfigs {
 
     @Value("${egov.taxhead.time.rebate}")
     private String timeRebateTaxHead;
+    
+    @Value("${egov.taxhead.appFee}")
+    private String appFeeTaxHead;
 
 
 

@@ -53,6 +53,10 @@ public class TradeLicenseDetail   {
 
     @JsonProperty("adhocExemption")
     private BigDecimal adhocExemption;
+    
+
+    @JsonProperty("applicationFee")
+    private BigDecimal applicationFee;
 
     @JsonProperty("adhocPenalty")
     private BigDecimal adhocPenalty;

@@ -200,7 +200,9 @@ public class  TradeLicense   {
 
         REJECTED("REJECTED"),
 
-        CANCELED("CANCELED");
+        CANCELED("CANCELED"),
+    	
+        PENDINGAPPLFEE("PENDINGAPPLFEE");
 
         private String value;
 
