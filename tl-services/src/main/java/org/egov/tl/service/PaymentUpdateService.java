@@ -136,7 +136,7 @@ public class PaymentUpdateService {
 					 * calling workflow to update status
 					 */
 					wfIntegrator.callWorkFlow(updateRequest);
-					
+					System.out.println("update demand on payment of application fee::"+updateRequest.getLicenses().get(0));
 					//To update demand on payment of application fee. Need to check final payment
 					calculationService.addCalculation(updateRequest);
 
