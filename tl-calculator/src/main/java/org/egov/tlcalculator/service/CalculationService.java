@@ -80,11 +80,18 @@ public class CalculationService {
                calculationReq.getCalulationCriteria(),mdmsData);
        
        if(status==TradeLicense.StatusEnum.INITIATED  || status==TradeLicense.StatusEnum.PENDINGAPPLFEE) {
+    	   System.out.println("initiate status");
     	   for (Calculation calculation : calculations) {
-    		   calculation.setTaxHeadEstimates(  calculation.getTaxHeadEstimates().stream().filter(
-        			   taxheadEst -> taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead())).collect(Collectors.toList()));
+    		   List<TaxHeadEstimate> taxheadEsts =  calculation.getTaxHeadEstimates().stream().filter(
+        			   taxheadEst -> (taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead())) && !taxheadEst.getEstimateAmount().equals(BigDecimal.ZERO)).collect(Collectors.toList());
+    		   if(taxheadEsts.size()==0) {
+    			   taxheadEsts = calculation.getTaxHeadEstimates().stream().filter(
+            			   taxheadEst -> !(taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead()))) .collect(Collectors.toList());
+    		   }
+    		   calculation.setTaxHeadEstimates(taxheadEsts);
 		}
        }
+      
        demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData,businessService_TL);
        CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
        producer.push(config.getSaveTopic(),calculationRes);
