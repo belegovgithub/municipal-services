@@ -91,6 +91,13 @@ public class CalculationService {
     		   calculation.setTaxHeadEstimates(taxheadEsts);
 		}
        }
+       else {
+    	   for (Calculation calculation : calculations) {
+    	   List<TaxHeadEstimate> taxheadEsts = calculation.getTaxHeadEstimates().stream().filter(
+    			   taxheadEst -> !(taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead()))) .collect(Collectors.toList());
+    	   calculation.setTaxHeadEstimates(taxheadEsts);
+    	   }
+       }
       
        demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData,businessService_TL);
        CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
@@ -210,12 +217,13 @@ public class CalculationService {
       }else{
           estimate.setTaxHeadCode(config.getBaseTaxHead());
           estimateList.add(estimate);
+          TaxHeadEstimate estimateAppfee = new TaxHeadEstimate();
+          estimateAppfee.setEstimateAmount(tradeAppFee);
+          estimateAppfee.setCategory(Category.FEE);
+          estimateAppfee.setTaxHeadCode(config.getAppFeeTaxHead());
+          estimateList.add(estimateAppfee);
       }
-      TaxHeadEstimate estimateAppfee = new TaxHeadEstimate();
-      estimateAppfee.setEstimateAmount(tradeAppFee);
-      estimateAppfee.setCategory(Category.FEE);
-      estimateAppfee.setTaxHeadCode(config.getAppFeeTaxHead());
-      estimateList.add(estimateAppfee);
+    
       estimatesAndSlabs.setEstimates(estimateList);
       return estimatesAndSlabs;
   }
