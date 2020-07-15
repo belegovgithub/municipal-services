@@ -1,12 +1,12 @@
 FROM egovio/apline-jre:8u121
 
-MAINTAINER Senthil<senthil.kalimuthu@tarento.com>
+MAINTAINER Vipin<vipinpublicdomain@gmail.com>
 
 
 # INSTRUCTIONS ON HOW TO BUILD JAR:
 # Move to the location where pom.xml is exist in project and build project using below command
 # "mvn clean package"
-COPY /target/tl-calculator-0.0.1-SNAPSHOT.jar /opt/egov/tl-calculator.jar
+COPY /target/pg-detail-0.0.1-SNAPSHOT.jar /opt/egov/pg-detail.jar
 
 COPY start.sh /usr/bin/start.sh
 
