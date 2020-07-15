@@ -20,11 +20,12 @@ public class PgDetail {
     private Long id;
     private String tenantId;
     private String merchantId;
-    private String secretKey;
-    private String userName;
-    private String password;
+    private String merchantSecretKey;
+    private String merchantUserName;
+    private String merchantPassword;
+    private String merchantServiceId;
     private Date lastModifiedDate;
 	private Date createdDate; 
-	private Long createdBy;
-	private Long lastModifiedBy; 
+	private String createdBy;
+	private String  lastModifiedBy; 
 }

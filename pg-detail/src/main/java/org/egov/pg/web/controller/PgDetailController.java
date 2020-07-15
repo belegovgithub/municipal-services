@@ -40,8 +40,9 @@ public class PgDetailController {
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 	
-	@RequestMapping(value = "/_getPgDetail", method = RequestMethod.POST)
+	@RequestMapping(value = "/_get", method = RequestMethod.POST)
 	public ResponseEntity<PgDetailResponse> getPgDetails(@RequestBody PgDetailRequest pgDetailRequest){
+		System.out.println(pgDetailRequest);
 		PgDetailResponse response = service.getPgDetails(pgDetailRequest);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 		

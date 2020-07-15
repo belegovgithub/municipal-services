@@ -74,51 +74,40 @@ public class PgDetailRepository {
 	}
 	
 	
-	public List<PgDetail> createPgDetails(User user,List<PgDetail>pgDetailList) {
-		List<PgDetail>pgDetailListResult = new ArrayList<PgDetail>();
-		if(pgDetailList.size()>0) {
-			for(PgDetail eachPgDetail:pgDetailList) {
-				final Long newId = getNextSequence();
-				eachPgDetail.setId(newId);
-				eachPgDetail.setCreatedDate(new Date());
-				eachPgDetail.setLastModifiedDate(new Date());
-				eachPgDetail.setCreatedBy(user.getId());
-				eachPgDetail.setLastModifiedBy(user.getId());
-				String savedPgDetailResult = save(eachPgDetail);
-				if(savedPgDetailResult.equals("success")) {
-					pgDetailListResult.add(eachPgDetail);
-				}
-				else {
-					System.out.println("error while saving pgDetail");
-					pgDetailListResult.clear();
-					return pgDetailListResult;
-				}
-				
-			}
+	public List<PgDetail> createPgDetails(User user, List<PgDetail> pgDetails ) {
+		final Long newId = getNextSequence();
+		PgDetail pgDetail = pgDetails.get(0);
+		pgDetail.setId(newId);
+		pgDetail.setCreatedDate(new Date());
+		pgDetail.setLastModifiedDate(new Date());
+		pgDetail.setCreatedBy(user.getUuid());
+		PgDetail  pg= save(pgDetail);
+		if(pg!=null) {
+			return pgDetails;
 		}
-		System.out.println("All went well, so returning the success list");
-		return pgDetailListResult;
+		return null;
 	}
 	
-	public String save(PgDetail pgDetail) {
-		Map<String,Object>pgDetilInputs = new HashMap<String, Object>();
-		pgDetilInputs.put("id", pgDetail.getId());
-		pgDetilInputs.put("tenantid", pgDetail.getTenantId());
-		pgDetilInputs.put("merchantid", pgDetail.getMerchantId());
-		pgDetilInputs.put("secretkey", pgDetail.getSecretKey());
-		pgDetilInputs.put("username", pgDetail.getUserName());
-		pgDetilInputs.put("password", pgDetail.getPassword());
-		pgDetilInputs.put("createddate", pgDetail.getCreatedDate());
-		pgDetilInputs.put("lastmodifieddate", pgDetail.getLastModifiedDate());
-		pgDetilInputs.put("createdby", pgDetail.getCreatedBy());
-		pgDetilInputs.put("lastmodifiedby", pgDetail.getLastModifiedBy());
-		int result = namedParameterJdbcTemplate.update(pgDetailQueryBuilder.getInsertUserQuery(), pgDetilInputs);
-		if(result !=0) {
-			System.out.println("Saved successfully");
-			return "success";
-			
+	public PgDetail save(PgDetail pgDetail) {
+		if(pgDetail!=null) {
+			Map<String,Object>pgDetilInputs = new HashMap<String, Object>();
+			pgDetilInputs.put("id", pgDetail.getId());
+			pgDetilInputs.put("tenantid", pgDetail.getTenantId());
+			pgDetilInputs.put("merchantid", pgDetail.getMerchantId());
+			pgDetilInputs.put("merchantSecretKey", pgDetail.getMerchantSecretKey());
+			pgDetilInputs.put("merchantUserName", pgDetail.getMerchantUserName());
+			pgDetilInputs.put("merchantPassword", pgDetail.getMerchantPassword());
+			pgDetilInputs.put("merchantServiceId", pgDetail.getMerchantServiceId());
+			pgDetilInputs.put("createddate", pgDetail.getCreatedDate());
+			pgDetilInputs.put("lastmodifieddate", pgDetail.getLastModifiedDate());
+			pgDetilInputs.put("createdby", pgDetail.getCreatedBy());
+			pgDetilInputs.put("lastmodifiedby", pgDetail.getLastModifiedBy());
+			int result = namedParameterJdbcTemplate.update(pgDetailQueryBuilder.getInsertUserQuery(), pgDetilInputs);
+			if(result!=0) {
+				return pgDetail;
+			}
 		}
-		return "error";
+		return null;
 		
 	}
 

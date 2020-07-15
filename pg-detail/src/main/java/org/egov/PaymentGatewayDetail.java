@@ -8,11 +8,11 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootApplication
 @Import({ TracerConfiguration.class })
-public class PaymentDetail {
+public class PaymentGatewayDetail {
 
     public static void main(String[] args) throws Exception {
     	System.out.println("starting my service==");
-        SpringApplication.run(PaymentDetail.class, args);
+        SpringApplication.run(PaymentGatewayDetail.class, args);
     }
 
 }

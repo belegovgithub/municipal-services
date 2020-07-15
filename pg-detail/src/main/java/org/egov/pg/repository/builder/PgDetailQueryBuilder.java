@@ -12,7 +12,7 @@ public class PgDetailQueryBuilder {
 	
 	public static  String getInsertUserQuery() {
 		
-		return "INSERT into eg_pgdetail(id, tenantid, merchantid, secretkey, username, password, createddate,lastmodifieddate,createdby,lastmodifiedby) values(:id,:tenantid, :merchantid, :secretkey, :username, :password, :createddate,:lastmodifieddate,:createdby,:lastmodifiedby)";
+		return "INSERT into eg_pgdetail(id, tenantid, merchantid, merchantSecretKey, merchantUserName, merchantPassword, merchantServiceId ,  createddate,lastmodifieddate,createdby,lastmodifiedby) values(:id,:tenantid, :merchantid, :merchantSecretKey, :merchantUserName, :merchantPassword, :merchantServiceId, :createddate,:lastmodifieddate,:createdby,:lastmodifiedby)";
 	   
 	}
 	

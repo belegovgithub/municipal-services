@@ -1,10 +1,12 @@
 
 package org.egov.pg.service;
+import java.util.ArrayList;
 import java.util.List;
 
 
 import org.egov.common.contract.request.User;
 import org.egov.common.contract.response.ResponseInfo;
+import org.egov.pg.domain.service.utils.EncryptionDecryptionUtil;
 import org.egov.pg.repository.PgDetailRepository;
 import org.egov.pg.utils.PgDetailUtils;
 import org.egov.pg.utils.ResponseInfoFactory;
@@ -34,6 +36,8 @@ public class PgDetailService {
 	@Autowired
 	private PgDetailRepository repository;
 	
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 //	@Autowired
 //	private BillingslabQueryBuilder queryBuilder;
 //	
@@ -46,19 +50,26 @@ public class PgDetailService {
 	 * @return
 	 */
 	public PgDetailResponse createPgDetails(PgDetailRequest pgDetailRequest) {
-		
-		List<PgDetail>pgDetailList = pgDetailRequest.getPgDetail();
+		PgDetail pg =encryptionDecryptionUtil.encryptObject(pgDetailRequest.getPgDetail().get(0) , "PgDetail",PgDetail.class);
+		System.out.println("Encyription "+pg);
+		List<PgDetail> pgList = new ArrayList<PgDetail>();
+		pgList.add(pg);
 		User userInfo = pgDetailRequest.getRequestInfo().getUserInfo();
-		List<PgDetail>pgDetailListResponse = repository.createPgDetails(userInfo,pgDetailList);
+		List<PgDetail> pgDetailListResponse = repository.createPgDetails(userInfo,pgList);
 		ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(pgDetailRequest.getRequestInfo(), true);
 		return new PgDetailResponse(responseInfo, pgDetailListResponse);
 		
 	}
 	
    public PgDetailResponse getPgDetails(PgDetailRequest pgDetailRequest) {
-	   List<PgDetail>pgDetailListResponse = repository.getPgDetails(pgDetailRequest.getPgDetail());
+	   List<PgDetail> pgDetailListResponse = repository.getPgDetails(pgDetailRequest.getPgDetail());
+	   ArrayList<PgDetail> decyrptList = new ArrayList<PgDetail>();
+	   if(pgDetailListResponse!=null && pgDetailListResponse.size()>0)
+	   for (PgDetail pgDetail : pgDetailListResponse) {
+		   decyrptList.add(encryptionDecryptionUtil.decryptObject(pgDetail, "PgDetail", PgDetail.class, pgDetailRequest.getRequestInfo()));
+	   }
 	   ResponseInfo responseInfo = responseInfoFactory.createResponseInfoFromRequestInfo(pgDetailRequest.getRequestInfo(), true);
-	   return new PgDetailResponse(responseInfo, pgDetailListResponse);
+	   return new PgDetailResponse(responseInfo, decyrptList);
    }
 	
 	
