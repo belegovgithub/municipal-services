@@ -232,6 +232,7 @@ public class NotificationUtil {
 	private String getApprovedMsg(TradeLicense license, BigDecimal amountToBePaid, String message) {
 		message = message.replace("<2>", license.getTradeName());
 		message = message.replace("<3>", amountToBePaid.toString());
+		message = message.replace("{PAYMENT_LINK}",config.getUiAppHost()+"/citizen");
 		return message;
 	}
 
