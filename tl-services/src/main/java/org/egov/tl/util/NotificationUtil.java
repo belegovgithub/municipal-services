@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -30,12 +31,14 @@ public class NotificationUtil {
 
 	private Producer producer;
 
+	private RestTemplate restTemplate;
+
 	@Autowired
-	public NotificationUtil(TLConfiguration config, ServiceRequestRepository serviceRequestRepository,
-			Producer producer) {
+	public NotificationUtil(TLConfiguration config, ServiceRequestRepository serviceRequestRepository, Producer producer, RestTemplate restTemplate) {
 		this.config = config;
 		this.serviceRequestRepository = serviceRequestRepository;
 		this.producer = producer;
+		this.restTemplate = restTemplate;
 	}
 
 	final String receiptNumberKey = "receiptNumber";
@@ -232,7 +235,19 @@ public class NotificationUtil {
 	private String getApprovedMsg(TradeLicense license, BigDecimal amountToBePaid, String message) {
 		message = message.replace("<2>", license.getTradeName());
 		message = message.replace("<3>", amountToBePaid.toString());
-		message = message.replace("{PAYMENT_LINK}",config.getUiAppHost()+"/citizen");
+
+
+		String UIHost = config.getUiAppHost();
+
+		String paymentPath = config.getPayLinkSMS();
+		paymentPath = paymentPath.replace("$consumercode",license.getApplicationNumber());
+		paymentPath = paymentPath.replace("$tenantId",license.getTenantId());
+		paymentPath = paymentPath.replace("$businessservice",businessService_TL);
+
+		String finalPath = UIHost + paymentPath;
+		System.out.println("final path=="+finalPath);
+		message = message.replace(PAYMENT_LINK_PLACEHOLDER,getShortenedUrl(finalPath));
+		System.out.println("Payment message=="+message);
 		return message;
 	}
 
@@ -519,6 +534,27 @@ public class NotificationUtil {
 	 */
 	public void sendEventNotification(EventRequest request) {
 		producer.push(config.getSaveUserEventsTopic(), request);
+	}
+
+
+	/**
+	 * Method to shortent the url
+	 * returns the same url if shortening fails
+	 * @param url
+	 */
+	public String getShortenedUrl(String url){
+
+		HashMap<String,String> body = new HashMap<>();
+		body.put("url",url);
+		StringBuilder builder = new StringBuilder(config.getUrlShortnerHost());
+		builder.append(config.getUrlShortnerEndpoint());
+		String res = restTemplate.postForObject(builder.toString(), body, String.class);
+
+		if(StringUtils.isEmpty(res)){
+			log.error("URL_SHORTENING_ERROR","Unable to shorten url: "+url); ;
+			return url;
+		}
+		else return res;
 	}
 
 }

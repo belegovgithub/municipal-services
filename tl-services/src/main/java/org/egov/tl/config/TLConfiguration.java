@@ -249,6 +249,9 @@ public class TLConfiguration {
 		
 	@Value("${egov.usr.events.pay.link}")
 	private String payLink;
+
+    @Value("${egov.msg.pay.link}")
+    private String payLinkSMS;
 	
 	@Value("${egov.usr.events.pay.code}")
 	private String payCode;
@@ -285,6 +288,13 @@ public class TLConfiguration {
 
 
 
+    // url shortner
+
+    @Value("${egov.url.shortner.host}")
+    private String urlShortnerHost;
+
+    @Value("${egov.url.shortner.endpoint}")
+    private String urlShortnerEndpoint;
 
 
 }
