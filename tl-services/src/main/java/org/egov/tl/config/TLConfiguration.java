@@ -247,10 +247,10 @@ public class TLConfiguration {
 	@Value("${egov.usr.events.create.topic}")
 	private String saveUserEventsTopic;
 		
-	@Value("${egov.usr.events.pay.link}")
+	@Value("${egov.usr.event.pay.link}")
 	private String payLink;
 
-    @Value("${egov.msg.pay.link}")
+    @Value("${egov.sms.pay.link}")
     private String payLinkSMS;
 	
 	@Value("${egov.usr.events.pay.code}")
