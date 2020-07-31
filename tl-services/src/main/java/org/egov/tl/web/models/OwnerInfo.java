@@ -45,10 +45,14 @@ public class OwnerInfo extends User  {
         @JsonProperty("userActive")
         private Boolean userActive;
 
+        //Added other Relationship  as per UAT Obsn
         public enum RelationshipEnum {
                 FATHER("FATHER"),
+                MOTHER("MOTHER"),
+                SPOUSE("SPOUSE"),
+                GUARDIAN("GUARDIAN");
 
-                HUSBAND("HUSBAND");
+                //HUSBAND("HUSBAND");
 
                 private String value;
 
