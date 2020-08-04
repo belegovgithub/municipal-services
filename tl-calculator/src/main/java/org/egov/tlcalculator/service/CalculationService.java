@@ -164,7 +164,7 @@ public class CalculationService {
 
       Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
       if(additionalData!=null) {
-      Integer garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
+      String garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
      if(garbageCharges!=null) {
     	 estimates.add(getGarbageCharges(calulationCriteria));
      	}
@@ -277,7 +277,7 @@ public class CalculationService {
     private TaxHeadEstimate getGarbageCharges(CalulationCriteria calulationCriteria){
         TaxHeadEstimate estimate = new TaxHeadEstimate();
         Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
-        Integer garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
+        String garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
         estimate.setEstimateAmount(new BigDecimal(garbageCharges));
         estimate.setTaxHeadCode(config.getGarbageChargesTaxHead());
         estimate.setCategory(Category.FEE);
