@@ -84,9 +84,8 @@ public class TLRepository {
 
 
         for (TradeLicense license : licenses) {
-        	licensesForUpdate.add(license);
             if (idToIsStateUpdatableMap.get(license.getId())) {
-                
+                licensesForUpdate.add(license);
             }
             else if(license.getAction().equalsIgnoreCase(ACTION_ADHOC))
                 licensesForAdhocChargeUpdate.add(license);
