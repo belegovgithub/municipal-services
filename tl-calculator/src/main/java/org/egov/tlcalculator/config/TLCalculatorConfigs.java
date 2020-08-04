@@ -87,7 +87,8 @@ public class TLCalculatorConfigs {
     @Value("${egov.taxhead.appFee}")
     private String appFeeTaxHead;
 
-
+    @Value("${egov.taxhead.garbage}")
+    private String garbageChargesTaxHead;
 
     //MDMS
     @Value("${egov.mdms.host}")

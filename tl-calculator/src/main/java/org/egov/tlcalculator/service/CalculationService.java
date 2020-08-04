@@ -161,6 +161,15 @@ public class CalculationService {
       if(calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdhocExemption()!=null)
           estimates.add(getAdhocExemption(calulationCriteria));
       
+
+      Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
+      if(additionalData!=null) {
+      Integer garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
+     if(garbageCharges!=null) {
+    	 estimates.add(getGarbageCharges(calulationCriteria));
+     	}
+      }
+      
       estimatesAndSlabs.setEstimates(estimates);
 
       return estimatesAndSlabs;
@@ -258,6 +267,23 @@ public class CalculationService {
         estimate.setCategory(Category.EXEMPTION);
         return estimate;
     }
+    
+    
+    /**
+     *  Creates taxHeadEstimates for Garbage Charges
+     * @param calulationCriteria CalculationCriteria containing the tradeLicense or applicationNumber
+     * @return Garbage Charges taxHeadEstimates
+     */
+    private TaxHeadEstimate getGarbageCharges(CalulationCriteria calulationCriteria){
+        TaxHeadEstimate estimate = new TaxHeadEstimate();
+        Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
+        Integer garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
+        estimate.setEstimateAmount(new BigDecimal(garbageCharges));
+        estimate.setTaxHeadCode(config.getGarbageChargesTaxHead());
+        estimate.setCategory(Category.FEE);
+        return estimate;
+    }
+
 
 
     /**
@@ -270,6 +296,7 @@ public class CalculationService {
 
       List<BigDecimal> tradeUnitFees = new LinkedList<>();
       List<BigDecimal> tradeAppFees = new LinkedList<>();
+      BigDecimal tradeAppTotalFee = null ;
       List<TradeUnit> tradeUnits = license.getTradeLicenseDetail().getTradeUnits();
       List<String> billingSlabIds = new LinkedList<>();
       int i = 0;
@@ -313,12 +340,13 @@ public class CalculationService {
 	                 //tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate().multiply(uomVal));
 	             }
 	             tradeAppFees.add(billingSlabs.get(0).getApplicationFee());
+	             tradeAppTotalFee = billingSlabs.get(0).getApplicationFee();
            i++;
          }
       }
        
       BigDecimal tradeUnitTotalFee = getTotalFee(tradeUnitFees,calculationType);
-      BigDecimal tradeAppTotalFee = getTotalFee(tradeAppFees,calculationType);
+     // BigDecimal tradeAppTotalFee = getTotalFee(tradeAppFees,calculationType);
 
       FeeAndBillingSlabIds feeAndBillingSlabIds = new FeeAndBillingSlabIds();
       feeAndBillingSlabIds.setFee(tradeUnitTotalFee);
