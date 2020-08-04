@@ -24,7 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -164,11 +167,14 @@ public class CalculationService {
 
       Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
       if(additionalData!=null) {
-      String garbageCharges =  JsonPath.read(additionalData, "$.garbageCharges");
-     if(garbageCharges!=null) {
-    	 estimates.add(getGarbageCharges(calulationCriteria));
-     	}
-      }
+    	  Configuration conf = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
+    	  
+    		  String garbageCharges =  JsonPath.using(conf).parse(additionalData).read("$.garbageCharges");
+    		  if(garbageCharges!=null) {
+    			  estimates.add(getGarbageCharges(calulationCriteria));
+    		  }
+    	  	
+      	}
       
       estimatesAndSlabs.setEstimates(estimates);
 
