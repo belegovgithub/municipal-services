@@ -138,17 +138,7 @@ config:
         image-name: "noc-services"
         dockerfile: "build/maven/Dockerfile"
       - work-dir: "noc-services/src/main/resources/db"
-        image-name: "noc-services-db"
-
-  - name: "builds/municipal-services/pg-detail"
-    build:
-      - work-dir: "pg-detail"
-        image-name: "pg-detail"
-        dockerfile: "build/maven/Dockerfile"
-      - work-dir: "pg-detail/src/main/resources/db"
-        image-name: "pg-detail-db"
-        
-        
+        image-name: "noc-services-db"        
         
         
      
