@@ -255,6 +255,7 @@ public class TLConstants {
 	
 	public static final String TL_ACTION_INITIATE = "INITIATE";
 	
+	public static final String TL_STATUS_INITIATED = "INITIATED";
 
 
     public static final List<String> FIELDS_TO_IGNORE = Collections.unmodifiableList(Arrays.asList(VARIABLE_ACTION,VARIABLE_WFDOCUMENTS,

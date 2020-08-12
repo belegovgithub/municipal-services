@@ -54,13 +54,15 @@ public class PaymentUpdateService {
 
 	private TradeUtil util;
 
+	private CalculationService calculationService;
+
 	@Value("${workflow.bpa.businessServiceCode.fallback_enabled}")
 	private Boolean pickWFServiceNameFromTradeTypeOnly;
 
 	@Autowired
 	public PaymentUpdateService(TradeLicenseService tradeLicenseService, TLConfiguration config, TLRepository repository,
 								WorkflowIntegrator wfIntegrator, EnrichmentService enrichmentService, ObjectMapper mapper,
-								WorkflowService workflowService,TradeUtil util) {
+								WorkflowService workflowService,TradeUtil util, CalculationService calculationService) {
 		this.tradeLicenseService = tradeLicenseService;
 		this.config = config;
 		this.repository = repository;
@@ -69,6 +71,7 @@ public class PaymentUpdateService {
 		this.mapper = mapper;
 		this.workflowService = workflowService;
 		this.util = util;
+		this.calculationService = calculationService;
 	}
 
 
@@ -134,6 +137,9 @@ public class PaymentUpdateService {
 					 * calling workflow to update status
 					 */
 					wfIntegrator.callWorkFlow(updateRequest);
+					
+					//To update demand on payment of application fee. Need to check final payment
+					calculationService.addCalculation(updateRequest);
 
 					updateRequest.getLicenses()
 							.forEach(obj -> log.info(" the status of the application is : " + obj.getStatus()));
