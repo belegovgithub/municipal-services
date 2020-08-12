@@ -14,7 +14,11 @@ public class FeeAndBillingSlabIds {
 
     @JsonProperty("fee")
     private BigDecimal fee;
-
+    
+    @JsonProperty("aplicationFee")
+    private BigDecimal applicationFee;
+    
+    
     @JsonProperty("billingSlabIds")
     private List<String> billingSlabIds;
 
