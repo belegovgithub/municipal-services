@@ -169,6 +169,9 @@ public class TradeLicenseService {
          else {
              licenses = getLicensesWithOwnerInfo(criteria,requestInfo);
          }
+         //Added as VAPT Obsn 10.5
+        tlValidator.validateUserwithOwnerDetail(requestInfo,licenses);
+         
        return licenses;
     }
 
@@ -217,8 +220,11 @@ public class TradeLicenseService {
      */
     public List<TradeLicense> getLicensesWithOwnerInfo(TradeLicenseSearchCriteria criteria,RequestInfo requestInfo){
         List<TradeLicense> licenses = repository.getLicenses(criteria);
+        
         if(licenses.isEmpty())
             return Collections.emptyList();
+        
+       
         licenses = enrichmentService.enrichTradeLicenseSearch(licenses,criteria,requestInfo);
         return licenses;
     }

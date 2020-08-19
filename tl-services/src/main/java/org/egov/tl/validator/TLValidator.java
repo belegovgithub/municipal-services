@@ -658,7 +658,36 @@ public class TLValidator {
     }
 
 
+    //Added to validate that logged in User matches with the Owner and Creator of the license are the same person 
+    public void validateUserwithOwnerDetail(RequestInfo request,List<TradeLicense> licenses){
+    	
+        Map<String,String> errorMap = new HashMap<>();
+        if(request.getUserInfo().getType().equals("CITIZEN") ) {
+        	String mobilenumber = request.getUserInfo().getUserName();
+        	String uuid = request.getUserInfo().getUuid();
+            licenses.forEach(license -> {
+                Boolean flag = false;
+                for(OwnerInfo ownerInfo : license.getTradeLicenseDetail().getOwners()){
+                    if(ownerInfo.getMobileNumber().equals(mobilenumber)  ){
+                        flag=true;
+                        break;
+                    }
+                }
+ 
+                if(flag || license.getTradeLicenseDetail().getAuditDetails().getCreatedBy().equals(uuid)) {
+                    flag=true;
+                }
+                
+                if(!flag)
+                    errorMap.put("UNAUTHORIZED USER","Unauthorized user to access the application:  "+license.getApplicationNumber());
+            });
 
+            if(!errorMap.isEmpty())
+                throw new CustomException(errorMap);
+            
+        }
+        
+    }
 
 
 
