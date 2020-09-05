@@ -670,13 +670,10 @@ public class TLValidator {
 						getStateLevelTenant(tradeLicense.getTenantId()));
 				if (!userDetailResponse.getUser().isEmpty()) {
 					User user = userDetailResponse.getUser().get(0);
-					System.out.println("Not empty" + user.getUuid());
 					if (!user.getUuid().equalsIgnoreCase(owner.getUuid())) {
-						System.out.println("Not same");
 						throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
 					}
 				} else {
-					System.out.println("user doesnot exists");
 					throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
 				}
 				}
