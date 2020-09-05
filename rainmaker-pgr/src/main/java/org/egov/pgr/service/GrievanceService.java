@@ -324,19 +324,22 @@ public class GrievanceService {
 		List<ActionInfo> actionInfos = request.getActionInfo();
 		final AuditDetails auditDetails = pGRUtils.getAuditDetails(String.valueOf(requestInfo.getUserInfo().getId()),false);
 		for (int index = 0; index < serviceReqs.size(); index++) {
-			Service service = serviceReqs.get(index);
-			ActionInfo actionInfo = actionInfos.get(index);
-			service.setAuditDetails(auditDetails); 
-			if(service.getActive() == null) service.setActive(true);
-			if(!StringUtils.isEmpty(actionInfo.getAction())) {
-				service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));
+			Service service = serviceReqs.get(index);			
+			for(int actionInfoCount = 0; actionInfoCount < actionInfos.size(); actionInfoCount++)
+			{
+				ActionInfo actionInfo = actionInfos.get(actionInfoCount);
+				service.setAuditDetails(auditDetails); 
+				if(service.getActive() == null) service.setActive(true);
+				if(!StringUtils.isEmpty(actionInfo.getAction())) {
+					service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns closed here.
+				}
+				String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
+						.collect(Collectors.toList()));
+				actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(service.getServiceRequestId()); 
+				actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
+				actionInfo.setTenantId(service.getTenantId()); actionInfo.status(actionInfo.getAction()); 
+				actionInfo.setStatus(actionStatusMap.get(actionInfo.getAction()));	
 			}
-			String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
-					.collect(Collectors.toList()));
-			actionInfo.setUuid(UUID.randomUUID().toString()); actionInfo.setBusinessKey(service.getServiceRequestId()); 
-			actionInfo.setBy(auditDetails.getLastModifiedBy() + ":" + role); actionInfo.setWhen(auditDetails.getLastModifiedTime());
-			actionInfo.setTenantId(service.getTenantId()); actionInfo.status(actionInfo.getAction()); 
-			actionInfo.setStatus(actionStatusMap.get(actionInfo.getAction()));			
 		}
 		if (!errorMap.isEmpty()) {
 			Map<String, String> newMap = new HashMap<>();

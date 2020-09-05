@@ -111,7 +111,7 @@ public class PGRRequestValidator {
 		log.info("Validating update request");
 		Map<String, String> errorMap = new HashMap<>();
 		validateDataSanity(serviceRequest, errorMap, false);
-		validateIfArraysEqual(serviceRequest, errorMap);
+		//validateIfArraysEqual(serviceRequest, errorMap);
 		if(!isUpdateOnInactiveCategoriessEnabled) {
 			vaidateServiceCodes(serviceRequest, errorMap);
 		}
