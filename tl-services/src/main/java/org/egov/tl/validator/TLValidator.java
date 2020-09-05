@@ -661,11 +661,38 @@ public class TLValidator {
             throw new CustomException(errorMap);
     }
 
+	public void validateUser(TradeLicenseRequest request) {
+		List<TradeLicense> licenses = request.getLicenses();
+		licenses.forEach(tradeLicense -> {
+			tradeLicense.getTradeLicenseDetail().getOwners().forEach(owner -> {
+				UserDetailResponse userDetailResponse = userService.searchByUserName(owner.getMobileNumber(),
+						getStateLevelTenant(tradeLicense.getTenantId()));
+				if (!userDetailResponse.getUser().isEmpty()) {
+					User user = userDetailResponse.getUser().get(0);
+					System.out.println("Not empty" + user.getUuid());
+					if (owner.getUuid() == null) {
+						System.out.println("is null");
+						throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
+					} else if (!user.getUuid().equalsIgnoreCase(owner.getUuid())) {
+						System.out.println("Not same");
+						throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
+					}
+				} else {
+					System.out.println("user doesnot exists");
+					if (owner.getUuid() != null) {
+						throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
+					}
+				}
 
+			});
 
+		});
 
+	}
 
-
+	private String getStateLevelTenant(String tenantId) {
+		return tenantId.split("\\.")[0];
+	}
 }
 
 
