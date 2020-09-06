@@ -123,7 +123,6 @@ public class UserService{
                     userDetailResponse = userCall( new CreateUserRequest(requestInfo,user),uri);
                     switch (businessService)
                     {
-                    	case businessService_TL:
                         case businessService_BPA:
                             owner=ownerInfoBackup;
                             break;
