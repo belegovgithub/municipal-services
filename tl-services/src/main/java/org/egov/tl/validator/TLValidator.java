@@ -666,11 +666,11 @@ public class TLValidator {
 		licenses.forEach(tradeLicense -> {
 			tradeLicense.getTradeLicenseDetail().getOwners().forEach(owner -> {
 				if (owner.getUuid() != null) {
-				UserDetailResponse userDetailResponse = userService.searchByUserName(owner.getMobileNumber(),
+				UserDetailResponse userDetailResponse = userService.searchByUserName(owner.getUserName(),
 						getStateLevelTenant(tradeLicense.getTenantId()));
 				if (!userDetailResponse.getUser().isEmpty()) {
 					User user = userDetailResponse.getUser().get(0);
-					if (!user.getUuid().equalsIgnoreCase(owner.getUuid())) {
+					if (!user.getUuid().equalsIgnoreCase(owner.getUuid())|| !user.getUserName().equalsIgnoreCase(owner.getUserName())|| !user.getMobileNumber().equalsIgnoreCase(owner.getMobileNumber())) {
 						throw new CustomException("Invalid", "Details are not matching with the entered Mobile Number");
 					}
 				} else {
