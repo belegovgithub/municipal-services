@@ -2,7 +2,10 @@ package org.egov.pgr.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -331,7 +334,122 @@ public class GrievanceService {
 				service.setAuditDetails(auditDetails); 
 				if(service.getActive() == null) service.setActive(true);
 				if(!StringUtils.isEmpty(actionInfo.getAction())) {
-					service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns closed here.
+					
+					//Create criteria object.
+					ServiceReqSearchCriteria criteria = new ServiceReqSearchCriteria();
+					List<String> serviceRequestIds = new ArrayList<String>();
+					serviceRequestIds.add(service.getServiceRequestId());
+					criteria.setServiceRequestId(serviceRequestIds);
+					criteria.setTenantId(service.getTenantId());
+					ServiceResponse serviceResponse = (ServiceResponse) getServiceRequestDetails(requestInfo, criteria);
+					
+					System.out.println("Hey the service response is : "+serviceResponse);
+					
+					//Run logic to check if its actually closed by all.
+					LinkedHashMap<String, List<ActionInfo>> assigneeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
+					LinkedHashMap<String, List<ActionInfo>> resolveeeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
+					for(ActionHistory actionHistory: serviceResponse.getActionHistory())
+					{
+						//Build valid assignee map
+						for(ActionInfo action: actionHistory.getActions())
+						{
+							String assigneeCode = action.getAssignee();
+							
+							if(assigneeWiseActions.containsKey(assigneeCode))
+							{
+								assigneeWiseActions.get(assigneeCode).add(action);
+							}
+							else
+							{
+								List<ActionInfo> actions = new ArrayList<ActionInfo>();
+								actions.add(action);
+								assigneeWiseActions.put(assigneeCode, actions);
+							}
+							System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
+						}
+						for (String assignee : assigneeWiseActions.keySet()) {
+							//Sort descending according to time.
+							Collections.sort(assigneeWiseActions.get(assignee), new Comparator<ActionInfo>() {
+							    @Override
+							    public int compare(ActionInfo o1, ActionInfo o2) {
+							        return o2.getWhen().compareTo(o1.getWhen());
+							    }
+							});
+						}
+						
+						//Build valid resolvee map
+						for(ActionInfo action: actionHistory.getActions())
+						{
+							if(!action.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
+							{
+								String resolveeCode =  action.getBy().split(":")[0];
+								if(resolveeeWiseActions.containsKey(resolveeCode))
+								{
+									resolveeeWiseActions.get(resolveeCode).add(action);
+								}
+								else
+								{
+									List<ActionInfo> actions = new ArrayList<ActionInfo>();
+									actions.add(action);
+									resolveeeWiseActions.put(resolveeCode, actions);
+								}
+								System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+action.getStatus());
+							}
+						}
+						for (String resolvee : resolveeeWiseActions.keySet()) {
+							//Sort descending according to time.
+							Collections.sort(resolveeeWiseActions.get(resolvee), new Comparator<ActionInfo>() {
+							    @Override
+							    public int compare(ActionInfo o1, ActionInfo o2) {
+							        return o2.getWhen().compareTo(o1.getWhen());
+							    }
+							});
+						}
+					}
+					
+					//Enter here only if the action is resolved
+					if(actionInfo.getAction().equalsIgnoreCase("resolve"))
+					{
+						boolean isResolvedByAll = true;
+						for (String assignee : assigneeWiseActions.keySet()) {
+							
+							System.out.println("  Sorted times: Assignee ");
+							for (ActionInfo aI : assigneeWiseActions.get(assignee)) {
+								System.out.println("    "+aI.getWhen());
+							}
+							
+							//First element is always the latest element containing the latest status.
+							System.out.println("Check: "+requestInfo.getUserInfo().getId()+" " + assignee);
+							if(requestInfo.getUserInfo().getId()!=null && assignee!=null && !assignee.equalsIgnoreCase(requestInfo.getUserInfo().getId().toString()))  //assignee can be null for open, check only if others have resolved.
+							{
+								System.out.println("Block 1");
+								if(resolveeeWiseActions.get(assignee)==null)
+								{
+									isResolvedByAll = false;
+									System.out.println("Block 2");
+								}
+								else
+								if(resolveeeWiseActions.get(assignee)!=null &&   //Resolvee is not empty
+									resolveeeWiseActions.get(assignee).size()>0 && //Resolvee size is > 0
+										!resolveeeWiseActions.get(assignee).get(0).getStatus().equalsIgnoreCase("resolved"))  //Resolvees latest entry says not resolved
+								{
+									isResolvedByAll = false;
+									System.out.println("Block 3");
+								}
+								
+							}
+						}
+						System.out.println("Is resolved by all: "+isResolvedByAll);
+						if(isResolvedByAll)
+							service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns resolved here.
+						else
+							service.setStatus(StatusEnum.fromValue(actionStatusMap.get("assign")));
+					}
+					else
+					{
+						service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns resolved here.
+					}
+					
 				}
 				String role = pGRUtils.getPrecedentRole(requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 						.collect(Collectors.toList()));
@@ -419,6 +537,7 @@ public class GrievanceService {
 		searcherRequest = pGRUtils.prepareSearchRequestWithDetails(uri, serviceReqSearchCriteria, requestInfo);
 		Object response = serviceRequestRepository.fetchResult(uri, searcherRequest);
 		log.debug(PGRConstants.SEARCHER_RESPONSE_TEXT + response);
+		System.out.println("Check the response here: "+PGRConstants.SEARCHER_RESPONSE_TEXT + response);;
 		if (null == response)
 			return pGRUtils.getDefaultServiceResponse(requestInfo);
 		ServiceResponse serviceResponse = prepareResult(response, requestInfo);

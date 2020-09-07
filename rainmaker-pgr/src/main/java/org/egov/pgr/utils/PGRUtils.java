@@ -22,12 +22,14 @@ import org.egov.pgr.contract.CountResponse;
 import org.egov.pgr.contract.RequestInfoWrapper;
 import org.egov.pgr.contract.SearcherRequest;
 import org.egov.pgr.contract.ServiceReqSearchCriteria;
+import org.egov.pgr.contract.ServiceRequest;
 import org.egov.pgr.contract.ServiceResponse;
 import org.egov.pgr.model.ActionHistory;
 import org.egov.pgr.model.ActionInfo;
 import org.egov.pgr.model.AuditDetails;
 import org.egov.pgr.model.Service;
 import org.egov.pgr.repository.ServiceRequestRepository;
+import org.egov.pgr.service.GrievanceService;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,6 +107,9 @@ public class PGRUtils {
 
 	@Autowired
 	private ServiceRequestRepository serviceRequestRepository;
+	
+	@Autowired
+	private GrievanceService grievanceService;
 	
 	private static final String MODULE_NAME = "{moduleName}";
 
@@ -565,6 +570,25 @@ public class PGRUtils {
 			}
 		}
 		return null;
+	}
+	
+	public String getCurrentStatus2(ServiceRequest serviceRequest) {
+		
+		//Create criteria object.
+		ServiceReqSearchCriteria criteria = new ServiceReqSearchCriteria();
+		List<String> serviceRequestIds = new ArrayList<String>();
+		serviceRequestIds.add(serviceRequest.getServices().get(0).getServiceRequestId()); //to be changed here
+		criteria.setServiceRequestId(serviceRequestIds);
+		criteria.setTenantId(serviceRequest.getServices().get(0).getTenantId()); //to be changed here
+		ServiceResponse serviceResponse = (ServiceResponse) grievanceService.getServiceRequestDetails(serviceRequest.getRequestInfo(), criteria);
+
+		if(serviceResponse!=null && serviceResponse.getServices().size() > 0)
+		{
+			return serviceResponse.getServices().get(0).getStatus().toString();
+		}
+		else 
+		return null;
+		
 	}
 	
 	/**
