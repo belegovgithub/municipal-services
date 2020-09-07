@@ -314,6 +314,119 @@ public class GrievanceService {
 		return ServiceResponse.builder().services(services).actionHistory(actionHistoryList).build();
 	}
 
+	private LinkedHashMap<String, List<ActionInfo>> getAssigneeMap(ActionHistory actionHistory)
+	{
+		LinkedHashMap<String, List<ActionInfo>> assigneeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
+		//Build valid assignee map
+		for(ActionInfo action: actionHistory.getActions())
+		{
+			String assigneeCode = action.getAssignee();
+			
+			if(assigneeWiseActions.containsKey(assigneeCode))
+			{
+				assigneeWiseActions.get(assigneeCode).add(action);
+			}
+			else
+			{
+				List<ActionInfo> actions = new ArrayList<ActionInfo>();
+				actions.add(action);
+				assigneeWiseActions.put(assigneeCode, actions);
+			}
+			System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
+		}
+		for (String assignee : assigneeWiseActions.keySet()) {
+			//Sort descending according to time.
+			Collections.sort(assigneeWiseActions.get(assignee), new Comparator<ActionInfo>() {
+			    @Override
+			    public int compare(ActionInfo o1, ActionInfo o2) {
+			        return o2.getWhen().compareTo(o1.getWhen());
+			    }
+			});
+		}
+		
+		return assigneeWiseActions;
+	}
+	
+	private LinkedHashMap<String, List<ActionInfo>> getResolveeMap(ActionHistory actionHistory)
+	{
+		LinkedHashMap<String, List<ActionInfo>> resolveeeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
+
+		for (ActionInfo actionInfo : actionHistory.getActions()) {
+			if(!actionInfo.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
+			{
+				String resolveeCode =  actionInfo.getBy().split(":")[0];
+				List<ActionInfo> actions = resolveeeWiseActions.containsKey(resolveeCode) ? resolveeeWiseActions.get(resolveeCode) :  new ArrayList<ActionInfo>();
+				resolveeeWiseActions.put(resolveeCode, actions);
+				actions.add(actionInfo);
+				System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+actionInfo.getStatus());
+			}
+		}
+		for (String resolvee : resolveeeWiseActions.keySet()) {
+			//Sort descending according to time.
+			Collections.sort(resolveeeWiseActions.get(resolvee), new Comparator<ActionInfo>() {
+			    @Override
+			    public int compare(ActionInfo o1, ActionInfo o2) {
+			        return o2.getWhen().compareTo(o1.getWhen());
+			    }
+			});
+		}
+		return resolveeeWiseActions;
+	}
+	/**
+	 * Searches and sets the 'partresolved' status to the latest 'resolved' if the complaint is not addressed by all.
+	 * @param response
+	 */
+	private void updatePartialResolutionStatus(ServiceResponse response, RequestInfo requestInfo)
+	{
+		Map<String, String> actionStatusMap = WorkFlowConfigs.getActionStatusMap(); 
+		System.out.println("In the updatePartialResolutionStatus");
+		for (int i=0; i<response.getServices().size(); i++) {
+			Service service = response.getServices().get(i);
+			ActionHistory actionHistory = response.getActionHistory().get(i);
+			LinkedHashMap<String, List<ActionInfo>> resolveeeWiseActions = getResolveeMap(actionHistory);
+			LinkedHashMap<String, List<ActionInfo>> assigneeWiseActions = getAssigneeMap(actionHistory);
+			
+			boolean resolvedByAll = service.getStatus().toString().equalsIgnoreCase("resolved") ? true: false;  //Get the actual status of the complaint
+			System.out.println("is resolved by all "+resolvedByAll);
+			if(!resolvedByAll) //If its not resolved by all, change only the latest 'resolved' statuses to partresolved.
+			{
+				for (String resolvee : resolveeeWiseActions.keySet()) {
+					System.out.println(" Checking for  "+resolvee+"/"+resolveeeWiseActions.get(resolvee).get(0).getStatus());
+					if(resolveeeWiseActions.get(resolvee).get(0).getStatus().equalsIgnoreCase("resolved"))
+						resolveeeWiseActions.get(resolvee).get(0).setStatus("partresolved");
+				}
+			}
+			
+			if(service.getStatus().toString().equalsIgnoreCase("reassignrequested")) //If complaint status is reassignrequested
+			{
+				String myId = requestInfo.getUserInfo().getId().toString();
+				ActionInfo myLatestResolveAction = null;
+				if(resolveeeWiseActions.get(myId) != null  && resolveeeWiseActions.get(myId).size()>0)
+					myLatestResolveAction = resolveeeWiseActions.get(myId).get(0);
+				
+				ActionInfo myLatestAssignAction = null;
+				if(assigneeWiseActions.get(myId) != null  && assigneeWiseActions.get(myId).size()>0)
+					myLatestAssignAction = assigneeWiseActions.get(myId).get(0);
+				
+				if(myLatestResolveAction!=null && myLatestAssignAction!=null)
+				{
+					if(myLatestAssignAction.getWhen() > myLatestResolveAction.getWhen())
+					{
+						//service.setStatus(StatusEnum.fromValue(actionStatusMap.get("assigned")));
+					}
+				}
+				else
+				if(myLatestAssignAction!=null)
+				{
+					service.setStatus(StatusEnum.fromValue("assigned"));
+				}
+			}
+		}
+	}
+	
+	void filterAndModifyBasedOnRoles(ServiceResponse response, RequestInfo requestInfo)
+	{
+	}
 	/**
 	 * Util method for the update to enrich the actions in the request 
 	 * 
@@ -861,6 +974,9 @@ public class GrievanceService {
 	 * @return
 	 */
 	public ServiceResponse enrichResult(RequestInfo requestInfo, ServiceResponse response) {
+		
+		updatePartialResolutionStatus(response, requestInfo);
+
 		List<Long> userIds = response.getServices().stream().map(a -> {
 					try {return Long.parseLong(a.getAccountId());}catch(Exception e) {return null;} }).collect(Collectors.toList());
 		List<Address> addresses = new ArrayList<>();
