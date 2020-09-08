@@ -55,6 +55,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 
+import ch.qos.logback.core.joran.action.Action;
 import lombok.extern.slf4j.Slf4j;
 
 @org.springframework.stereotype.Service
@@ -394,6 +395,18 @@ public class GrievanceService {
 					//System.out.println(" Checking for  "+resolvee+"/"+resolveeeWiseActions.get(resolvee).get(0).getStatus());
 					if(resolveeeWiseActions.get(resolvee).get(0).getStatus().equalsIgnoreCase("resolved"))
 						resolveeeWiseActions.get(resolvee).get(0).setStatus("partresolved");
+				}
+			}
+			else // If full resolved, only make the last one as resolved.
+			{
+				if(actionHistory.getActions() !=null && actionHistory.getActions().size()>0)
+				{
+					for (i=0; i< actionHistory.getActions().size();i++) {
+						if(i!=0 && actionHistory.getActions().get(i).getStatus().equalsIgnoreCase("resolved")) //Except first entry, mark everything as part resolved.
+						{
+							actionHistory.getActions().get(i).setStatus("partresolved");
+						}
+					}
 				}
 			}
 			
