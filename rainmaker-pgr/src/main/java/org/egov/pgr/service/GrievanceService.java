@@ -332,7 +332,7 @@ public class GrievanceService {
 				actions.add(action);
 				assigneeWiseActions.put(assigneeCode, actions);
 			}
-			System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
+			//System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
 		}
 		for (String assignee : assigneeWiseActions.keySet()) {
 			//Sort descending according to time.
@@ -358,7 +358,7 @@ public class GrievanceService {
 				List<ActionInfo> actions = resolveeeWiseActions.containsKey(resolveeCode) ? resolveeeWiseActions.get(resolveeCode) :  new ArrayList<ActionInfo>();
 				resolveeeWiseActions.put(resolveeCode, actions);
 				actions.add(actionInfo);
-				System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+actionInfo.getStatus());
+				//System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+actionInfo.getStatus());
 			}
 		}
 		for (String resolvee : resolveeeWiseActions.keySet()) {
@@ -376,10 +376,10 @@ public class GrievanceService {
 	 * Searches and sets the 'partresolved' status to the latest 'resolved' if the complaint is not addressed by all.
 	 * @param response
 	 */
-	private void updatePartialResolutionStatus(ServiceResponse response, RequestInfo requestInfo)
+	public void updatePartialResolutionStatus(ServiceResponse response, RequestInfo requestInfo)
 	{
 		Map<String, String> actionStatusMap = WorkFlowConfigs.getActionStatusMap(); 
-		System.out.println("In the updatePartialResolutionStatus");
+		//System.out.println("In the updatePartialResolutionStatus");
 		for (int i=0; i<response.getServices().size(); i++) {
 			Service service = response.getServices().get(i);
 			ActionHistory actionHistory = response.getActionHistory().get(i);
@@ -387,11 +387,11 @@ public class GrievanceService {
 			LinkedHashMap<String, List<ActionInfo>> assigneeWiseActions = getAssigneeMap(actionHistory);
 			
 			boolean resolvedByAll = service.getStatus().toString().equalsIgnoreCase("resolved") ? true: false;  //Get the actual status of the complaint
-			System.out.println("is resolved by all "+resolvedByAll);
+			//System.out.println("is resolved by all "+resolvedByAll);
 			if(!resolvedByAll) //If its not resolved by all, change only the latest 'resolved' statuses to partresolved.
 			{
 				for (String resolvee : resolveeeWiseActions.keySet()) {
-					System.out.println(" Checking for  "+resolvee+"/"+resolveeeWiseActions.get(resolvee).get(0).getStatus());
+					//System.out.println(" Checking for  "+resolvee+"/"+resolveeeWiseActions.get(resolvee).get(0).getStatus());
 					if(resolveeeWiseActions.get(resolvee).get(0).getStatus().equalsIgnoreCase("resolved"))
 						resolveeeWiseActions.get(resolvee).get(0).setStatus("partresolved");
 				}
@@ -418,7 +418,8 @@ public class GrievanceService {
 				else
 				if(myLatestAssignAction!=null)
 				{
-					service.setStatus(StatusEnum.fromValue("assigned"));
+					//Temporarily dont fool.
+					//service.setStatus(StatusEnum.fromValue("assigned"));
 				}
 			}
 		}
@@ -456,7 +457,7 @@ public class GrievanceService {
 					criteria.setTenantId(service.getTenantId());
 					ServiceResponse serviceResponse = (ServiceResponse) getServiceRequestDetails(requestInfo, criteria);
 					
-					System.out.println("Hey the service response is : "+serviceResponse);
+					//System.out.println("Hey the service response is : "+serviceResponse +" its status: "+serviceResponse.getServices().get(0).getStatus());
 					
 					//Run logic to check if its actually closed by all.
 					LinkedHashMap<String, List<ActionInfo>> assigneeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
@@ -478,7 +479,7 @@ public class GrievanceService {
 								actions.add(action);
 								assigneeWiseActions.put(assigneeCode, actions);
 							}
-							System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
+							//System.out.println("Check actions: Assignee: "+assigneeCode+" - "+action.getStatus());
 						}
 						for (String assignee : assigneeWiseActions.keySet()) {
 							//Sort descending according to time.
@@ -506,7 +507,7 @@ public class GrievanceService {
 									actions.add(action);
 									resolveeeWiseActions.put(resolveeCode, actions);
 								}
-								System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+action.getStatus());
+								//System.out.println("Check actions: Reslovee: "+resolveeCode+" - "+action.getStatus());
 							}
 						}
 						for (String resolvee : resolveeeWiseActions.keySet()) {
@@ -526,41 +527,61 @@ public class GrievanceService {
 						boolean isResolvedByAll = true;
 						for (String assignee : assigneeWiseActions.keySet()) {
 							
-							System.out.println("  Sorted times: Assignee ");
+							//System.out.println("  Sorted times: Assignee ");
 							for (ActionInfo aI : assigneeWiseActions.get(assignee)) {
-								System.out.println("    "+aI.getWhen());
+								//System.out.println("    "+aI.getWhen());
 							}
 							
 							//First element is always the latest element containing the latest status.
-							System.out.println("Check: "+requestInfo.getUserInfo().getId()+" " + assignee);
+							//System.out.println("Check: "+requestInfo.getUserInfo().getId()+" " + assignee);
 							if(requestInfo.getUserInfo().getId()!=null && assignee!=null && !assignee.equalsIgnoreCase(requestInfo.getUserInfo().getId().toString()))  //assignee can be null for open, check only if others have resolved.
 							{
-								System.out.println("Block 1");
+								//System.out.println("Block 1");
 								if(resolveeeWiseActions.get(assignee)==null)
 								{
 									isResolvedByAll = false;
-									System.out.println("Block 2");
+									//System.out.println("Block 2");
 								}
 								else
 								if(resolveeeWiseActions.get(assignee)!=null &&   //Resolvee is not empty
 									resolveeeWiseActions.get(assignee).size()>0 && //Resolvee size is > 0
-										!resolveeeWiseActions.get(assignee).get(0).getStatus().equalsIgnoreCase("resolved"))  //Resolvees latest entry says not resolved
+										!(resolveeeWiseActions.get(assignee).get(0).getStatus().equalsIgnoreCase("resolved") || resolveeeWiseActions.get(assignee).get(0).getStatus().equalsIgnoreCase("partresolved"))//Resolvees latest entry says not resolved
+											&& serviceResponse.getServices().get(0).getStatus().toString().equalsIgnoreCase("assigned"))   // The Current Status is assigned, but not solved by all.
 								{
-									isResolvedByAll = false;
-									System.out.println("Block 3");
+									if(!resolveeeWiseActions.get(assignee).get(0).getStatus().equalsIgnoreCase("reassignrequested")) //My latest status says i have requested reassignment, But Complaint status is Assigned.
+									{
+										isResolvedByAll = false;
+										//System.out.println("Block 3 " +resolveeeWiseActions.get(assignee).get(0).getStatus());
+									}
 								}
-								
 							}
 						}
-						System.out.println("Is resolved by all: "+isResolvedByAll);
+						if(serviceResponse.getServices().get(0).getStatus().toString().equalsIgnoreCase("reassignrequested"))//Current status should not be reassignrequested. If yes, definitely not resolved by all.
+						{
+							isResolvedByAll = false;
+							//System.out.println("Block 4 Negation");
+						}
+						
+						//System.out.println("Is resolved by all: "+isResolvedByAll);
 						if(isResolvedByAll)
+						{
 							service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns resolved here.
-						else
-							service.setStatus(StatusEnum.fromValue(actionStatusMap.get("assign")));
+						}
+						else //Leave the service status as it is.
+						{
+//							boolean atleastOneLatestRequestForReassignment = false;
+//							for (String resolvee : resolveeeWiseActions.keySet()) {
+//								atleastOneLatestRequestForReassignment = resolveeeWiseActions.get(resolvee).get(0).getStatus().equalsIgnoreCase("reassignrequested") ? true:false; //If any one has requested for reassignment
+//							
+//							}
+							service.setStatus(serviceResponse.getServices().get(0).getStatus());
+							//System.out.println("Setting status here 1 "+serviceResponse.getServices().get(0).getStatus());
+						}
 					}
 					else
 					{
 						service.setStatus(StatusEnum.fromValue(actionStatusMap.get(actionInfo.getAction())));  // returns resolved here.
+						//System.out.println("Setting status here 2");
 					}
 					
 				}
@@ -571,6 +592,7 @@ public class GrievanceService {
 				actionInfo.setTenantId(service.getTenantId()); actionInfo.status(actionInfo.getAction()); 
 				actionInfo.setStatus(actionStatusMap.get(actionInfo.getAction()));	
 			}
+			//System.out.println("Check the final status: "+service.getStatus());
 		}
 		if (!errorMap.isEmpty()) {
 			Map<String, String> newMap = new HashMap<>();
@@ -650,7 +672,7 @@ public class GrievanceService {
 		searcherRequest = pGRUtils.prepareSearchRequestWithDetails(uri, serviceReqSearchCriteria, requestInfo);
 		Object response = serviceRequestRepository.fetchResult(uri, searcherRequest);
 		log.debug(PGRConstants.SEARCHER_RESPONSE_TEXT + response);
-		System.out.println("Check the response here: "+PGRConstants.SEARCHER_RESPONSE_TEXT + response);;
+		//System.out.println("Check the response here: "+PGRConstants.SEARCHER_RESPONSE_TEXT + response);;
 		if (null == response)
 			return pGRUtils.getDefaultServiceResponse(requestInfo);
 		ServiceResponse serviceResponse = prepareResult(response, requestInfo);
@@ -975,7 +997,7 @@ public class GrievanceService {
 	 */
 	public ServiceResponse enrichResult(RequestInfo requestInfo, ServiceResponse response) {
 		
-		updatePartialResolutionStatus(response, requestInfo);
+		//updatePartialResolutionStatus(response, requestInfo); //Dont call here.
 
 		List<Long> userIds = response.getServices().stream().map(a -> {
 					try {return Long.parseLong(a.getAccountId());}catch(Exception e) {return null;} }).collect(Collectors.toList());

@@ -73,6 +73,8 @@ public class ServiceController {
 		pgrRequestValidator.validateSearch(serviceReqSearchCriteria, requestInfoWrapper.getRequestInfo());
 		Object serviceReqResponse = service.getServiceRequestDetails(requestInfoWrapper.getRequestInfo(),
 				serviceReqSearchCriteria);
+		//Fooling the UI.
+		service.updatePartialResolutionStatus((ServiceResponse)serviceReqResponse, requestInfoWrapper.getRequestInfo());
 		return new ResponseEntity<>(serviceReqResponse, HttpStatus.OK);
 	}
 	
