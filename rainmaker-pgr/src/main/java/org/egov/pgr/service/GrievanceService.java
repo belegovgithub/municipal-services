@@ -352,7 +352,7 @@ public class GrievanceService {
 		LinkedHashMap<String, List<ActionInfo>> resolveeeWiseActions = new LinkedHashMap<String, List<ActionInfo>>();
 
 		for (ActionInfo actionInfo : actionHistory.getActions()) {
-			if(!actionInfo.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
+			if(actionInfo.getStatus()!=null && !actionInfo.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
 			{
 				String resolveeCode =  actionInfo.getBy().split(":")[0];
 				List<ActionInfo> actions = resolveeeWiseActions.containsKey(resolveeCode) ? resolveeeWiseActions.get(resolveeCode) :  new ArrayList<ActionInfo>();
@@ -493,7 +493,7 @@ public class GrievanceService {
 						//Build valid resolvee map
 						for(ActionInfo action: actionHistory.getActions())
 						{
-							if(!action.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
+							if(action.getStatus()!=null && !action.getStatus().equalsIgnoreCase("assigned")) //Put everything that is not "assigned"
 							{
 								String resolveeCode =  action.getBy().split(":")[0];
 								if(resolveeeWiseActions.containsKey(resolveeCode))
