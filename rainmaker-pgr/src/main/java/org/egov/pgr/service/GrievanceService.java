@@ -401,10 +401,10 @@ public class GrievanceService {
 			{
 				if(actionHistory.getActions() !=null && actionHistory.getActions().size()>0)
 				{
-					for (i=0; i< actionHistory.getActions().size();i++) {
-						if(i!=0 && actionHistory.getActions().get(i).getStatus().equalsIgnoreCase("resolved")) //Except first entry, mark everything as part resolved.
+					for (int j=0; j< actionHistory.getActions().size();j++) {
+						if(j!=0 && actionHistory.getActions().get(j).getStatus().equalsIgnoreCase("resolved")) //Except first entry, mark everything as part resolved.
 						{
-							actionHistory.getActions().get(i).setStatus("partresolved");
+							actionHistory.getActions().get(j).setStatus("partresolved");
 						}
 					}
 				}
