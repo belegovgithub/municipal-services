@@ -173,9 +173,6 @@ public class TradeLicenseService {
          else {
              licenses = getLicensesWithOwnerInfo(criteria,requestInfo);
          }
-         //Added as per VAPT Obsn 10.5
-        tlValidator.validateUserwithOwnerDetail(requestInfo,licenses);
-         
        return licenses;
     }
 
