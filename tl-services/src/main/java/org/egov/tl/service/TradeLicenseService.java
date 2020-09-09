@@ -103,10 +103,12 @@ public class TradeLicenseService {
        if(businessServicefromPath==null)
             businessServicefromPath = businessService_TL;
        tlValidator.validateBusinessService(tradeLicenseRequest,businessServicefromPath);
+       tlValidator.validateUser(tradeLicenseRequest);
        Object mdmsData = util.mDMSCall(tradeLicenseRequest);
        actionValidator.validateCreateRequest(tradeLicenseRequest);
        enrichmentService.enrichTLCreateRequest(tradeLicenseRequest, mdmsData);
        tlValidator.validateCreate(tradeLicenseRequest, mdmsData);
+       
        switch(businessServicefromPath)
        {
            case businessService_BPA:
@@ -269,6 +271,7 @@ public class TradeLicenseService {
             if (businessServicefromPath == null)
                 businessServicefromPath = businessService_TL;
             tlValidator.validateBusinessService(tradeLicenseRequest, businessServicefromPath);
+            tlValidator.validateUser(tradeLicenseRequest);
             Object mdmsData = util.mDMSCall(tradeLicenseRequest);
             String businessServiceName = null;
             switch (businessServicefromPath) {
