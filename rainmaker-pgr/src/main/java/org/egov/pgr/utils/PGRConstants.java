@@ -111,7 +111,7 @@ public class PGRConstants {
 	public static final String  SERVICE_REQID_REGEX = "(^[0-9/]*$)";
 
 
-	
+	public static final String LOCALIZATION_DEPT_PREFIX = "COMMON_MASTERS_DEPARTMENT_";
 
 
 	
