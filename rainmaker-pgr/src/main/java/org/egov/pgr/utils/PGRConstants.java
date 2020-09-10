@@ -30,7 +30,7 @@ public class PGRConstants {
 	public static final String MDMS_COMMON_MASTERS_MODULE_NAME = "common-masters";
 	public static final String MDMS_DEPT_MASTERS_MASTER_NAME = "Department";
 	public static final String MDMS_DESIGNATION_MASTERS_MASTER_NAME = "Designation";
-	public static final String LOCALIZATION_MODULE_NAME = "rainmaker-pgr";
+	public static final String LOCALIZATION_MODULE_NAME = "rainmaker-pgr,rainmaker-common";//Added rainmaker-common for Dept Name
 	
 
 	public static final String LOCALIZATION_CODE_SUBMIT_CITIZEN = "pgr.sms.notification.submit.citizen";
@@ -111,7 +111,7 @@ public class PGRConstants {
 	public static final String  SERVICE_REQID_REGEX = "(^[0-9/]*$)";
 
 
-	
+	public static final String LOCALIZATION_DEPT_PREFIX = "COMMON_MASTERS_DEPARTMENT_";	
 
 
 	
