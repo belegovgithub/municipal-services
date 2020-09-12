@@ -41,20 +41,20 @@ public class Service   {
   @NotNull
   @JsonProperty("tenantId")
   @Size(min=2,max=25)
-  @Pattern(regexp="^[a-zA-Z.]*$")
+  @Pattern(regexp="^[a-zA-Z.]*$", message = "Error")
   private String tenantId;
 
   @NotNull
   @JsonProperty("serviceCode")
   @Size(min=2,max=50)
-  @Pattern(regexp="^[a-zA-Z0-9._]*$")
+  @Pattern(regexp="^[a-zA-Z0-9._]*$", message = "Service Code invalid")
   private String serviceCode;
 
   @JsonProperty("serviceRequestId")
   private String serviceRequestId;
 
   @JsonProperty("description")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
+  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$", message = "Description Invalid")
   @Size(max=256)
   private String description;
 
@@ -68,7 +68,7 @@ public class Service   {
   private String addressId;
   
   @JsonProperty("address")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
+  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$", message = "Address Invalid")
   @Size(max=160)
   private String address;
 
@@ -77,7 +77,7 @@ public class Service   {
   private String email;
 
   @JsonProperty("deviceId")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
+  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$", message = "DeviceId invalid")
   @Size(max=160)
   private String deviceId;
 
@@ -85,16 +85,16 @@ public class Service   {
   private String accountId;
 
   @JsonProperty("firstName")
-  @Pattern(regexp="(^[a-zA-Z. ]$)")
+  @Pattern(regexp="(^[a-zA-Z. ]$)",message = " FirstName invalid")
   private String firstName;
 
   @JsonProperty("lastName")
-  @Pattern(regexp="(^[a-zA-Z. ]$)")
+  @Pattern(regexp="(^[a-zA-Z. ]$)", message = " Lastname invalid")
   private String lastName;
 
   @JsonProperty("phone")
   @NotEmpty
-  @Pattern(regexp="(^$|[0-9]{10})")
+  @Pattern(regexp="(^$|[0-9]{10})", message = "Phone number invalid")
   private String phone;
 
   @JsonProperty("attributes")
