@@ -201,7 +201,7 @@ public class Service   {
   private Long expectedTime;
 
   @JsonProperty("feedback")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
+  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$",  message="Invalid Feedback")
   private String feedback;
 
   @JsonProperty("rating")
@@ -213,7 +213,7 @@ public class Service   {
   private AuditDetails auditDetails;
   
   @JsonProperty("landmark")
-  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$")
+  @Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$",  message="Invalid LandMark")
   private String landmark;
   
   }
