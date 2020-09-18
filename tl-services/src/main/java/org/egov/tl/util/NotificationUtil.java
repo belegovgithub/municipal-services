@@ -341,7 +341,8 @@ public class NotificationUtil {
 	 */
 	public String getOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
 		String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_OWNER, localizationMessages);
-		if(!license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPROVED)) {
+		System.out.println("license.getStatus()"+license.getStatus());
+		if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED) || license.getStatus().equalsIgnoreCase(TLConstants.STATUS_PEND_APPL_FEE)) {
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_OWNER, localizationMessages);
 		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
@@ -361,7 +362,7 @@ public class NotificationUtil {
 	 */
 	public String getPayerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
 		String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_PAYER, localizationMessages);
-		if(!license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPROVED)) {
+		if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED) || license.getStatus().equalsIgnoreCase(TLConstants.STATUS_PEND_APPL_FEE)) {
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_PAYER, localizationMessages);
 		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));

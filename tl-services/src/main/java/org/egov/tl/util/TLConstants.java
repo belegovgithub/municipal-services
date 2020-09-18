@@ -184,6 +184,8 @@ public class TLConstants {
     public static final String STATUS_INITIATED = "INITIATED";
 
     public static final String STATUS_APPLIED  = "APPLIED";
+    
+    public static final String STATUS_PEND_APPL_FEE  = "PENDINGAPPLFEE";
 
     public static final String STATUS_APPROVED  = "APPROVED";
 
