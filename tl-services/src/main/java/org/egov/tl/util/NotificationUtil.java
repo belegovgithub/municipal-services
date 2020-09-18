@@ -341,8 +341,13 @@ public class NotificationUtil {
 	 */
 	public String getOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
 		String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_OWNER, localizationMessages);
+		System.out.println("license.getStatus=="+license.getStatus());
 		if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED)) {
+			System.out.println("license.getStatus=="+license.getStatus());
+
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_OWNER, localizationMessages);
+			System.out.println("messageTemplate=="+messageTemplate);
+
 		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
 		messageTemplate = messageTemplate.replace("<3>", license.getTradeName());
