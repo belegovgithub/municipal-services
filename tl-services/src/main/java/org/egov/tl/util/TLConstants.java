@@ -44,10 +44,14 @@ public class TLConstants {
     public static final String NOTIFICATION_FIELD_INSPECTION = "tl.en.field.inspection";
 
     public static final String NOTIFICATION_PAYMENT_OWNER = "tl.en.counter.payment.successful.owner";
+    
+    public static final String NOTIFICATION_APPFEE_PAYMENT_OWNER = "tl.en.counter.appfee.payment.successful.owner";
 
     public static final String NOTIFICATION_RENEWAL_PAYMENT_OWNER = "tl.en.counter.renewal.payment.successful.owner";
 
     public static final String NOTIFICATION_PAYMENT_PAYER = "tl.en.counter.payment.successful.payer";
+    
+    public static final String NOTIFICATION_APPFEE_PAYMENT_PAYER = "tl.en.counter.appfee.payment.successful.payer";
 
     public static final String NOTIFICATION_RENEWAL_PAYMENT_PAYER = "tl.en.counter.renewal.payment.successful.payer";
 

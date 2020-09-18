@@ -341,6 +341,9 @@ public class NotificationUtil {
 	 */
 	public String getOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
 		String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_OWNER, localizationMessages);
+		if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED)) {
+			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_OWNER, localizationMessages);
+		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
 		messageTemplate = messageTemplate.replace("<3>", license.getTradeName());
 		messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
@@ -358,6 +361,9 @@ public class NotificationUtil {
 	 */
 	public String getPayerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
 		String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PAYMENT_PAYER, localizationMessages);
+		if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED)) {
+			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_PAYER, localizationMessages);
+		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
 		messageTemplate = messageTemplate.replace("<3>", license.getTradeName());
 		messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
