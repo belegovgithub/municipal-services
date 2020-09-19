@@ -76,6 +76,11 @@ public class NotificationUtil {
 		 * getMessageTemplate(TLConstants.NOTIFICATION_PAID,localizationMessage);
 		 * message = getApprovalPendingMsg(license,messageTemplate); break;
 		 */
+			
+		case ACTION_STATUS_PENDINGAPPROVAL:
+            messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_PENDINGAPPROVAL, localizationMessage);
+            message = getApprovalPendingMsg(license, messageTemplate);
+            break;
 
 		case ACTION_STATUS_APPROVED:
 			BigDecimal amountToBePaid = getAmountToBePaid(requestInfo, license);
