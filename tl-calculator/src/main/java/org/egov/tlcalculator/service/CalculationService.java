@@ -80,7 +80,7 @@ public class CalculationService {
        Object mdmsData = mdmsService.mDMSCall(calculationReq.getRequestInfo(),tenantId);
        List<Calculation> calculations = getCalculation(calculationReq.getRequestInfo(),
                calculationReq.getCalulationCriteria(),mdmsData);
-       log.info("cal request obj==="+calculationReq);
+       log.info("cal request obj==="+calculationReq.toString());
        if(status==TradeLicense.StatusEnum.INITIATED  || status==TradeLicense.StatusEnum.PENDINGAPPLFEE) {
     	   log.info("inside initiated or pending appl fee==="+status);
     	   System.out.println("initiate status");
@@ -102,7 +102,7 @@ public class CalculationService {
     	   calculation.setTaxHeadEstimates(taxheadEsts);
     	   }
        }
-       log.info("Calculation==="+calculations);
+       log.info("Calculation==="+calculations.toString());
        demandService.generateDemand(calculationReq.getRequestInfo(),calculations,mdmsData,businessService_TL);
        CalculationRes calculationRes = CalculationRes.builder().calculations(calculations).build();
        producer.push(config.getSaveTopic(),calculationRes);

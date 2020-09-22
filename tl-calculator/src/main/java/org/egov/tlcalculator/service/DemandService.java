@@ -1,9 +1,6 @@
 package org.egov.tlcalculator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
-
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -32,7 +29,7 @@ import static org.egov.tlcalculator.utils.TLCalculatorConstants.MDMS_ROUNDOFF_TA
 import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_BPA;
 import static org.egov.tlcalculator.utils.TLCalculatorConstants.businessService_TL;
 
-@Slf4j
+
 @Service
 public class DemandService {
 
@@ -231,10 +228,9 @@ public class DemandService {
      * @return Demands that are updated
      */
     private List<Demand> updateDemand(RequestInfo requestInfo,List<Calculation> calculations,String businessService){
-    	log.info("update demand in cal service " + calculations);
         List<Demand> demands = new LinkedList<>();
         for(Calculation calculation : calculations) {
-        	log.info("update demand calc obj " + calculation);
+
             List<Demand> searchResult = searchDemand(calculation.getTenantId(),Collections.singleton(calculation.getTradeLicense().getApplicationNumber())
                     , requestInfo,businessService);
 
@@ -332,7 +328,6 @@ public class DemandService {
         Map<String, List<DemandDetail>> taxHeadToDemandDetail = new HashMap<>();
 
         demandDetails.forEach(demandDetail -> {
-        	log.info("demandDetail.getTaxHeadMasterCode() " + demandDetail.getTaxHeadMasterCode());
             if(!taxHeadToDemandDetail.containsKey(demandDetail.getTaxHeadMasterCode())){
                 List<DemandDetail> demandDetailList = new LinkedList<>();
                 demandDetailList.add(demandDetail);
