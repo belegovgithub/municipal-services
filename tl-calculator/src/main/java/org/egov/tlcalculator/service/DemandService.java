@@ -370,7 +370,7 @@ public class DemandService {
                  }
             }
         }
-        List<DemandDetail> combinedBillDetials = new LinkedList<>(demandDetails);
+        List<DemandDetail> combinedBillDetials = new LinkedList<>();
         combinedBillDetials.addAll(newDemandDetails);
         addRoundOffTaxHead(calculation.getTenantId(),combinedBillDetials);
         return combinedBillDetials;
