@@ -24,7 +24,7 @@ public class Address {
 
 	@JsonProperty("houseNoAndStreetName")
 	//@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$", message="Invalid House no or street name")
-	@Pattern(regexp = "^[\\p{L}\\p{M}\\s.,|@#!&()0-9']+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|@#!&()0-9'])+$|^[\\p{L}\\p{M}]+$", message="Invalid House no or street name")
+	@Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$", message="Invalid House no or street name")
 	@Size(max=160)
 	public String houseNoAndStreetName;
 
@@ -53,7 +53,7 @@ public class Address {
 
 	@JsonProperty("landmark")
 	//@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&'-]*$",  message="Invalid Landmark")
-	@Pattern(regexp = "^[\\p{L}\\p{M}\\s0-9]+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|0-9])+$|^[\\p{L}\\p{M}]+$",  message="Invalid Landmark")
+	@Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$",  message="Invalid Landmark")
 	@Size(max=160)
 	public String landmark;
 	

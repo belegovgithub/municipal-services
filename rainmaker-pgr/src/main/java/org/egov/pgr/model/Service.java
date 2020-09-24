@@ -54,7 +54,7 @@ public class Service   {
   private String serviceRequestId;
 
   @JsonProperty("description")
-  @Pattern(regexp = "^[\\p{L}\\p{M}\\s.,|@#!&()0-9']+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|@#!&()0-9'])+$|^[\\p{L}\\p{M}]+$", message="Description Invalid")
+  @Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$", message="Description Invalid")
   //@Pattern(regexp = "", message = "Description Invalid")
   @Size(max=256)
   private String description;
@@ -69,7 +69,7 @@ public class Service   {
   private String addressId;
   
   @JsonProperty("address")
-  @Pattern(regexp = "^[\\p{L}\\p{M}\\s.,|@#!&()0-9']+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|@#!&()0-9'])+$|^[\\p{L}\\p{M}]+$", message="Address Invalid")
+  @Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$", message="Address Invalid")
   //@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$", message = "Address Invalid")
   @Size(max=160)
   private String address;
@@ -204,7 +204,7 @@ public class Service   {
 
   
   @JsonProperty("feedback")
-  @Pattern(regexp = "^[\\p{L}\\p{M}\\s.,|@#!&()0-9']+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|@#!&()0-9'])+$|^[\\p{L}\\p{M}]+$", message="Invalid feedback")
+  @Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$", message="Invalid feedback")
   //@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$",  message="Invalid Feedback")
   private String feedback;
 
@@ -217,7 +217,7 @@ public class Service   {
   private AuditDetails auditDetails;
   
   @JsonProperty("landmark")
-  @Pattern(regexp = "^[\\p{L}\\p{M}\\s0-9]+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|0-9])+$|^[\\p{L}\\p{M}]+$",  message="Invalid Landmark")
+  @Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$",  message="Invalid Landmark")
   //@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&']*$",  message="Invalid LandMark")
   private String landmark;
   

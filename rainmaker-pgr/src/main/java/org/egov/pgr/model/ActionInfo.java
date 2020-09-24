@@ -33,7 +33,7 @@ public class ActionInfo   {
   
   @JsonProperty("tenantId")
   @Size(min=2,max=25)
-  @Pattern(regexp="^[a-zA-Z.]*$", message = " Error")
+  @Pattern(regexp="^[a-zA-Z.]*$", message = "Invalid tenant Error")
   private String tenantId = null;
 
   @JsonProperty("by")
@@ -62,7 +62,7 @@ public class ActionInfo   {
   private List<String> media = null;
 
   @JsonProperty("comments")
-  @Pattern(regexp = "^[\\p{L}\\p{M}\\s.,|@#!&()0-9;']+([\\p{L}\\p{Pd}\\p{Zs}]*[\\p{L}\\p{M}\\s.,|@#!&()0-9;'])+$|^[\\p{L}\\p{M}]+$", message="Invalid Comments")
+  @Pattern(regexp = "^[\\p{L}\\p{Pd}\\p{Zs}\\p{M}\\s.,|@#!&()0-9;'\\/]*$", message="Invalid Comments")
   //@Pattern(regexp = "^[a-zA-Z0-9!@#.,/:; ()&']*$", message = "Invalid Comments")
   @Size(max=256)
   private String comment = null;
