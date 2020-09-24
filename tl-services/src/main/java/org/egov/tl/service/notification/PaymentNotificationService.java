@@ -239,7 +239,7 @@ public class PaymentNotificationService {
             valMap.put(businessServiceKey,businessServiceList.isEmpty()?null:businessServiceList.get(0));
             valMap.put(consumerCodeKey,consumerCodeList.isEmpty()?null:consumerCodeList.get(0));
             valMap.put(tenantIdKey,context.read("$.Payment.tenantId"));
-            valMap.put(payerMobileNumberKey,mobileNumberList.isEmpty()?null:mobileNumberList.get(0));
+            valMap.put(payerMobileNumberKey,context.read("$.Payment.mobileNumber")!=null ?context.read("$.Payment.mobileNumber"):(mobileNumberList.isEmpty() ? null : mobileNumberList.get(0)));
             valMap.put(paidByKey,context.read("$.Payment.paidBy"));
             valMap.put(amountPaidKey,amountPaidList.isEmpty()?null:String.valueOf(amountPaidList.get(0)));
             valMap.put(receiptNumberKey,receiptNumberList.isEmpty()?null:receiptNumberList.get(0));
