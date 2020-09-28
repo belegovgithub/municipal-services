@@ -304,7 +304,8 @@ public class PGRNotificationConsumer {
                 if (null != employeeDetails) {
                     List<String> deptCodes = new ArrayList<>();
                     deptCodes.add(employeeDetails.get("department"));
-                    department = notificationService.getDepartmentForNotification(serviceReq, deptCodes, requestInfo);
+                    department = employeeDetails.get("department");
+                    //department = notificationService.getDepartmentForNotification(serviceReq, deptCodes, requestInfo);
                     //Added to get the Localized Dept Name
                     department = messageMap.get(PGRConstants.LOCALIZATION_DEPT_PREFIX + department);
                     designation = notificationService.getDesignation(serviceReq, employeeDetails.get("designation"), requestInfo);
