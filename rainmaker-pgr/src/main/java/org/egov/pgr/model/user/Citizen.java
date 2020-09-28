@@ -21,7 +21,7 @@ public class Citizen {
 	private Long id;
 	private String uuid;
 	
-	@Pattern(regexp="^[a-zA-Z. ]*$", message="Invalid Citizen Name. Enter name in English.")
+	@Pattern(regexp="^[\\p{L}\\p{M}\\s.]*$", message="Invalid Citizen Name. Allowed special charecters are dots and spaces only")
 	@Size(max=30)
 	private String name;
 	
