@@ -32,6 +32,7 @@ import org.egov.wscalculation.repository.ServiceRequestRepository;
 import org.egov.wscalculation.util.CalculatorUtil;
 import org.egov.wscalculation.util.WSCalculationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +62,7 @@ public class MasterDataService {
 	@Autowired
 	private EstimationService estimationService;
 
+
 	/**
 	 * Fetches and creates map of all required masters
 	 * 
@@ -73,7 +75,7 @@ public class MasterDataService {
 		Map<String, Object> masterMap = new HashMap<>();
 		List<TaxPeriod> taxPeriods = getTaxPeriodList(requestInfo, tenantId, serviceFieldValue);
 		List<TaxHeadMaster> taxHeadMasters = getTaxHeadMasterMap(requestInfo, tenantId, serviceFieldValue);
-		taxHeadMasters =taxHeadMasters.stream().filter(txHead -> txHead.getService().equals(serviceFieldValue)).collect(Collectors.toList());
+		taxHeadMasters =taxHeadMasters.stream().filter(txHead -> txHead.getService().equals(WSCalculationConstant.ONE_TIME_FEE_SERVICE_FIELD)).collect(Collectors.toList());
 		Map<String, Map<String, Object>> financialYearMaster = getFinancialYear(requestInfo, tenantId);
 		masterMap.put(WSCalculationConstant.TAXPERIOD_MASTER_KEY, taxPeriods);
 		masterMap.put(WSCalculationConstant.TAXHEADMASTER_MASTER_KEY, taxHeadMasters);
