@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
@@ -69,6 +70,7 @@ public class MasterDataService {
 	public Map<String, Object> getMasterMap(RequestInfo requestInfo, String tenantId,String serviceFieldValue) {
 		List<TaxPeriod> taxPeriods = getTaxPeriodList(requestInfo, tenantId,serviceFieldValue);
 		List<TaxHeadMaster> taxHeadMasters = getTaxHeadMasterMap(requestInfo, tenantId,serviceFieldValue);
+		taxHeadMasters =taxHeadMasters.stream().filter(txHead -> txHead.getService().equals(SWCalculationConstant.ONE_TIME_FEE_SERVICE_FIELD)).collect(Collectors.toList());
 		Map<String, Map<String, Object>> financialYearMaster = getFinancialYear(requestInfo, tenantId);
 		Map<String, Object> masterMap = new HashMap<>();
 		masterMap.put(SWCalculationConstant.TAXPERIOD_MASTER_KEY, taxPeriods);
