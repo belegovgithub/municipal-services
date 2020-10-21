@@ -25,9 +25,9 @@ public class ValidateProperty {
 		if (StringUtils.isEmpty(property.getPropertyId())) {
 			throw new CustomException("INVALID_PROPERTY", "WaterConnection cannot be updated without property Id");
 		}
-		if (StringUtils.isEmpty(property.getStatus()) || (!property.getStatus().equals(Status.ACTIVE))) {
-			throw new CustomException("INVALID_PROPERTY_STATUS", " Please enter a valid property ID");
-		}
+//		if (StringUtils.isEmpty(property.getStatus()) || (!property.getStatus().equals(Status.ACTIVE))) {
+//			throw new CustomException("INVALID_PROPERTY_STATUS", " Please enter a valid property ID");
+//		}
 	}
 
 	/**
