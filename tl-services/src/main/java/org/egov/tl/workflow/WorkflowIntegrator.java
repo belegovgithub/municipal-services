@@ -106,12 +106,12 @@ public class WorkflowIntegrator {
 					});
 				}
 				obj.put(BUSINESSIDKEY, license.getApplicationNumber());
-				obj.put(TENANTIDKEY, wfTenantId);
+				obj.put(TENANTIDKEY, license.getTenantId());
 				switch(businessServiceFromMDMS)
 				{
 				//TLR Changes
 					case businessService_TL:
-						obj.put(BUSINESSSERVICEKEY, currentLicense.getWorkflowCode());
+						obj.put(BUSINESSSERVICEKEY, license.getWorkflowCode());
 						obj.put(MODULENAMEKEY, TLMODULENAMEVALUE);
 						break;
 
