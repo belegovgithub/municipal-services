@@ -31,9 +31,9 @@ public class ValidateProperty {
 		if (StringUtils.isEmpty(property.getTenantId())) {
 			throw new CustomException("INVALID_PROPERTY", "SewerageConnection cannot be updated without tenantId");
 		}
-		if (org.springframework.util.StringUtils.isEmpty(property.getStatus()) || (!property.getStatus().equals(Status.ACTIVE))) {
-			throw new CustomException("INVALID_PROPERTY_STATUS", " Please enter a valid property ID");
-		}
+		//if (org.springframework.util.StringUtils.isEmpty(property.getStatus()) || (!property.getStatus().equals(Status.ACTIVE))) {
+		//	throw new CustomException("INVALID_PROPERTY_STATUS", " Please enter a valid property ID");
+		//}
 	}
 	
 	public Property getOrValidateProperty(SewerageConnectionRequest sewerageConnectionRequest) {
