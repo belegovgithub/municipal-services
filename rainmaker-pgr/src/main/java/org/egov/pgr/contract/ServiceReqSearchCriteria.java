@@ -34,7 +34,7 @@ public class ServiceReqSearchCriteria {
 	private List<String> serviceRequestId;
 	
 	@JsonProperty("assignedTo")
-	@Pattern(regexp="^[a-zA-Z0-9]$",  message="Invalid Assignment")
+	@Pattern(regexp="^[a-zA-Z0-9]*$",  message="Invalid Assignment")
 	private String assignedTo;
 	
 	@JsonProperty("accountId")
