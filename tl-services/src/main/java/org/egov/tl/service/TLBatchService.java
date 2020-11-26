@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.egov.tl.util.TLConstants.*;
 
@@ -157,10 +158,15 @@ public class TLBatchService {
                 if(StringUtils.isEmpty(license.getWorkflowCode()))
                     license.setWorkflowCode(DEFAULT_WORKFLOW);
             });
+            Map<String, List<TradeLicense> > licenseMap = licenses.stream().collect(Collectors.groupingBy(tl->tl.getTenantId())); 
+            for (String tenantId : licenseMap.keySet())  
+            { 
+            	List<TradeLicense> tradeLicenses = licenseMap.get(tenantId); 
+            	 workflowIntegrator.callWorkFlow(new TradeLicenseRequest(requestInfo, tradeLicenses));
 
-            workflowIntegrator.callWorkFlow(new TradeLicenseRequest(requestInfo, licenses));
-
-            producer.push(config.getUpdateWorkflowTopic(), new TradeLicenseRequest(requestInfo, licenses));
+                 producer.push(config.getUpdateWorkflowTopic(), new TradeLicenseRequest(requestInfo, tradeLicenses));
+            } 
+           
         }
         catch (Exception e){
             e.printStackTrace();
