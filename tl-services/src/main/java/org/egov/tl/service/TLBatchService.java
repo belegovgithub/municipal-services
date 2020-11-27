@@ -6,10 +6,12 @@ import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.producer.Producer;
 import org.egov.tl.repository.TLRepository;
 import org.egov.tl.util.NotificationUtil;
+import org.egov.tl.util.TradeUtil;
 import org.egov.tl.web.models.SMSRequest;
 import org.egov.tl.web.models.TradeLicense;
 import org.egov.tl.web.models.TradeLicenseRequest;
 import org.egov.tl.web.models.TradeLicenseSearchCriteria;
+import org.egov.tl.web.models.TradeUnit;
 import org.egov.tl.workflow.WorkflowIntegrator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,16 +45,18 @@ public class TLBatchService {
 
     private Producer producer;
 
+    private TradeUtil tradeUtil;
     @Autowired
     public TLBatchService(NotificationUtil util, TLConfiguration config, TLRepository repository,
                           EnrichmentService enrichmentService, WorkflowIntegrator workflowIntegrator,
-                          Producer producer) {
+                          Producer producer,TradeUtil tradeUtil) {
         this.util = util;
         this.config = config;
         this.repository = repository;
         this.enrichmentService = enrichmentService;
         this.workflowIntegrator = workflowIntegrator;
         this.producer = producer;
+        this.tradeUtil =tradeUtil;
     }
 
 
@@ -75,36 +79,42 @@ public class TLBatchService {
         if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
             validTill = validTill + config.getReminderPeriod();
 
+        List<String>  applicableTenants = tradeUtil.getModuleTeants(requestInfo, serviceName);
+        if(!CollectionUtils.isEmpty(applicableTenants)) {
+        	for (String tenantId : applicableTenants) {
+        		TradeLicenseSearchCriteria criteria = TradeLicenseSearchCriteria.builder()
+                        .businessService(serviceName)
+                        .validTo(validTill)
+                        .status(STATUS_APPROVED)
+                        .tenantId(tenantId)
+                        .limit(config.getPaginationSize())
+                        .build();
 
-        TradeLicenseSearchCriteria criteria = TradeLicenseSearchCriteria.builder()
-                .businessService(serviceName)
-                .validTo(validTill)
-                .status(STATUS_APPROVED)
-                .limit(config.getPaginationSize())
-                .build();
+                int offSet = 0;
 
-        int offSet = 0;
+                while (true){
 
-        while (true){
+                    log.info("current Offset: "+offSet);
 
-            log.info("current Offset: "+offSet);
+                    List<TradeLicense> licenses = repository.getLicenses(criteria);
+                    if(CollectionUtils.isEmpty(licenses))
+                        break;
 
-            List<TradeLicense> licenses = repository.getLicenses(criteria);
-            if(CollectionUtils.isEmpty(licenses))
-                break;
+                    licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
 
-            licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
+                    if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
+                        sendReminderSMS(requestInfo, licenses);
 
-            if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
-                sendReminderSMS(requestInfo, licenses);
+                    else if(jobName.equalsIgnoreCase(JOB_EXPIRY))
+                        expireLicenses(requestInfo, licenses);
 
-            else if(jobName.equalsIgnoreCase(JOB_EXPIRY))
-                expireLicenses(requestInfo, licenses);
+                    offSet = offSet + config.getPaginationSize();
 
-            offSet = offSet + config.getPaginationSize();
-
-            criteria.setOffset(offSet);
+                    criteria.setOffset(offSet);
+                }
+            }
         }
+        
 
 
     }
@@ -158,15 +168,11 @@ public class TLBatchService {
                 if(StringUtils.isEmpty(license.getWorkflowCode()))
                     license.setWorkflowCode(DEFAULT_WORKFLOW);
             });
-            Map<String, List<TradeLicense> > licenseMap = licenses.stream().collect(Collectors.groupingBy(tl->tl.getTenantId())); 
-            for (String tenantId : licenseMap.keySet())  
-            { 
-            	List<TradeLicense> tradeLicenses = licenseMap.get(tenantId); 
-            	 workflowIntegrator.callWorkFlow(new TradeLicenseRequest(requestInfo, tradeLicenses));
-
-                 producer.push(config.getUpdateWorkflowTopic(), new TradeLicenseRequest(requestInfo, tradeLicenses));
-            } 
-           
+            
+            workflowIntegrator.callWorkFlow(new TradeLicenseRequest(requestInfo, licenses));
+         
+            producer.push(config.getUpdateWorkflowTopic(), new TradeLicenseRequest(requestInfo, licenses));
+                       
         }
         catch (Exception e){
             e.printStackTrace();

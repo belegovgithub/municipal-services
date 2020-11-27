@@ -1,5 +1,6 @@
 package org.egov.tl.util;
 
+import com.fasterxml.jackson.databind.Module;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -242,6 +243,7 @@ public class TradeUtil {
 
         return tlModuleDtls;
     }
+    
 
 
     private MdmsCriteriaReq getMDMSRequest(RequestInfo requestInfo,String tenantId){
@@ -287,7 +289,27 @@ public class TradeUtil {
         return result;
     }
 
+    public List<String> getModuleTeants(RequestInfo requestInfo,String serviceName){
+         
+    	
+        List<MasterDetail> cityMasterDetails = new ArrayList<>();
+        List<ModuleDetail> cityModuleDetails = new ArrayList<>();
+        
+        final String filter = "$.[?(@.module=='"+serviceName+"')]";
 
+        cityMasterDetails.add(MasterDetail.builder().name(TLConstants.MDMS_CITYMODULE_CODE).filter(filter).build());
+
+        cityModuleDetails.add( ModuleDetail.builder().masterDetails(cityMasterDetails)
+                .moduleName(TLConstants.MDMS_TENANT_MODULE).build());
+        MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(cityModuleDetails).tenantId(requestInfo.getUserInfo().getTenantId()) 
+                .build();
+        
+        MdmsCriteriaReq mdmsCriteriaReq = MdmsCriteriaReq.builder().mdmsCriteria(mdmsCriteria)
+                .requestInfo(requestInfo).build();
+    	Object result = serviceRequestRepository.fetchResult(getMdmsSearchUrl(), mdmsCriteriaReq);
+    	List<String> res=JsonPath.read(result, TLConstants.MDMS_MODULE_TENANT_CODE);
+        return res;
+    }
 
 
     public Object mDMSCallForBPA(RequestInfo requestInfo,String tenantId,String tradetype){

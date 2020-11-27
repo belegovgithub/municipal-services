@@ -289,7 +289,12 @@ public class TLConstants {
     public static final String DEFAULT_WORKFLOW = "NewTL";
 
     public static final String PAYMENT_LINK_PLACEHOLDER="{PAYMENT_LINK}";
+    
+    public static final String MDMS_TENANT_MODULE = "tenant";
 
+    public static final String MDMS_CITYMODULE_CODE="citymodule";
+
+    public static final String MDMS_MODULE_TENANT_CODE = "$.MdmsRes.tenant.citymodule.*.tenants.*.code";
     public TLConstants() {}
 
 
