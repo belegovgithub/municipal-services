@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,9 +98,19 @@ public class TLBatchService {
                     log.info("current Offset: "+offSet);
 
                     List<TradeLicense> licenses = repository.getLicenses(criteria);
+                    
                     if(CollectionUtils.isEmpty(licenses))
                         break;
-
+                    
+                    List<String> licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
+                    log.info("Licence list which will expire : "+licNos );
+                    //Expire only the license for which renewal application started 
+                    if(jobName.equalsIgnoreCase(JOB_EXPIRY)) {
+                    	repository.removeTLNotRenewed(licenses);
+                    	licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
+                        log.info("Licence list which will expire (after removing approval-not-renewed)  : "+licNos );
+                    }
+                    
                     licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
 
                     if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))

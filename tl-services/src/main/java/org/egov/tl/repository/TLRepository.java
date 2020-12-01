@@ -61,6 +61,23 @@ public class TLRepository {
         sortChildObjectsById(licenses);
         return licenses;
     }
+ 
+    /**
+     * Remove the tradeLicense from the list which are not yet initalized for renewal --User Requirement
+     * @param tradeLicenses
+     */
+    public void removeTLNotRenewed(List<TradeLicense> tradeLicenses) {
+    	final String checkForRenewalInstance ="SELECT applicationnumber FROM eg_tl_tradelicense tl WHERE "+
+    	  		"tl.licensenumber =? AND tl.validfrom >=?";
+    	List<TradeLicense> notToExpire= new ArrayList<TradeLicense>();
+    	for (TradeLicense tradeLicense : tradeLicenses) {
+    		List<String> licenses =  jdbcTemplate.queryForList(checkForRenewalInstance, String.class,tradeLicense.getLicenseNumber(),tradeLicense.getValidTo());
+    		if(CollectionUtils.isEmpty(licenses)) {
+    			notToExpire.add(tradeLicense);
+    		}
+    	}
+    	tradeLicenses.removeAll(notToExpire);
+    }
 
     /**
      * Pushes the request on save topic
