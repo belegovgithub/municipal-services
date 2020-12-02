@@ -6,6 +6,7 @@ import org.egov.tl.config.TLConfiguration;
 import org.egov.tl.producer.Producer;
 import org.egov.tl.repository.builder.TLQueryBuilder;
 import org.egov.tl.repository.rowmapper.TLRowMapper;
+import org.egov.tl.util.TLConstants;
 import org.egov.tl.web.models.*;
 import org.egov.tl.workflow.WorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,10 +69,10 @@ public class TLRepository {
      */
     public void removeTLNotRenewed(List<TradeLicense> tradeLicenses) {
     	final String checkForRenewalInstance ="SELECT applicationnumber FROM eg_tl_tradelicense tl WHERE "+
-    	  		"tl.licensenumber =? AND tl.validfrom >=?";
+    	  		"tl.licensenumber =? AND tl.validfrom >=? AND tl.status = ?";
     	List<TradeLicense> notToExpire= new ArrayList<TradeLicense>();
     	for (TradeLicense tradeLicense : tradeLicenses) {
-    		List<String> licenses =  jdbcTemplate.queryForList(checkForRenewalInstance, String.class,tradeLicense.getLicenseNumber(),tradeLicense.getValidTo());
+    		List<String> licenses =  jdbcTemplate.queryForList(checkForRenewalInstance, String.class,tradeLicense.getLicenseNumber(),tradeLicense.getValidTo(),TLConstants.STATUS_APPROVED);
     		if(CollectionUtils.isEmpty(licenses)) {
     			notToExpire.add(tradeLicense);
     		}
