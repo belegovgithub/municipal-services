@@ -110,6 +110,8 @@ public class TLBatchService {
                     	licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
                         log.info("Licence list which will expire (after removing approval-not-renewed)  : "+licNos );
                     }
+                    if(CollectionUtils.isEmpty(licenses))
+                        break;
                     
                     licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
 
