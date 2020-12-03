@@ -218,17 +218,19 @@ public class CalculationService {
 
       estimate.setEstimateAmount(totalTax);
       estimate.setCategory(Category.TAX);
+      TaxHeadEstimate estimateAppfee = new TaxHeadEstimate();
+      estimateAppfee.setEstimateAmount(tradeAppFee);
+      estimateAppfee.setCategory(Category.FEE);
+      estimateAppfee.setTaxHeadCode(config.getAppFeeTaxHead());
+      
       if(license.getApplicationType() != null && license.getApplicationType().toString().equals(TLCalculatorConstants.APPLICATION_TYPE_RENEWAL)){
           estimate.setTaxHeadCode(config.getRenewTaxHead());
           estimateList.add(estimate);
+          estimateList.add(estimateAppfee);   
           estimateList.addAll(tlRenewal.tlRenewalCalculation(requestInfo,calulationCriteria,mdmsData,totalTax));
       }else{
           estimate.setTaxHeadCode(config.getBaseTaxHead());
           estimateList.add(estimate);
-          TaxHeadEstimate estimateAppfee = new TaxHeadEstimate();
-          estimateAppfee.setEstimateAmount(tradeAppFee);
-          estimateAppfee.setCategory(Category.FEE);
-          estimateAppfee.setTaxHeadCode(config.getAppFeeTaxHead());
           estimateList.add(estimateAppfee);      }
 
       estimatesAndSlabs.setEstimates(estimateList);
