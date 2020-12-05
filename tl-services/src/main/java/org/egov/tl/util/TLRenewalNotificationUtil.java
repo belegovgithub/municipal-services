@@ -413,7 +413,8 @@ public class TLRenewalNotificationUtil {
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_PAYER, localizationMessages);
 		}
         messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
-        messageTemplate = messageTemplate.replace("<3>", valMap.get(receiptNumberKey));
+        messageTemplate = messageTemplate.replace("<3>", license.getApplicationNumber());
+        messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
         return messageTemplate;
     }
 
