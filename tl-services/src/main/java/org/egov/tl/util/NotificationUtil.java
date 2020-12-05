@@ -225,7 +225,7 @@ public class NotificationUtil {
 	 */
 	private String getApprovalPendingMsg(TradeLicense license, String message) {
 		// message = message.replace("<1>",);
-		message = message.replace("<2>", license.getApplicationNumber());
+		message = message.replace("<3>", license.getApplicationNumber());
 
 		return message;
 	}
@@ -240,7 +240,7 @@ public class NotificationUtil {
 	 * @return customized message for approved
 	 */
 	private String getApprovedMsg(TradeLicense license, BigDecimal amountToBePaid, String message) {
-		message = message.replace("<2>", license.getTradeName());
+		message = message.replace("<2>", license.getApplicationNumber());
 		message = message.replace("<3>", amountToBePaid.toString());
 
 
@@ -270,6 +270,7 @@ public class NotificationUtil {
 		// message = message.replace("<1>",);
 		message = message.replace("<2>", license.getTradeName());
 		message = message.replace("<3>", license.getApplicationNumber());
+
 		return message;
 	}
 
@@ -283,7 +284,7 @@ public class NotificationUtil {
 	 * @return customized message for rejected
 	 */
 	private String getFieldInspectionMsg(TradeLicense license, String message) {
-		message = message.replace("<2>", license.getApplicationNumber());
+		message = message.replace("<3>", license.getApplicationNumber());
 		return message;
 	}
 
@@ -329,8 +330,8 @@ public class NotificationUtil {
 	 * @return customized message for cancelled
 	 */
 	private String getCancelledMsg(TradeLicense license, String message) {
-		message = message.replace("<2>", license.getTradeName());
-		message = message.replace("<3>", license.getLicenseNumber());
+		//message = message.replace("<2>", license.getTradeName());
+		message = message.replace("<2>", license.getLicenseNumber());
 
 		return message;
 	}
@@ -351,7 +352,7 @@ public class NotificationUtil {
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_OWNER, localizationMessages);
 		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
-		messageTemplate = messageTemplate.replace("<3>", license.getTradeName());
+		messageTemplate = messageTemplate.replace("<3>", license.getApplicationNumber());
 		messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
 		return messageTemplate;
 	}
@@ -371,7 +372,7 @@ public class NotificationUtil {
 			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_PAYER, localizationMessages);
 		}
 		messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
-		messageTemplate = messageTemplate.replace("<3>", license.getTradeName());
+		messageTemplate = messageTemplate.replace("<3>", license.getApplicationNumber());
 		messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
 		return messageTemplate;
 	}

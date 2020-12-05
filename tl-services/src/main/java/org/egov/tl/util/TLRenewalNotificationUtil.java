@@ -244,10 +244,10 @@ public class TLRenewalNotificationUtil {
      * @return customized message for approved
      */
     private String getApprovedMsg(TradeLicense license, BigDecimal amountToBePaid, String message) {
-        message = message.replace("<2>", license.getTradeName());
-        message = message.replace("<3>", license.getApplicationNumber());
-        String date = epochToDate(license.getValidTo());
-        message = message.replace("<4>", date);
+       // message = message.replace("<2>", license.getTradeName());
+        message = message.replace("<2>", license.getApplicationNumber());
+       // String date = epochToDate(license.getValidTo());
+        message = message.replace("<3>", amountToBePaid.toString());
 
         String UIHost = config.getUiAppHost();
 
@@ -290,8 +290,10 @@ public class TLRenewalNotificationUtil {
      */
     private String getRejectedMsg(TradeLicense license, String message) {
         // message = message.replace("<1>",);
-        message = message.replace("<2>", license.getTradeName());
+    	 message = message.replace("<2>", license.getTradeName());
+
         message = message.replace("<3>", license.getApplicationNumber());
+
         return message;
     }
 
@@ -305,8 +307,8 @@ public class TLRenewalNotificationUtil {
      * @return customized message for rejected
      */
     private String getFieldInspectionMsg(TradeLicense license, String message) {
-        message = message.replace("<2>", license.getApplicationNumber());
-        message = message.replace("<3>", license.getTradeName());
+        message = message.replace("<3>", license.getApplicationNumber());
+        //message = message.replace("<3>", license.getTradeName());
         return message;
     }
 
@@ -321,8 +323,8 @@ public class TLRenewalNotificationUtil {
      * @return customized message for rejected
      */
     private String getPendingApprovalMsg(TradeLicense license, String message) {
-        message = message.replace("<2>", license.getApplicationNumber());
-        message = message.replace("<3>", license.getTradeName());
+        message = message.replace("<3>", license.getApplicationNumber());
+        //message = message.replace("<3>", license.getTradeName());
         return message;
     }
 
@@ -370,8 +372,8 @@ public class TLRenewalNotificationUtil {
      * @return customized message for cancelled
      */
     private String getCancelledMsg(TradeLicense license, String message) {
-        message = message.replace("<2>", license.getTradeName());
-        message = message.replace("<3>", license.getLicenseNumber());
+       // message = message.replace("<2>", license.getTradeName());
+        message = message.replace("<2>", license.getLicenseNumber());
 
         return message;
     }
@@ -387,8 +389,12 @@ public class TLRenewalNotificationUtil {
      */
     public String getOwnerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
         String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_RENEWAL_PAYMENT_OWNER, localizationMessages);
+        if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED) || license.getStatus().equalsIgnoreCase(TLConstants.STATUS_PEND_APPL_FEE)) {
+			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_OWNER, localizationMessages);
+		}
         messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
-        messageTemplate = messageTemplate.replace("<3>", valMap.get(receiptNumberKey));
+        messageTemplate = messageTemplate.replace("<3>", license.getApplicationNumber());
+        messageTemplate = messageTemplate.replace("<4>", valMap.get(receiptNumberKey));
         return messageTemplate;
     }
 
@@ -403,6 +409,9 @@ public class TLRenewalNotificationUtil {
      */
     public String getPayerPaymentMsg(TradeLicense license, Map<String, String> valMap, String localizationMessages) {
         String messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_RENEWAL_PAYMENT_PAYER, localizationMessages);
+        if(license.getStatus().equalsIgnoreCase(TLConstants.STATUS_APPLIED) || license.getStatus().equalsIgnoreCase(TLConstants.STATUS_PEND_APPL_FEE)) {
+			messageTemplate = getMessageTemplate(TLConstants.NOTIFICATION_APPFEE_PAYMENT_PAYER, localizationMessages);
+		}
         messageTemplate = messageTemplate.replace("<2>", valMap.get(amountPaidKey));
         messageTemplate = messageTemplate.replace("<3>", valMap.get(receiptNumberKey));
         return messageTemplate;
