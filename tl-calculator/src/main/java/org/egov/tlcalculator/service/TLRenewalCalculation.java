@@ -237,7 +237,7 @@ public class TLRenewalCalculation {
         Integer month = Integer.valueOf(time[1])-1;
         // One is subtracted because calender reads january as 0
         Integer year = Integer.valueOf( financalYear.split("-")[0]);
-        if (month < 3) year += 1;
+        //if (month < 3) year += 1;
         cal.set(year, month, day);
     }
 
