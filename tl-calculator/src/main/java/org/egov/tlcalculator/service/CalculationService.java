@@ -163,7 +163,7 @@ public class CalculationService {
     	  Configuration conf = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
     	  
     		  String garbageCharges =  JsonPath.using(conf).parse(additionalData).read("$.garbageCharges");
-    		  if(garbageCharges!=null) {
+    		  if(garbageCharges!=null && garbageCharges.length()!=0) {
     			  estimates.add(getGarbageCharges(calulationCriteria));
     		  }
     	  	
