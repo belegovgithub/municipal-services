@@ -200,7 +200,8 @@ public class PGRNotificationConsumer {
         for (String role : pGRUtils.getReceptorsOfNotification(actionInfo.getStatus(), actionInfo.getAction())) {
             if (role.equals(PGRConstants.ROLE_EMPLOYEE))
                 continue;
-            String message = getMessageForSMS(serviceReq, actionInfo, requestInfo, role);
+            String message = getMessageForSMS(serviceReq, actionInfo, requestInfo, role)!=null?
+            		getMessageForSMS(serviceReq, actionInfo, requestInfo, role).getMessage(): "";
             String data = notificationService.getMobileAndIdForNotificationService(requestInfo, serviceReq.getAccountId(), serviceReq.getTenantId(), actionInfo.getAssignee(), role);
             if (StringUtils.isEmpty(message))
                 continue;
@@ -247,15 +248,18 @@ public class PGRNotificationConsumer {
             String phoneNumberRetrived = notificationService.getMobileAndIdForNotificationService(requestInfo, serviceReq.getAccountId(), serviceReq.getTenantId(), actionInfo.getAssignee(), role);
             phoneNumberRetrived = phoneNumberRetrived.split("[|]")[0];
             String phone = StringUtils.isEmpty(phoneNumberRetrived) ? serviceReq.getPhone() : phoneNumberRetrived;
-            String message = getMessageForSMS(serviceReq, actionInfo, requestInfo, role);
+            String message = getMessageForSMS(serviceReq, actionInfo, requestInfo, role)!=null? 
+            		getMessageForSMS(serviceReq, actionInfo, requestInfo, role).getMessage(): "";
+            String templateId = getMessageForSMS(serviceReq, actionInfo, requestInfo, role)!=null? 
+            		getMessageForSMS(serviceReq, actionInfo, requestInfo, role).getTemplateId(): "";
             if (StringUtils.isEmpty(message))
                 continue;
-            smsRequestsTobeSent.add(SMSRequest.builder().mobileNumber(phone).message(message).build());
+            smsRequestsTobeSent.add(SMSRequest.builder().mobileNumber(phone).message(message).templateId(templateId).build());
         }
         return smsRequestsTobeSent;
     }
 
-    public String getMessageForSMS(Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, String role) {
+    public SMSRequest getMessageForSMS(Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, String role) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(notificationDateFormat);
         String date = dateFormat.format(new Date());
         String tenantId = serviceReq.getTenantId().split("[.]")[0]; // localization values are for now state-level.
@@ -269,7 +273,7 @@ public class PGRNotificationConsumer {
         }
         if (null == NotificationService.localizedMessageMap.get(locale + "|" + tenantId)) // static map that saves code-message pair against locale | tenantId.
             notificationService.getLocalisedMessages(requestInfo, tenantId, locale, PGRConstants.LOCALIZATION_MODULE_NAME);
-        Map<String, String> messageMap = NotificationService.localizedMessageMap.get(locale + "|" + tenantId);
+        Map<String, SMSRequest> messageMap = NotificationService.localizedMessageMap.get(locale + "|" + tenantId);
         if (null == messageMap)
             return null;
         List<Object> listOfValues = notificationService.getServiceType(serviceReq, requestInfo, locale);
@@ -278,24 +282,32 @@ public class PGRNotificationConsumer {
 
     }
 
-    public String getMessage(List<Object> listOfValues, String date, Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, Map<String, String> messageMap, String role) {
+    public SMSRequest getMessage(List<Object> listOfValues, String date, Service serviceReq, ActionInfo actionInfo, RequestInfo requestInfo, Map<String, SMSRequest> messageMap, String role) {
         if (null == listOfValues.get(0)) {
             return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
         }
         String text = null;
+        String templateId = null;
         String[] reasonForRejection = new String[2];
         Map<String, String> employeeDetails = null;
         String department = null;
         String designation = null;
         if (StringUtils.isEmpty(actionInfo.getStatus()) && !StringUtils.isEmpty(actionInfo.getComment())) {
-            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT);
+            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT) != null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT).getMessage() : "";
+            templateId = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT) != null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT).getTemplateId() : null;
             text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_COMMENT_KEY, actionInfo.getComment())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_USER_NAME_KEY, requestInfo.getUserInfo().getName());
         } else {
-            text = messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role));
+            text = messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role)) != null?
+            		messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role)).getMessage(): "";
+            templateId = messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role)) != null?
+            		messageMap.get(PGRConstants.getStatusRoleLocalizationKeyMap().get(actionInfo.getStatus() + "|" + role)).getTemplateId(): null;
             if (actionInfo.getStatus().equals(WorkFlowConfigs.STATUS_OPENED)) {
                 if (null != actionInfo.getAction() && actionInfo.getAction().equals(WorkFlowConfigs.ACTION_REOPEN)) {
-                    text = messageMap.get(PGRConstants.getActionRoleLocalizationKeyMap().get(WorkFlowConfigs.ACTION_REOPEN + "|" + role));
+                    text = messageMap.get(PGRConstants.getActionRoleLocalizationKeyMap().get(WorkFlowConfigs.ACTION_REOPEN + "|" + role)) != null?
+                    		messageMap.get(PGRConstants.getActionRoleLocalizationKeyMap().get(WorkFlowConfigs.ACTION_REOPEN + "|" + role)).getMessage() : "";
+                    templateId = messageMap.get(PGRConstants.getActionRoleLocalizationKeyMap().get(WorkFlowConfigs.ACTION_REOPEN + "|" + role)) != null?
+                    		messageMap.get(PGRConstants.getActionRoleLocalizationKeyMap().get(WorkFlowConfigs.ACTION_REOPEN + "|" + role)).getTemplateId() : null;
                     employeeDetails = notificationService.getEmployeeDetails(serviceReq.getTenantId(), actionInfo.getAssignee(), requestInfo);
                     text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_EMP_NAME_KEY, employeeDetails.get("name"));
                 }
@@ -307,7 +319,8 @@ public class PGRNotificationConsumer {
                     department = employeeDetails.get("department");
                     //department = notificationService.getDepartmentForNotification(serviceReq, deptCodes, requestInfo);
                     //Added to get the Localized Dept Name
-                    department = messageMap.get(PGRConstants.LOCALIZATION_DEPT_PREFIX + department);
+                    department = messageMap.get(PGRConstants.LOCALIZATION_DEPT_PREFIX + department) != null? 
+                    		messageMap.get(PGRConstants.LOCALIZATION_DEPT_PREFIX + department).getMessage() : "";
                     designation = notificationService.getDesignation(serviceReq, employeeDetails.get("designation"), requestInfo);
                 } else {
                     return getDefaultMessage(messageMap, actionInfo.getStatus(), actionInfo.getAction(), actionInfo.getComment());
@@ -351,25 +364,31 @@ public class PGRNotificationConsumer {
             else {
                 ulb = StringUtils.capitalize(serviceReq.getTenantId().split("[.]")[1]);
             }
-            return text.replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINT_TYPE_KEY, listOfValues.get(0).toString())
+            return new SMSRequest(
+            	null, 
+            	text.replaceAll(PGRConstants.SMS_NOTIFICATION_COMPLAINT_TYPE_KEY, listOfValues.get(0).toString())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_ID_KEY, serviceReq.getServiceRequestId())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_DATE_KEY, date)
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_APP_LINK_KEY, uiAppHost + uiFeedbackUrl + serviceReq.getServiceRequestId())
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_APP_DOWNLOAD_LINK_KEY, appDownloadLink)
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_AO_DESIGNATION, PGRConstants.ROLE_NAME_GRO)
                     .replaceAll(PGRConstants.SMS_NOTIFICATION_ULB_NAME, ulb)
-                    .replaceAll(PGRConstants.SMS_NOTIFICATION_SLA_NAME, listOfValues.get(1).toString());
+                    .replaceAll(PGRConstants.SMS_NOTIFICATION_SLA_NAME, listOfValues.get(1).toString()), 
+	            templateId);
 
         }
-        return text;
+        return new SMSRequest(null, text, templateId);
     }
 
-    public String getDefaultMessage(Map<String, String> messageMap, String status, String action, String comment) {
+    public SMSRequest getDefaultMessage(Map<String, SMSRequest> messageMap, String status, String action, String comment) {
         String text = null;
+        String templateId = null;
         if (StringUtils.isEmpty(status) && !StringUtils.isEmpty(comment)) {
-            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT_DEFAULT);
+            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT_DEFAULT) != null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT_DEFAULT).getMessage() : "";
+            templateId = messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT_DEFAULT) != null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_COMMENT_DEFAULT).getTemplateId() : null;
         } else {
-            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_DEFAULT);
+            text = messageMap.get(PGRConstants.LOCALIZATION_CODE_DEFAULT) !=null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_DEFAULT).getMessage() : "" ;
+            templateId = messageMap.get(PGRConstants.LOCALIZATION_CODE_DEFAULT) !=null ? messageMap.get(PGRConstants.LOCALIZATION_CODE_DEFAULT).getTemplateId() : null ;
             text = text.replaceAll(PGRConstants.SMS_NOTIFICATION_STATUS_KEY, PGRConstants.getStatusNotifKeyMap().get(status));
             if (status.equals(WorkFlowConfigs.STATUS_OPENED)) {
                 if (null != action && action.equals(WorkFlowConfigs.ACTION_REOPEN))
@@ -380,7 +399,7 @@ public class PGRNotificationConsumer {
             }
         }
 
-        return text;
+        return new SMSRequest(null,  text, templateId);
     }
 
     public boolean isNotificationEnabled(String status, String userType, String comment, String action) {

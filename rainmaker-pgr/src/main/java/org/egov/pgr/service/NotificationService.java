@@ -11,7 +11,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
+import org.egov.pgr.contract.LocalizationDto;
 import org.egov.pgr.contract.RequestInfoWrapper;
+import org.egov.pgr.contract.SMSRequest;
 import org.egov.pgr.contract.ServiceReqSearchCriteria;
 import org.egov.pgr.contract.ServiceResponse;
 import org.egov.pgr.model.ActionInfo;
@@ -24,7 +26,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.TypeRef;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,7 +70,7 @@ public class NotificationService {
 	@Autowired
 	private PGRUtils pGRUtils;
 	
-	public static Map<String, Map<String, String>> localizedMessageMap = new HashMap<>();
+	public static Map<String, Map<String, SMSRequest>> localizedMessageMap = new HashMap<>();
 
 	/**
 	 * Fetches the Service type and sla hours for the respective service type
@@ -89,7 +97,8 @@ public class NotificationService {
 				return null;
 			if (null == localizedMessageMap.get(locale + "|" + tenantId)) // static map that saves code-message pair against locale | tenantId.
 				getLocalisedMessages(requestInfo, tenantId, locale, PGRConstants.LOCALIZATION_MODULE_NAME);
-			serviceType = localizedMessageMap.get(locale + "|" + tenantId).get(PGRConstants.LOCALIZATION_COMP_CATEGORY_PREFIX + serviceTypes.get(0)); //result set is always of size one.
+			serviceType = localizedMessageMap.get(locale + "|" + tenantId).get(PGRConstants.LOCALIZATION_COMP_CATEGORY_PREFIX + serviceTypes.get(0)) != null ? 
+					localizedMessageMap.get(locale + "|" + tenantId).get(PGRConstants.LOCALIZATION_COMP_CATEGORY_PREFIX + serviceTypes.get(0)).getMessage() : ""; //result set is always of size one.
 			if(StringUtils.isEmpty(serviceType))
 				serviceType = PGRUtils.splitCamelCase(serviceTypes.get(0));
 		} catch (Exception e) {
@@ -202,7 +211,7 @@ public class NotificationService {
 	 * @param module
 	 */
 	public void getLocalisedMessages(RequestInfo requestInfo, String tenantId, String locale, String module) {
-		Map<String, String> mapOfCodesAndMessages = new HashMap<>();
+		Map<String, SMSRequest> mapOfCodesAndMessages = new HashMap<>();
 		StringBuilder uri = new StringBuilder();
 		RequestInfoWrapper requestInfoWrapper = pGRUtils.prepareRequestForLocalization(uri, requestInfo, locale,
 				tenantId, module);
@@ -211,16 +220,36 @@ public class NotificationService {
 		Object result = null;
 		try {
 			result = serviceRequestRepository.fetchResult(uri, requestInfoWrapper);
-			codes = JsonPath.read(result, PGRConstants.LOCALIZATION_CODES_JSONPATH);
-			messages = JsonPath.read(result, PGRConstants.LOCALIZATION_MSGS_JSONPATH);
+			//System.out.println("Check the result "+ result);
+			//codes = JsonPath.read(result, PGRConstants.LOCALIZATION_CODES_JSONPATH);
+			//messages = JsonPath.read(result, PGRConstants.LOCALIZATION_MSGS_JSONPATH);
+			
 		} catch (Exception e) {
 			log.error("Exception while fetching from localization: " + e);
 		}
 		if (null != result) {
-			for (int i = 0; i < codes.size(); i++) {
-				mapOfCodesAndMessages.put(codes.get(i), messages.get(i));
+			
+//			for (int i = 0; i < codes.size(); i++) {
+//				
+//				mapOfCodesAndMessages.put(codes.get(i), new SMSRequest(null, messages.get(i), null/*templateIds.get(i)*/));
+//			}
+			
+			Gson gson = new Gson();
+			JsonObject jObj = gson.toJsonTree(result).getAsJsonObject();
+			for (String key : jObj.keySet()) {
+				//System.out.println("key " + key);
+				JsonArray jsonArray = jObj.get(key).getAsJsonArray();
+				for (int i=0; i<jsonArray.size();i++) {
+					String code = jsonArray.get(i).getAsJsonObject().get("code").getAsString();
+					String message = jsonArray.get(i).getAsJsonObject().get("message").getAsString();
+					String templateId = jsonArray.get(i).getAsJsonObject().get("templateId") != null? 
+							jsonArray.get(i).getAsJsonObject().get("templateId").getAsString():null;
+					mapOfCodesAndMessages.put(code, new SMSRequest(null, message, templateId));
+				}
 			}
 			localizedMessageMap.put(locale + "|" + tenantId, mapOfCodesAndMessages);
+			
+			//System.out.println("Check once "+localizedMessageMap);
 		}
 	}
 	
