@@ -221,8 +221,8 @@ public class PaymentNotificationService {
             message = util.getPayerPaymentMsg(license,valMap,localizationMessages);
         String templateId = null;
 		if(message!=null && message.contains(TLConstants.MESSAGE_SEPERATOR)) {
-			templateId = message.split(TLConstants.MESSAGE_SEPERATOR)[0];
-			message = message.split(TLConstants.MESSAGE_SEPERATOR)[1];
+			templateId = message.split(TLConstants.MESSAGE_SEPERATOR,2)[0];
+			message = message.split(TLConstants.MESSAGE_SEPERATOR,2)[1];
 		}
         String customizedMsg = message.replace("<1>",valMap.get(paidByKey));
         SMSRequest smsRequest = new SMSRequest(valMap.get(payerMobileNumberKey),customizedMsg,templateId);

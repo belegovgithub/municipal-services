@@ -138,7 +138,7 @@ public class NotificationUtil {
 		}
 		String templateId =getMessageTemplateId(notificationCode, localizationMessage);
         if(!StringUtils.isEmpty(templateId) && !StringUtils.isEmpty(message)) {
-        	message=templateId+TLConstants.MESSAGE_SEPERATOR+templateId;
+        	message=templateId+TLConstants.MESSAGE_SEPERATOR+message;
         }
         return message;	
 	}
