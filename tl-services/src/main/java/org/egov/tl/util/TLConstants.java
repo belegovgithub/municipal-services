@@ -81,6 +81,7 @@ public class TLConstants {
 
     public static final String NOTIFICATION_TL_REMINDER = "tl.en.reminder";
 
+    public static final String MESSAGE_SEPERATOR ="!-~!";
 
     public static final List<String> NOTIFICATION_CODES = Collections.unmodifiableList(Arrays.asList(
             RENEWAL_NOTIFICATION_INITIATED, RENEWAL_NOTIFICATION_APPLIED, RENEWAL_NOTIFICATION_FIELD_INSPECTION, RENEWAL_NOTIFICATION_PENDINGAPPROVAL,

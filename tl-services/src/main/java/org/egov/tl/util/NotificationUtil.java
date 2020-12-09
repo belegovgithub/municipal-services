@@ -136,9 +136,25 @@ public class NotificationUtil {
 		} catch (Exception e) {
 			log.warn("Fetching from localization failed", e);
 		}
-		return message;
+		String templateId =getMessageTemplateId(notificationCode, localizationMessage);
+        if(!StringUtils.isEmpty(templateId) && !StringUtils.isEmpty(message)) {
+        	message=templateId+TLConstants.MESSAGE_SEPERATOR+templateId;
+        }
+        return message;	
 	}
 
+    private String getMessageTemplateId(String notificationCode, String localizationMessage) {
+        String path = "$..messages[?(@.code==\"{}\")].templateId";
+        path = path.replace("{}", notificationCode);
+        String templateid = null;
+        try {
+            Object messageObj = JsonPath.parse(localizationMessage).read(path);
+            templateid = ((ArrayList<String>) messageObj).get(0);
+        } catch (Exception e) {
+            log.warn("Unable to fetch template id ", e);
+        }
+        return templateid;
+    }
 	/**
 	 * Returns the uri for the localization call
 	 * 
@@ -406,8 +422,9 @@ public class NotificationUtil {
 			if (CollectionUtils.isEmpty(smsRequestList))
 				log.info("Messages from localization couldn't be fetched!");
 			for (SMSRequest smsRequest : smsRequestList) {
+				log.info("SMS topic" + smsRequest);
 				producer.push(config.getSmsNotifTopic(), smsRequest);
-				log.info("MobileNumber: " + smsRequest.getMobileNumber() + " Messages: " + smsRequest.getMessage());
+				log.info("MobileNumber: " + smsRequest.getMobileNumber() + " Messages: " + smsRequest.getMessage() +" TemplateId: "+smsRequest.getTemplateId());
 			}
 		}
 	}
@@ -469,9 +486,16 @@ public class NotificationUtil {
 	public List<SMSRequest> createSMSRequest(String message, Map<String, String> mobileNumberToOwnerName) {
 		List<SMSRequest> smsRequest = new LinkedList<>();
 		for (Map.Entry<String, String> entryset : mobileNumberToOwnerName.entrySet()) {
+			String templateId=null;
+			if(message.contains(TLConstants.MESSAGE_SEPERATOR)) {
+				String[] splitMsg =  message.split(TLConstants.MESSAGE_SEPERATOR,2);
+				message=splitMsg[1];
+				templateId = splitMsg[0];
+			}
 			String customizedMsg = message.replace("<1>", entryset.getValue());
 			customizedMsg = customizedMsg.replace(NOTIF_OWNER_NAME_KEY, entryset.getValue());
-			smsRequest.add(new SMSRequest(entryset.getKey(), customizedMsg));
+			
+			smsRequest.add(new SMSRequest(entryset.getKey(), customizedMsg,templateId));
 		}
 		return smsRequest;
 	}
@@ -547,6 +571,7 @@ public class NotificationUtil {
 	 * @param request
 	 */
 	public void sendEventNotification(EventRequest request) {
+		log.info("Event Info : " + request);
 		producer.push(config.getSaveUserEventsTopic(), request);
 	}
 
