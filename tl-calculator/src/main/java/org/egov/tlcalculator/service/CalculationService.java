@@ -83,7 +83,7 @@ public class CalculationService {
        if(status==TradeLicense.StatusEnum.INITIATED  || status==TradeLicense.StatusEnum.PENDINGAPPLFEE) {
     	   for (Calculation calculation : calculations) {
     		   List<TaxHeadEstimate> taxheadEsts =  calculation.getTaxHeadEstimates().stream().filter(
-        			   taxheadEst -> (taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead())) && !taxheadEst.getEstimateAmount().equals(BigDecimal.ZERO)).collect(Collectors.toList());
+        			   taxheadEst -> (taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead())) && taxheadEst.getEstimateAmount().compareTo(BigDecimal.ZERO)!=0).collect(Collectors.toList());
     		   if(taxheadEsts.size()==0) {
     			   taxheadEsts = calculation.getTaxHeadEstimates().stream().filter(
             			   taxheadEst -> !(taxheadEst.getTaxHeadCode().equals(config.getAppFeeTaxHead()))) .collect(Collectors.toList());
