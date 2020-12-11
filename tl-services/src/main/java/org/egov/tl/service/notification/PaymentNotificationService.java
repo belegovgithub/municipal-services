@@ -11,6 +11,7 @@ import org.egov.tl.repository.TLRepository;
 import org.egov.tl.service.TradeLicenseService;
 import org.egov.tl.util.BPANotificationUtil;
 import org.egov.tl.util.NotificationUtil;
+import org.egov.tl.util.TLConstants;
 import org.egov.tl.util.TLRenewalNotificationUtil;
 import org.egov.tl.web.models.*;
 import org.egov.tl.web.models.collection.PaymentDetail;
@@ -190,12 +191,15 @@ public class PaymentNotificationService {
             if(owner.getMobileNumber()!=null)
                 mobileNumberToOwnerName.put(owner.getMobileNumber(),owner.getName());
         });
-
+        String templateId = null;
+		if(message!=null && message.contains(TLConstants.MESSAGE_SEPERATOR)) {
+			templateId = message.split(TLConstants.MESSAGE_SEPERATOR,2)[0];
+			message = message.split(TLConstants.MESSAGE_SEPERATOR,2)[1];
+		}
         List<SMSRequest> smsRequests = new LinkedList<>();
-
         for(Map.Entry<String,String> entrySet : mobileNumberToOwnerName.entrySet()){
             String customizedMsg = message.replace("<1>",entrySet.getValue());
-            smsRequests.add(new SMSRequest(entrySet.getKey(),customizedMsg));
+            smsRequests.add(new SMSRequest(entrySet.getKey(),customizedMsg,templateId));
         }
         return smsRequests;
     }
@@ -215,9 +219,13 @@ public class PaymentNotificationService {
         }
         else
             message = util.getPayerPaymentMsg(license,valMap,localizationMessages);
-
+        String templateId = null;
+		if(message!=null && message.contains(TLConstants.MESSAGE_SEPERATOR)) {
+			templateId = message.split(TLConstants.MESSAGE_SEPERATOR,2)[0];
+			message = message.split(TLConstants.MESSAGE_SEPERATOR,2)[1];
+		}
         String customizedMsg = message.replace("<1>",valMap.get(paidByKey));
-        SMSRequest smsRequest = new SMSRequest(valMap.get(payerMobileNumberKey),customizedMsg);
+        SMSRequest smsRequest = new SMSRequest(valMap.get(payerMobileNumberKey),customizedMsg,templateId);
         return smsRequest;
     }
 

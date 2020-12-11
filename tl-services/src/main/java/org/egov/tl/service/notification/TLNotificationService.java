@@ -159,6 +159,12 @@ public class TLNotificationService {
 			}
 			
             if(message == null) continue;
+            String templateId =null;
+            if(message.contains(TLConstants.MESSAGE_SEPERATOR)) {
+				String[] splitMsg =  message.split(TLConstants.MESSAGE_SEPERATOR,2);
+				message=splitMsg[1];
+				templateId = splitMsg[0];
+			} 
             Map<String,String > mobileNumberToOwner = new HashMap<>();
             license.getTradeLicenseDetail().getOwners().forEach(owner -> {
                 if(owner.getMobileNumber()!=null)
