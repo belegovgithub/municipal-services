@@ -118,8 +118,18 @@ public class TLBatchService {
                     if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
                         sendReminderSMS(requestInfo, licenses);
 
-                    else if(jobName.equalsIgnoreCase(JOB_EXPIRY))
-                        expireLicenses(requestInfo, licenses);
+                    else if(jobName.equalsIgnoreCase(JOB_EXPIRY)) {
+                    	//Workflow through error if NewTL/EDITRenewal both goes for expiry
+                    	List<TradeLicense> newTLs= licenses.stream().filter(l->l.getWorkflowCode().equals(DEFAULT_WORKFLOW)).collect(Collectors.toList());
+                    	if(!CollectionUtils.isEmpty(newTLs)) {
+                    		expireLicenses(requestInfo, newTLs);	
+                    	}
+                    	licenses.removeAll(newTLs);
+                    	if(!CollectionUtils.isEmpty(licenses)) {
+                    		expireLicenses(requestInfo, licenses);	
+                    	} 
+                    }
+                        
 
                     offSet = offSet + config.getPaginationSize();
 
