@@ -37,7 +37,7 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
     					.surveyId(id)
     					.lesseAsPerGLR(rs.getString("lesse"))
     					.surveyNo(rs.getString("surveyno"))
-    					.finalTermExpiryDate((Long) rs.getObject("termexpirydate"))
+    					.finalTermExpiryDate((Long) rs.getObject("finaltermexpirydate"))
     					.build();
                 leaseAgreementMap.put(id,currentRenewal);
             }
