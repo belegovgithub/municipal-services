@@ -65,9 +65,15 @@ public class LamsQueryBuilder {
             addClauseIfRequired(preparedStmtList,builder);
             builder.append(" renewal.accountid = ? ");
             preparedStmtList.add(criteria.getAccountId());
+            
+            List<String> userIds = criteria.getUserIds();
+            if(!CollectionUtils.isEmpty(userIds)) {
+                builder.append(" OR (renewal.accountid IN (").append(createQuery(userIds)).append("))");
+                addToPreparedStatement(preparedStmtList,userIds);
+            }
 
         }
-
+        else {
             if (criteria.getTenantId() != null) {
                 addClauseIfRequired(preparedStmtList, builder);
                 builder.append(" renewal.tenantid=? ");
@@ -78,6 +84,12 @@ public class LamsQueryBuilder {
                 addClauseIfRequired(preparedStmtList, builder);
                 builder.append(" renewal.id IN (").append(createQuery(ids)).append(")");
                 addToPreparedStatement(preparedStmtList, ids);
+            }
+            List<String> userIds = criteria.getUserIds();
+            if(!CollectionUtils.isEmpty(userIds)) {
+            	addClauseIfRequired(preparedStmtList, builder);
+                builder.append("(renewal.accountid IN (").append(createQuery(userIds)).append("))");
+                addToPreparedStatement(preparedStmtList,userIds);
             }
             if (criteria.getApplicationNumber()!= null) {
                 addClauseIfRequired(preparedStmtList, builder);
@@ -109,6 +121,7 @@ public class LamsQueryBuilder {
                 builder.append(" renewal.applicationtype = ? ");
                 preparedStmtList.add(criteria.getApplicationType());
             }
+        }
         return addPaginationWrapper(builder.toString(),preparedStmtList,criteria);
     }
 

@@ -29,6 +29,9 @@ public class SearchCriteria {
 
 	@JsonProperty("ids")
 	private List<String> ids;
+	
+	@JsonProperty("userIds")
+	private List<String> userIds;
 
 	@JsonProperty("applicationNumber")
 	private String applicationNumber;
@@ -77,14 +80,14 @@ public class SearchCriteria {
 	
 	@Override
 	public String toString() {
-		return "SearchCriteria [tenantId=" + tenantId + ", ids=" + ids + ", applicationNumber=" + applicationNumber
+		return "SearchCriteria [tenantId=" + tenantId + ", ids=" + ids + ", userIds=" + userIds + ",applicationNumber=" + applicationNumber
 				+ ", accountId=" + accountId + ", mobileNumber=" + mobileNumber + ", businessService=" + businessService
 				+ ", offset=" + offset + ", limit=" + limit + ", status=" + status + "]";
 	}
 
 	public boolean isEmpty() {
 		return (this.tenantId == null && this.status == null && this.applicationType == null && this.ids == null && this.applicationNumber == null
-                &&  this.mobileNumber == null 
+                &&  this.mobileNumber == null && this.userIds==null
         );
 	}
 	

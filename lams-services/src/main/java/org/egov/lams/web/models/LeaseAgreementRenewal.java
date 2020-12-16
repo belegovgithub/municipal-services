@@ -42,7 +42,7 @@ public class  LeaseAgreementRenewal   {
 
     public enum ApplicationTypeEnum {
         NEW(LRConstants.APPLICATION_TYPE_NEW),
-
+        EXTENSION(LRConstants.APPLICATION_TYPE_EXTENSION),
         RENEWAL(LRConstants.APPLICATION_TYPE_RENEWAL);
 
         private String value;

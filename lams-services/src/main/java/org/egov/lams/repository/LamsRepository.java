@@ -107,6 +107,7 @@ public class LamsRepository {
     public List<LeaseAgreementRenewal> getLeaseRenewals(SearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getLeaseRenewalSearchQuery(criteria, preparedStmtList);
+        log.info("query : "+query);
         List<LeaseAgreementRenewal> leases =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
         return leases;
     }

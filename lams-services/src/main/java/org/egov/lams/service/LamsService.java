@@ -2,11 +2,11 @@ package org.egov.lams.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.validation.Valid;
+import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.lams.config.LamsConfiguration;
@@ -28,6 +28,7 @@ import org.egov.lams.workflow.WorkflowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LamsService {
@@ -82,11 +83,16 @@ public class LamsService {
 	        if(userDetailResponse.getUser().size()==0){
 	            return Collections.emptyList();
 	        }
-	        criteria.setAccountId(userDetailResponse.getUser().get(0).getUuid().toString());
+	        //criteria.setAccountId(userDetailResponse.getUser().get(0).getUuid().toString());
+	        if(CollectionUtils.isEmpty(criteria.getUserIds())){
+	            Set<String> ownerids = new HashSet<>();
+	            userDetailResponse.getUser().forEach(owner -> ownerids.add(owner.getUuid()));
+	            criteria.setUserIds(new ArrayList<>(ownerids));
+	        }
         }
 		
-		if(requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN"))
-			criteria.setTenantId(null);
+		//if(requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN"))
+			//criteria.setTenantId(null);
 		leases = repository.getLeaseRenewals(criteria);
 		leases.forEach(lease -> {
 			List<UserInfo> userDetails = new ArrayList<UserInfo>();
