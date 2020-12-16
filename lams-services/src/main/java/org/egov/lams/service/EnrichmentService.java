@@ -80,7 +80,11 @@ public class EnrichmentService {
         String tenantId = request.getLeases().get(0).getTenantId();
         request.getLeases().forEach(lease -> {
         	//System.out.println("requestInfo, tenantId "+requestInfo + tenantId);
-        	String applicationNumber = getIdList(requestInfo, tenantId, config.getLamsLRApplNumIdgenName(), config.getLamsLRApplNumIdgenFormat(), 1).get(0);
+        	String applicationNumber ="";
+        	if(LRConstants.APPLICATION_TYPE_RENEWAL.equals(String.valueOf(lease.getApplicationType())))
+        		applicationNumber = getIdList(requestInfo, tenantId, config.getLamsLRApplNumIdgenName(), config.getLamsLRApplNumIdgenFormat(), 1).get(0);
+        	else if(LRConstants.APPLICATION_TYPE_EXTENSION.equals(String.valueOf(lease.getApplicationType())))
+        		applicationNumber = getIdList(requestInfo, tenantId, config.getLamsLEApplNumIdgenName(), config.getLamsLEApplNumIdgenFormat(), 1).get(0);
         	lease.setApplicationNumber(applicationNumber);
         });
     }

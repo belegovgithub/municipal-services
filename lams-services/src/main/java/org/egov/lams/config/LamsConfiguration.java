@@ -72,6 +72,12 @@ public class LamsConfiguration {
 
     @Value("${egov.idgen.lamsLRApplNum.format}")
     private String lamsLRApplNumIdgenFormat;
+    
+    @Value("${egov.idgen.lamsLEApplNum.name}")
+    private String lamsLEApplNumIdgenName;
+
+    @Value("${egov.idgen.lamsLEApplNum.format}")
+    private String lamsLEApplNumIdgenFormat;
 
 
     //Persister Config
