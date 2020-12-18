@@ -84,8 +84,8 @@ public class LamsRepository {
 
 
         for (LeaseAgreementRenewal lease : leases) {
-        	if(LRConstants.APPLICATION_TYPE_EXTENSION.equals(String.valueOf(lease.getApplicationType())) && 
-        			LRConstants.ACTION_APPROVE.equals(lease.getStatus())) {
+        	if(LRConstants.ACTION_APPROVE.equals(lease.getStatus())) {
+        		log.info("Updating Mst");
         		producer.push(config.getUpdateLamsSurveyTopic(), lamsRequest);
         	}
             if (idToIsStateUpdatableMap.get(lease.getId())) {
@@ -107,7 +107,6 @@ public class LamsRepository {
     public List<LeaseAgreementRenewal> getLeaseRenewals(SearchCriteria criteria) {
         List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getLeaseRenewalSearchQuery(criteria, preparedStmtList);
-        log.info("query : "+query);
         List<LeaseAgreementRenewal> leases =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
         return leases;
     }
