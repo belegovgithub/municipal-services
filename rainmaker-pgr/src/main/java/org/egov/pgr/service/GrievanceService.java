@@ -226,7 +226,8 @@ public class GrievanceService {
 		RequestInfo requestInfo = serviceRequest.getRequestInfo();
 		List<String> roles = requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 				.collect(Collectors.toList());
-		if(roles.contains(PGRConstants.ROLE_NAME_CSR) || roles.contains(PGRConstants.ROLE_CSR)) {
+		if(roles.contains(PGRConstants.ROLE_NAME_CSR) || roles.contains(PGRConstants.ROLE_CSR) ||
+				roles.contains(PGRConstants.ROLE_NAME_GRO) || roles.contains(PGRConstants.ROLE_GRO)) {
 			serviceRequest.getServices().stream().forEach(request -> {
 				String accId = null;
 				if (null != request.getCitizen()) {
