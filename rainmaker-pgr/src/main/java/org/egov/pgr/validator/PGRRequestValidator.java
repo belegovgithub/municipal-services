@@ -337,6 +337,9 @@ public class PGRRequestValidator {
 		List<String> actions = null;
 		actions = roleActionMap.get(pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
+		
+		//System.out.println("The precedent role is "+pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
+				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
 		final List<String> actionsAllowedForTheRole = actions;
 		String role = pgrUtils.getPrecedentRole(roles);
 		List<String> serviceCodes = new ArrayList<>();
@@ -368,6 +371,11 @@ public class PGRRequestValidator {
 				errorMap.put(ErrorConstants.INVALID_ACTION_FOR_GRO_CODE, ErrorConstants.INVALID_ACTION_FOR_GRO_MSG);
 			}
 		}
+		
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+		
+		validateLateUpdates(serviceRequest,errorMap);
 
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
@@ -395,6 +403,33 @@ public class PGRRequestValidator {
 			throw new CustomException(errorMap);
 	}
 	
+	/**
+	 * This method will check if the citizen/employees hold old status on frontend, and try to update the status.
+	 * @param serviceRequest
+	 * @param errorMap
+	 */
+	public void validateLateUpdates(ServiceRequest serviceRequest, Map<String, String> errorMap) {
+		ServiceResponse serviceResponse = getServiceRequests(serviceRequest, errorMap);
+		if (!errorMap.isEmpty())
+			return;
+		List<ActionHistory> historys = serviceResponse.getActionHistory();
+		Map<String, ActionHistory> historyMap = new HashMap<>();
+		historys.forEach(a -> historyMap.put(a.getActions().get(0).getBusinessKey(), a));
+		for (int index = 0; index < serviceRequest.getServices().size(); index++) {
+			Service service = serviceRequest.getServices().get(index);
+			ActionHistory history = historyMap.get(service.getServiceRequestId());
+			String currentStatus = pgrUtils.getCurrentStatus(history);
+			if(serviceRequest!=null && serviceRequest.getServices()!=null && serviceRequest.getServices().size() > 0 &&
+					serviceRequest.getServices().get(0).getStatus()!=null &&
+					!serviceRequest.getServices().get(0).getStatus().toString().equals(currentStatus))
+			{
+				//System.out.println("Looks like you are not updated.");
+				String error = ErrorConstants.LATEUPDATE_EG_PGR_SERVICE_REQ_ID_MSG;
+				errorMap.put(ErrorConstants.LATEUPDATE_EG_PGR_SERVICE_REQ_ID_CODE, error);
+			}
+		}
+
+	}
 	 /**
 	  * This method valiates if the action being performed is valid on the current status of the sevice request.
 	  * NOTE - It also checks if the service requests being validated are available in the system. As part of the action validation.

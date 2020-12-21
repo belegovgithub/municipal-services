@@ -94,4 +94,7 @@ public class ErrorConstants {
 	
 	public static final String INVALID_EG_PGR_SERVICE_REQ_ID_CODE = "EG_PGR_INVALID_SERVICE_REQ_ID";
 	public static final String INVALID_EG_PGR_SERVICE_REQ_ID_MSG = "Invalid Service request id: ";
+	
+	public static final String LATEUPDATE_EG_PGR_SERVICE_REQ_ID_MSG = "Refresh your page and try again.";
+	public static final String LATEUPDATE_EG_PGR_SERVICE_REQ_ID_CODE = "LATEUPDATE_EG_PGR_SERVICE_REQ_ID";
 }
