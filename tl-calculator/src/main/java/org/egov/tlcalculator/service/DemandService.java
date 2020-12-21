@@ -185,7 +185,7 @@ public class DemandService {
                         break;
                     }else{
                         Map<String, Long> taxPeriods = mdmsService.getTaxPeriods(requestInfo, license, mdmsData);
-                        taxPeriodFrom = taxPeriods.get(TLCalculatorConstants.MDMS_STARTDATE);
+                        taxPeriodFrom = taxPeriods.get(TLCalculatorConstants.MDMS_STARTDATE)+(1000 * 60 * 60 * 24);
                         taxPeriodTo = taxPeriods.get(TLCalculatorConstants.MDMS_ENDDATE);
                         break;
                     }
