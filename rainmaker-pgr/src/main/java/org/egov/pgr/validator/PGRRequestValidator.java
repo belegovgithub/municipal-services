@@ -339,7 +339,7 @@ public class PGRRequestValidator {
 				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
 		
 		//System.out.println("The precedent role is "+pgrUtils.getPrecedentRole(serviceRequest.getRequestInfo().getUserInfo()
-				.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
+				//.getRoles().stream().map(Role::getCode).collect(Collectors.toList())));
 		final List<String> actionsAllowedForTheRole = actions;
 		String role = pgrUtils.getPrecedentRole(roles);
 		List<String> serviceCodes = new ArrayList<>();
