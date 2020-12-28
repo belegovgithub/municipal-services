@@ -26,7 +26,7 @@ public class Citizen {
 	private String name;
 	
 	@JsonProperty("permanentAddress")
-	@Pattern(regexp = "^[a-zA-Z0-9!@#.,/: ()&'-]*$", message="Invalid Address")
+	@Pattern(regexp = "^[\\p{L}\\p{M}\\p{Zs}a-zA-Z0-9!@#.,/: ()&'-]*$", message="Invalid Address")
 	@Size(max=160)
 	private String address;
 	
