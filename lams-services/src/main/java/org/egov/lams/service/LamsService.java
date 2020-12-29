@@ -109,7 +109,7 @@ public class LamsService {
         if (businessServicefromPath == null)
             businessServicefromPath = LRConstants.businessService_LAMS;
         validator.validateBusinessService(lamsRequest);
-        String businessServiceName = config.getLamsBusinessServiceValue();
+        String businessServiceName = lamsRequest.getLeases().get(0).getWorkflowCode();
         BusinessService businessService = workflowService.getBusinessService(lamsRequest.getLeases().get(0).getTenantId(), 
         		lamsRequest.getRequestInfo(), businessServiceName);
         actionValidator.validateUpdateRequest(lamsRequest, businessService);
