@@ -59,7 +59,7 @@ public class LAMSNotificationService {
 	private void enrichSMSRequest(LamsRequest request, List<SMSRequest> smsRequests) {
 		String tenantId = request.getLeases().get(0).getTenantId();
 		for (LeaseAgreementRenewal leaseRenewal : request.getLeases()) {
-			String message = null;
+			SMSRequest message = null;
 			String localizationMessages = util.getLocalizationMessages(tenantId, request.getRequestInfo());
 			message = util.getCustomizedMsg(request.getRequestInfo(), leaseRenewal, localizationMessages);
 			if (message == null)
@@ -72,7 +72,7 @@ public class LAMSNotificationService {
 					mobileNumberToOwner.put(userdetail.getMobileNumber(),
 						userdetail.getName());
 			});
-			smsRequests.addAll(util.createSMSRequest(message, mobileNumberToOwner));
+			smsRequests.addAll(util.createSMSRequest(message.getMessage(), mobileNumberToOwner,message.getTemplateId()));
 		}
 	}
 

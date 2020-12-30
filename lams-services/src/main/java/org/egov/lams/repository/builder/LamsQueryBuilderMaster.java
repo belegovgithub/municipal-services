@@ -30,7 +30,7 @@ public class LamsQueryBuilderMaster {
     		+ LEFT_JOIN
     		+ "eg_lams_property_location loc on loc.id=survey.propertylocationid";
 
-      private  String paginationWrapperMaster = "SELECT * FROM " +
+     /* private  String paginationWrapperMaster = "SELECT * FROM " +
               "(SELECT *, DENSE_RANK() OVER (ORDER BY survey_id ) offset_ FROM " +
               "({})" +
               " result) result_offset " +
@@ -52,12 +52,11 @@ public class LamsQueryBuilderMaster {
 
         if(criteria.getOffset()!=null)
             offset = criteria.getOffset();
-
         preparedStmtList.add(offset);
         preparedStmtList.add(limit+offset);
 
        return finalQuery;
-    }
+    }*/
 
 
     private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
@@ -79,7 +78,7 @@ public class LamsQueryBuilderMaster {
 		}
 		if (criteria.getLocated() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
-			builder.append(" loc.location=? ");
+			builder.append(" loc.id=? ");
 			preparedStmtList.add(criteria.getLocated());
 		}
 		if (criteria.getSurveyNo()!= null) {
@@ -87,7 +86,9 @@ public class LamsQueryBuilderMaster {
 			builder.append("  survey.surveyno = ? ");
 			preparedStmtList.add(criteria.getSurveyNo());
 		}
-		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria );
+		//return addPaginationWrapper(builder.toString(), preparedStmtList, criteria );
+		builder.append(" order by surveyno");
+		return builder.toString();
 	}
 
 }

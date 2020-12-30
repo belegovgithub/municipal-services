@@ -3,6 +3,7 @@ package org.egov.lams.rowmapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,8 +33,9 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
             LeaseAgreementRenewalDetail currentRenewal = leaseAgreementMap.get(id);
 
             if(currentRenewal == null){
+            	DecimalFormat df = new DecimalFormat("#.###");
                 currentRenewal = LeaseAgreementRenewalDetail.builder()
-    					.area(((Float) rs.getObject("area")).doubleValue())
+    					.area(Double.parseDouble(df.format(((Float) rs.getObject("area")).doubleValue())))
     					.surveyId(id)
     					.lesseAsPerGLR(rs.getString("lesse"))
     					.surveyNo(rs.getString("surveyno"))

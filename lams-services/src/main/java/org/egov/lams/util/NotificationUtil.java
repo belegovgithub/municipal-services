@@ -50,71 +50,89 @@ public class NotificationUtil {
 		return jsonString;
 	}
 
-	public String getCustomizedMsg(RequestInfo requestInfo, LeaseAgreementRenewal leaseRenewal, String localizationMessage) {
-		String message = null, messageTemplate;
+	public SMSRequest getCustomizedMsg(RequestInfo requestInfo, LeaseAgreementRenewal leaseRenewal, String localizationMessage) {
+		SMSRequest messageTemplate = null;
 		String ACTION_STATUS = leaseRenewal.getAction() + "_" + leaseRenewal.getStatus();
 		switch (ACTION_STATUS) {
 		case LRConstants.ACTION_STATUS_APPLIED:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_APPLIED, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getAppliedMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_CITIZENREVIEW:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_CITIZENREVIEW, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_APPROVED:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_APPROVED, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_REJECTED:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_REJECTED, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_CEOEXAMINATION:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_CEOEXAMINATION, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_DEOEXAMINATION:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_DEOEXAMINATION, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_PDDEEXAMINATION:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_PDDEEXAMINATION, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_DGDEEXAMINATION:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_DGDEEXAMINATION, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		case LRConstants.ACTION_STATUS_MODEXAMINATION:
 			messageTemplate = getMessageTemplate(LRConstants.NOTIFICATION_MODEXAMINATION, localizationMessage);
-			message = getAppliedMsg(leaseRenewal, messageTemplate);
+			messageTemplate.setMessage(getOtherMsg(leaseRenewal, messageTemplate.getMessage()));
 			break;
 		}
-		return message;
+		return messageTemplate;
 	}
 
-	private String getMessageTemplate(String notificationCode, String localizationMessage) {
+	private SMSRequest getMessageTemplate(String notificationCode, String localizationMessage) {
 		String path = "$..messages[?(@.code==\"{}\")].message";
 		path = path.replace("{}", notificationCode);
 		String message = null;
+		
+		String pathTemplate = "$..messages[?(@.code==\"{}\")].templateId";
+		pathTemplate = pathTemplate.replace("{}", notificationCode);
+		String templateId = null;
+		
 		try {
 			Object messageObj = JsonPath.parse(localizationMessage).read(path);
 			message = ((ArrayList<String>) messageObj).get(0);
+			
+			Object templateObj = JsonPath.parse(localizationMessage).read(pathTemplate);
+			templateId = ((ArrayList<String>) templateObj).get(0);
 		} catch (Exception e) {
 			log.warn("Fetching from localization failed", e);
 		}
-		return message;
+		SMSRequest smsRequest = new SMSRequest();
+		smsRequest.setMessage(message);
+		smsRequest.setTemplateId(templateId);
+		return smsRequest;
 	}
 
 
+	private String getOtherMsg(LeaseAgreementRenewal lease, String message) {
+		message = message.replace("<1>", String.valueOf(lease.getApplicationType()).toLowerCase());
+		message = message.replace("<2>", lease.getApplicationNumber());
+
+		return message;
+	}
+
 	private String getAppliedMsg(LeaseAgreementRenewal lease, String message) {
+		message = message.replace("<1>", String.valueOf(lease.getApplicationType()).toLowerCase());
 		message = message.replace("<2>", lease.getLeaseDetails().getSurveyNo());
 		message = message.replace("<3>", lease.getApplicationNumber());
 
 		return message;
 	}
-
 	
 	public void sendSMS(List<SMSRequest> smsRequestList, boolean isSMSEnabled) {
 		if (isSMSEnabled) {
@@ -127,12 +145,12 @@ public class NotificationUtil {
 		}
 	}
 
-	public List<SMSRequest> createSMSRequest(String message, Map<String, String> mobileNumberToOwnerName) {
+	public List<SMSRequest> createSMSRequest(String message, Map<String, String> mobileNumberToOwnerName , String templateId) {
 		List<SMSRequest> smsRequest = new LinkedList<>();
 		for (Map.Entry<String, String> entryset : mobileNumberToOwnerName.entrySet()) {
 			String customizedMsg = message.replace("<1>", entryset.getValue());
 			customizedMsg = customizedMsg.replace(LRConstants.NOTIF_OWNER_NAME_KEY, entryset.getValue());
-			smsRequest.add(new SMSRequest(entryset.getKey(), customizedMsg));
+			smsRequest.add(new SMSRequest(entryset.getKey(), customizedMsg, templateId));
 		}
 		return smsRequest;
 	}
