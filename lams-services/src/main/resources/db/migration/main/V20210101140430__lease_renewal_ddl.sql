@@ -1,4 +1,4 @@
-CREATE TABLE public.eg_lams_mst_office
+CREATE TABLE eg_lams_mst_office
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     officeid character varying(25) COLLATE pg_catalog."default" NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE public.eg_lams_property_location
 );
 
 
-CREATE TABLE public.eg_lams_survey_no_details
+CREATE TABLE eg_lams_survey_no_details
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     mstofficeid character varying(64) COLLATE pg_catalog."default" NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE public.eg_lams_survey_no_details
 );
 
 
-CREATE TABLE public.eg_lams_leaserenewal
+CREATE TABLE eg_lams_leaserenewal
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     accountid character varying(64) COLLATE pg_catalog."default",
@@ -65,7 +65,7 @@ CREATE TABLE public.eg_lams_leaserenewal
 
 
 
-CREATE TABLE public.eg_lams_leaserenewal_audit
+CREATE TABLE eg_lams_leaserenewal_audit
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     accountid character varying(64) COLLATE pg_catalog."default",
@@ -84,7 +84,7 @@ CREATE TABLE public.eg_lams_leaserenewal_audit
     businessservice character varying(64) COLLATE pg_catalog."default"
 );
 
-CREATE TABLE public.eg_lams_leaserenewaldetail
+CREATE TABLE eg_lams_leaserenewaldetail
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     surveyno character varying(25) COLLATE pg_catalog."default",
@@ -103,7 +103,7 @@ CREATE TABLE public.eg_lams_leaserenewaldetail
         ON DELETE NO ACTION
 );
 
-CREATE TABLE public.eg_lams_leaserenewaldetail_audit
+CREATE TABLE eg_lams_leaserenewaldetail_audit
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     surveyno character varying(25) COLLATE pg_catalog."default",
@@ -117,7 +117,7 @@ CREATE TABLE public.eg_lams_leaserenewaldetail_audit
     lastmodifiedtime bigint
 );
 
-CREATE TABLE public.eg_lams_applicationdocument
+CREATE TABLE eg_lams_applicationdocument
 (
     id character varying(64) COLLATE pg_catalog."default" NOT NULL,
     documenttype character varying(64) COLLATE pg_catalog."default",
