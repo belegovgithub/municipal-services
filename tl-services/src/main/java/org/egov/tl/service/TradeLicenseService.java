@@ -269,6 +269,7 @@ public class TradeLicenseService {
         List<TradeLicense> licenceResponse = null;
         if(applicationType != null && (applicationType).toString().equals(TLConstants.APPLICATION_TYPE_RENEWAL ) &&
                 licence.getAction().equalsIgnoreCase(TLConstants.TL_ACTION_INITIATE) && licence.getStatus().equals(TLConstants.STATUS_APPROVED)){
+        	tlValidator.validateRenewalApplication(tradeLicenseRequest);
             List<TradeLicense> createResponse = create(tradeLicenseRequest, businessServicefromPath);
             licenceResponse =  createResponse;
         }

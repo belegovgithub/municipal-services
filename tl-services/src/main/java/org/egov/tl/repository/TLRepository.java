@@ -167,4 +167,14 @@ public class TLRepository {
                 preparedStmtList.toArray(),
                 new SingleColumnRowMapper<>(String.class));
     }
+
+	public Boolean checkAlreadyRenewed(TradeLicenseRequest request) {
+		Boolean alreadyRenewed = false;
+		String query = " select id from eg_tl_tradelicense tl where licensenumber=? and status not in ('APPROVED','EXPIRED','CANCELLED')";
+    		List<String> ids =  jdbcTemplate.queryForList(query, String.class,request.getLicenses().get(0).getLicenseNumber());
+    		if(!CollectionUtils.isEmpty(ids)) {
+    			alreadyRenewed = true;
+    		}
+    		return alreadyRenewed;
+	}
 }
