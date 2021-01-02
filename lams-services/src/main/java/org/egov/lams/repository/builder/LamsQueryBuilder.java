@@ -43,7 +43,9 @@ public class LamsQueryBuilder {
     		+ INNER_JOIN_STRING 
     		+ "eg_lams_survey_no_details surveydetail ON surveydetail.surveyno = renewaldetail.surveyno"
     		+ LEFT_JOIN
-    		+ "eg_lams_property_location loc ON loc.id= surveydetail.propertylocationid";
+    		+ "eg_lams_property_location loc ON loc.id= surveydetail.propertylocationid"
+    		+ LEFT_JOIN 
+    		+ "eg_lams_mst_office mst on mst.tenantid = renewal.tenantid where surveydetail.mstofficeid=mst.id";
 
 
       private final String paginationWrapper = "SELECT * FROM " +
