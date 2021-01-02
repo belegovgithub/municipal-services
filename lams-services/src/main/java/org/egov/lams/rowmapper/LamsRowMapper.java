@@ -2,6 +2,7 @@ package org.egov.lams.rowmapper;
 
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -87,16 +88,30 @@ public class LamsRowMapper  implements ResultSetExtractor<List<LeaseAgreementRen
 				annualRent = ((Float) rs.getObject("annualrent")).doubleValue();
 			LeaseAgreementRenewalDetail detail = LeaseAgreementRenewalDetail.builder()
 					.annualRent(annualRent)
-					.area(((Float) rs.getObject("area")).doubleValue())
+					.area(((BigDecimal) rs.getObject("area")).doubleValue())
 					.auditDetails(auditDetails)
 					.id(renewalDtlId)
-					.lesseAsPerGLR(rs.getString("lesse"))
+					.lesseAsPerGLR(rs.getString("lessee"))
 					.surveyId(rs.getString("survey_id"))
 					.surveyNo(rs.getString("surveyno"))
 					.termExpiryDate((Long) rs.getObject("termexpirydate"))
-					.finalTermExpiryDate((Long) rs.getObject("finaltermexpirydate"))
+					//.finalTermExpiryDate((Long) rs.getObject("finaltermexpirydate"))
 					.termNo(rs.getString("termno"))
 					.located(rs.getString("location"))
+					.mutationId(rs.getString("mutationid"))
+					.detailsAndMutDate(rs.getString("mutation_desc"))
+					.areaUnit(rs.getString("unitname"))
+					.description(rs.getString("description"))
+					.classSurvey(rs.getString("classsurvey"))
+					.managedBy(rs.getString("by_whom_manage"))
+					.landLord(rs.getString("landlord"))
+					.holderOfOccupancyRights(rs.getString("holdersrights"))
+					.remarks(rs.getString("remarks"))
+					.volume(rs.getString("volumeno"))
+					.pageOfRegister(rs.getString("pageno"))
+					.natureOfHolderRights(rs.getString("natureofholdersrights"))
+					.rentTowardsCentGovt(rs.getString("rent_central_govt"))
+					.rentTowardsCB(rs.getString("rent_cantt_board"))
 					.build();
 			currentRenewal.setLeaseDetails(detail);
 		}

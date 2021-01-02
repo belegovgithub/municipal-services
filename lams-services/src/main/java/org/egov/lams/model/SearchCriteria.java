@@ -30,6 +30,9 @@ public class SearchCriteria {
 	@JsonProperty("ids")
 	private List<String> ids;
 	
+	@JsonProperty("tenantIds")
+	private List<String> tenantIds;
+	
 	@JsonProperty("userIds")
 	private List<String> userIds;
 

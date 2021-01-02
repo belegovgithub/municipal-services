@@ -77,6 +77,48 @@ public class LeaseAgreementRenewalDetail   {
         @JsonProperty("surveyId")
         private String surveyId;
         
+        @JsonProperty("mutationId")
+        private String mutationId;
+        
+        @JsonProperty("volume")
+        private String volume;
+        
+        @JsonProperty("pageOfRegister")
+        private String pageOfRegister;
+        
+        @JsonProperty("detailsAndMutDate")
+        private String detailsAndMutDate;
+        
+        @JsonProperty("areaUnit")
+        private String areaUnit;
+        
+        @JsonProperty("description")
+        private String description;
+        
+        @JsonProperty("classSurvey")
+        private String classSurvey;
+        
+        @JsonProperty("managedBy")
+        private String managedBy;
+        
+        @JsonProperty("landLord")
+        private String landLord;
+        
+        @JsonProperty("holderOfOccupancyRights")
+        private String holderOfOccupancyRights;
+        
+        @JsonProperty("natureOfHolderRights")
+        private String natureOfHolderRights;
+        
+        @JsonProperty("rentTowardsCentGovt")
+        private String rentTowardsCentGovt;
+        
+        @JsonProperty("rentTowardsCB")
+        private String rentTowardsCB;
+        
+        @JsonProperty("remarks")
+        private String remarks;
+        
         @JsonProperty("applicationDocuments")
         @Valid
         private List<Document> applicationDocuments = null;

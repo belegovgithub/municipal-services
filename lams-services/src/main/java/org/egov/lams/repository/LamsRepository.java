@@ -84,10 +84,10 @@ public class LamsRepository {
 
 
         for (LeaseAgreementRenewal lease : leases) {
-        	if(LRConstants.ACTION_APPROVE.equals(lease.getAction())) {
+        	/*if(LRConstants.ACTION_APPROVE.equals(lease.getAction())) {
         		log.info("Updating Mst");
         		producer.push(config.getUpdateLamsSurveyTopic(), lamsRequest);
-        	}
+        	}*/
             if (idToIsStateUpdatableMap.get(lease.getId())) {
                 leasesForUpdate.add(lease);
             }

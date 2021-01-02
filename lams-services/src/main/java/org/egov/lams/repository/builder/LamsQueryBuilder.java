@@ -33,7 +33,7 @@ public class LamsQueryBuilder {
     		+ "renewaldetail.id as renewaldetail_id,renewaldetail.lastModifiedTime as renewaldetail_lastModifiedTime,"
     		+ "renewaldetail.createdBy as renewaldetail_createdBy,renewaldetail.lastModifiedBy as renewaldetail_lastModifiedBy,"
     		+ "renewaldetail.createdTime as renewaldetail_createdTime,renewaldetail.surveyno as renewal_surveyno,"
-    		+ "renewal.accountId as uuid ,surveydetail.id as survey_id ,surveydetail.area ,surveydetail.lesse ,surveydetail.finaltermexpirydate ,"
+    		+ "renewal.accountId as uuid ,surveydetail.*, surveydetail.id as survey_id , COALESCE(surveydetail.natureofholdersrights,surveydetail.nature_of_holder_desc) as natureofholdersrights, "
     		+ "lamsapldoc.id as lams_ap_doc_id,lamsapldoc.documenttype as lams_ap_doc_documenttype,"
     		+ "lamsapldoc.filestoreid as lams_ap_doc_filestoreid,lamsapldoc.active as lams_ap_doc_active, loc.location FROM eg_lams_leaserenewal renewal "
     		+ LEFT_JOIN
@@ -41,11 +41,11 @@ public class LamsQueryBuilder {
     		+ LEFT_JOIN
             + "eg_lams_applicationdocument lamsapldoc ON lamsapldoc.leaserenewaldetailid = renewaldetail.id"
     		+ INNER_JOIN_STRING 
-    		+ "eg_lams_survey_no_details surveydetail ON surveydetail.surveyno = renewaldetail.surveyno"
+    		+ "eg_lams_survey_no_details1 surveydetail ON surveydetail.surveyno = renewaldetail.surveyno "
     		+ LEFT_JOIN
     		+ "eg_lams_property_location loc ON loc.id= surveydetail.propertylocationid"
     		+ LEFT_JOIN 
-    		+ "eg_lams_mst_office mst on mst.tenantid = renewal.tenantid where surveydetail.mstofficeid=mst.id";
+    		+ "eg_lams_mst_office mst on mst.tenantid = renewal.tenantid and surveydetail.mstofficeid=mst.id ";
 
 
       private final String paginationWrapper = "SELECT * FROM " +
@@ -80,6 +80,12 @@ public class LamsQueryBuilder {
                 addClauseIfRequired(preparedStmtList, builder);
                 builder.append(" renewal.tenantid=? ");
                 preparedStmtList.add(criteria.getTenantId());
+            }
+            List<String> tenantIds = criteria.getTenantIds();
+            if (!CollectionUtils.isEmpty(tenantIds)) {
+                addClauseIfRequired(preparedStmtList, builder);
+                builder.append(" renewal.tenantid IN (").append(createQuery(tenantIds)).append(")");
+                addToPreparedStatement(preparedStmtList, tenantIds);
             }
             List<String> ids = criteria.getIds();
             if (!CollectionUtils.isEmpty(ids)) {
