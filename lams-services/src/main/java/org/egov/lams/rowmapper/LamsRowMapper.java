@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,11 +85,12 @@ public class LamsRowMapper  implements ResultSetExtractor<List<LeaseAgreementRen
 	                .lastModifiedTime(rs.getLong("renewaldetail_createdTime"))
 	                .build();
 			Double annualRent = 0.0;
+			DecimalFormat df = new DecimalFormat("#.###");
 			if(null!=rs.getObject("annualrent"))
 				annualRent = ((Float) rs.getObject("annualrent")).doubleValue();
 			LeaseAgreementRenewalDetail detail = LeaseAgreementRenewalDetail.builder()
 					.annualRent(annualRent)
-					.area(((BigDecimal) rs.getObject("area")).doubleValue())
+					.area(Double.parseDouble(df.format(((BigDecimal) rs.getObject("area")).doubleValue()))+"  "+rs.getString("unitname"))
 					.auditDetails(auditDetails)
 					.id(renewalDtlId)
 					.lesseAsPerGLR(rs.getString("lessee"))
@@ -100,7 +102,7 @@ public class LamsRowMapper  implements ResultSetExtractor<List<LeaseAgreementRen
 					.located(rs.getString("location"))
 					.mutationId(rs.getString("mutationid"))
 					.detailsAndMutDate(rs.getString("mutation_desc"))
-					.areaUnit(rs.getString("unitname"))
+					//.areaUnit(rs.getString("unitname"))
 					.description(rs.getString("description"))
 					.classSurvey(rs.getString("classsurvey"))
 					.managedBy(rs.getString("by_whom_manage"))

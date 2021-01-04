@@ -36,7 +36,7 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
             if(currentRenewal == null){
             	DecimalFormat df = new DecimalFormat("#.###");
                 currentRenewal = LeaseAgreementRenewalDetail.builder()
-    					.area(Double.parseDouble(df.format(((BigDecimal) rs.getObject("area")).doubleValue())))
+    					.area(Double.parseDouble(df.format(((BigDecimal) rs.getObject("area")).doubleValue()))+"  "+rs.getString("unitname"))
     					.surveyId(id)
     					.lesseAsPerGLR(rs.getString("lessee"))
     					.surveyNo(rs.getString("surveyno"))
@@ -44,7 +44,7 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
     					.located(rs.getString("location"))
     					.mutationId(rs.getString("mutationid"))
     					.detailsAndMutDate(rs.getString("mutation_desc"))
-    					.areaUnit(rs.getString("unitname"))
+    					//.areaUnit(rs.getString("unitname"))
     					.description(rs.getString("description"))
     					.classSurvey(rs.getString("classsurvey"))
     					.managedBy(rs.getString("by_whom_manage"))

@@ -63,7 +63,7 @@ public class LeaseAgreementRenewalDetail   {
 
         @NotNull
         @JsonProperty("area")
-        private Double area;
+        private String area;
 
         @JsonProperty("annualRent")
         private Double annualRent;
