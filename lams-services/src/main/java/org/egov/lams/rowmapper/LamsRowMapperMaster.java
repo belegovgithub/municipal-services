@@ -1,6 +1,7 @@
 package org.egov.lams.rowmapper;
 
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -35,11 +36,26 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
             if(currentRenewal == null){
             	DecimalFormat df = new DecimalFormat("#.###");
                 currentRenewal = LeaseAgreementRenewalDetail.builder()
-    					.area(Double.parseDouble(df.format(((Float) rs.getObject("area")).doubleValue())))
+    					.area(Double.parseDouble(df.format(((BigDecimal) rs.getObject("area")).doubleValue())))
     					.surveyId(id)
-    					.lesseAsPerGLR(rs.getString("lesse"))
+    					.lesseAsPerGLR(rs.getString("lessee"))
     					.surveyNo(rs.getString("surveyno"))
-    					.finalTermExpiryDate((Long) rs.getObject("finaltermexpirydate"))
+//    					.finalTermExpiryDate((Long) rs.getObject("finaltermexpirydate"))
+    					.located(rs.getString("location"))
+    					.mutationId(rs.getString("mutationid"))
+    					.detailsAndMutDate(rs.getString("mutation_desc"))
+    					.areaUnit(rs.getString("unitname"))
+    					.description(rs.getString("description"))
+    					.classSurvey(rs.getString("classsurvey"))
+    					.managedBy(rs.getString("by_whom_manage"))
+    					.landLord(rs.getString("landlord"))
+    					.holderOfOccupancyRights(rs.getString("holdersrights"))
+    					.remarks(rs.getString("remarks"))
+    					.volume(rs.getString("volumeno"))
+    					.pageOfRegister(rs.getString("pageno"))
+    					.natureOfHolderRights(rs.getString("natureofholdersrights"))
+    					.rentTowardsCentGovt(rs.getString("rent_central_govt"))
+    					.rentTowardsCB(rs.getString("rent_cantt_board"))
     					.build();
                 leaseAgreementMap.put(id,currentRenewal);
             }
