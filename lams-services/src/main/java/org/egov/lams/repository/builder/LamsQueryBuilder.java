@@ -129,6 +129,11 @@ public class LamsQueryBuilder {
                 builder.append(" renewal.applicationtype = ? ");
                 preparedStmtList.add(criteria.getApplicationType());
             }
+            if (criteria.getLocated() != null) {
+    			addClauseIfRequired(preparedStmtList, builder);
+    			builder.append(" loc.id=? ");
+    			preparedStmtList.add(criteria.getLocated());
+    		}
         }
         return addPaginationWrapper(builder.toString(),preparedStmtList,criteria);
     }
