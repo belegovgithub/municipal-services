@@ -20,7 +20,7 @@ public class LamsValidator {
 	public void validateFields(LamsRequest request) {
 		Map<String, String> errorMap = new HashMap<>();
 		request.getLeases().forEach(lease -> {
-			if (lease.getSurveyNo() == null || lease.getSurveyNo().isEmpty())
+			if (lease.getSurveyNo() == null || lease.getSurveyNo().isEmpty() || lease.getSurveyId().isEmpty())
 				errorMap.put("NULL_SurveyNo", " Survey Number cannot be empty");
 			//if (!lease.getTenantId().equalsIgnoreCase(request.getRequestInfo().getUserInfo().getTenantId()))
 				//errorMap.put("Invalid Tenant", "Invalid tenant id");

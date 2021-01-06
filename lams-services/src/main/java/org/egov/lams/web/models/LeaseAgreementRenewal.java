@@ -81,6 +81,11 @@ public class  LeaseAgreementRenewal   {
         @Size(max=64)
         @JsonProperty("surveyNo")
         private String surveyNo;
+        
+        @NotNull
+        @Size(max=50)
+        @JsonProperty("surveyId")
+        private String surveyId;
 
         @Size(max=64)
         @JsonProperty("applicationNumber")

@@ -55,6 +55,7 @@ public class EnrichmentService {
 	        	leaseRenewals.setAccountId(requestInfo.getUserInfo().getUuid().toString());
 	        leaseRenewals.getLeaseDetails().setId(UUID.randomUUID().toString());
 	        leaseRenewals.getLeaseDetails().setSurveyNo(leaseRenewals.getSurveyNo());
+	        leaseRenewals.getLeaseDetails().setSurveyId(leaseRenewals.getSurveyId());
 	        leaseRenewals.setApplicationDate(auditDetails.getCreatedTime());
 	        leaseRenewals.getLeaseDetails().getApplicationDocuments().forEach(document -> {
                 document.setId(UUID.randomUUID().toString());
