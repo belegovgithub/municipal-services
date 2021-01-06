@@ -154,12 +154,26 @@ public class UserService {
 	}
 
 	public UserDetailResponse getUser(SearchCriteria criteria,RequestInfo requestInfo){
+		UserDetailResponse res = null;
+		if(null!=criteria.getTenantId()) {
         UserSearchRequest userSearchRequest = UserSearchRequest.builder().requestInfo(requestInfo)
         		.tenantId(criteria.getTenantId()).mobileNumber(criteria.getMobileNumber()).active(true)
         		.userType(LRConstants.ROLE_CITIZEN).build();
         StringBuilder url = new StringBuilder(userHost+userSearchEndpoint); 
-        UserDetailResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, userSearchRequest), UserDetailResponse.class);
+        res = mapper.convertValue(serviceRequestRepository.fetchResult(url, userSearchRequest), UserDetailResponse.class);
         return res;
+		}
+		else if(null!=criteria.getTenantIds() && criteria.getTenantIds().size()>0) {
+			for(String tenantId : criteria.getTenantIds()) {
+			UserSearchRequest userSearchRequest = UserSearchRequest.builder().requestInfo(requestInfo)
+	        		.tenantId(tenantId).mobileNumber(criteria.getMobileNumber()).active(true)
+	        		.userType(LRConstants.ROLE_CITIZEN).build();
+	        StringBuilder url = new StringBuilder(userHost+userSearchEndpoint); 
+	        res = mapper.convertValue(serviceRequestRepository.fetchResult(url, userSearchRequest), UserDetailResponse.class);
+	        return res;
+			}
+		}
+		return res;
     }
 	
 	public UserDetailResponse getUserByUUid(String accountId,RequestInfo requestInfo){
