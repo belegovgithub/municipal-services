@@ -67,7 +67,7 @@ public class TLRepository {
      * Remove the tradeLicense from the list which are not yet initalized for renewal --User Requirement
      * @param tradeLicenses
      */
-    public void removeTLNotRenewed(List<TradeLicense> tradeLicenses) {
+    public void checkAppNotRenewed(List<TradeLicense> tradeLicenses) {
     	final String checkForRenewalInstance ="SELECT applicationnumber FROM eg_tl_tradelicense tl WHERE "+
     	  		"tl.licensenumber =? AND tl.validfrom >=? AND tl.status = ?";
     	List<TradeLicense> notToExpire= new ArrayList<TradeLicense>();
@@ -78,6 +78,25 @@ public class TLRepository {
     		}
     	}
     	tradeLicenses.removeAll(notToExpire);
+    }
+    
+    /**
+     * Check and remove the License which are in renewal approval cycle. 
+     * Reminder should send only for application which are not renewed or not submitted for approval
+     * @param tradeLicenses
+     */
+    public void checkAppNotInApprovalCycle(List<TradeLicense> tradeLicenses) {
+    	List<String> appReminderStatus = Arrays.asList(config.getReminderApplicationStatus().split(","));
+    	final String checkForRenewalInstance ="SELECT applicationnumber,status  FROM eg_tl_tradelicense tl WHERE "+
+    	  		"tl.licensenumber =? AND tl.validfrom >=?  ORDER BY lastmodifiedtime DESC";
+    	List<TradeLicense> notToSendReminder= new ArrayList<TradeLicense>();
+    	for (TradeLicense tradeLicense : tradeLicenses) {
+    		List<Map<String, Object>> licenses=  jdbcTemplate.queryForList(checkForRenewalInstance,  tradeLicense.getLicenseNumber() ,tradeLicense.getValidTo() );
+    		if(!(CollectionUtils.isEmpty(licenses) || appReminderStatus.contains(licenses.get(0).get("status")))) {
+    			notToSendReminder.add(tradeLicense);
+    		}
+    	}
+    	tradeLicenses.removeAll(notToSendReminder);
     }
 
     /**

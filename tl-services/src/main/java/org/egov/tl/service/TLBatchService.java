@@ -102,34 +102,44 @@ public class TLBatchService {
                     if(CollectionUtils.isEmpty(licenses))
                         break;
                     
+                    //Filter application based on constraints : start 
                     List<String> licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
-                    log.info("Licence list which will expire : "+licNos );
+                    log.info("Approved License pending for "+jobName+": "+licNos );
                     //Expire only the license for which renewal application started 
                     if(jobName.equalsIgnoreCase(JOB_EXPIRY)) {
-                    	repository.removeTLNotRenewed(licenses);
+                    	repository.checkAppNotRenewed(licenses);
                     	licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
-                        log.info("Licence list which will expire (after removing approval-not-renewed)  : "+licNos );
+                        log.info("Applicable TL which will expire  : "+licNos );
                     }
-                    if(CollectionUtils.isEmpty(licenses))
-                        break;
                     
-                    licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
+                    if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER)) {
+                    	repository.checkAppNotInApprovalCycle(licenses);
+                    	licNos =licenses.stream().map(l->l.getLicenseNumber()).collect(Collectors.toList());
+                        log.info("Applicable TL sending for reminder : "+licNos );
+                    }
+                    //Filter application based on constraints : end                      
+                    //Process only if license list are not empty
+                    if(!CollectionUtils.isEmpty(licenses)) {
+                    	licenses = enrichmentService.enrichTradeLicenseSearch(licenses, criteria, requestInfo);
 
-                    if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
-                        sendReminderSMS(requestInfo, licenses);
+                        if(jobName.equalsIgnoreCase(JOB_SMS_REMINDER))
+                            sendReminderSMS(requestInfo, licenses);
 
-                    else if(jobName.equalsIgnoreCase(JOB_EXPIRY)) {
-                    	//Workflow through error if NewTL/EDITRenewal both goes for expiry
-                    	List<TradeLicense> newTLs= licenses.stream().filter(l->l.getWorkflowCode().equals(DEFAULT_WORKFLOW)).collect(Collectors.toList());
-                    	if(!CollectionUtils.isEmpty(newTLs)) {
-                    		expireLicenses(requestInfo, newTLs);	
-                    	}
-                    	licenses.removeAll(newTLs);
-                    	if(!CollectionUtils.isEmpty(licenses)) {
-                    		expireLicenses(requestInfo, licenses);	
-                    	} 
+                        else if(jobName.equalsIgnoreCase(JOB_EXPIRY)) {
+                        	//Workflow through error if NewTL/EDITRenewal both goes for expiry
+                        	List<TradeLicense> newTLs= licenses.stream().filter(l->l.getWorkflowCode().equals(DEFAULT_WORKFLOW)).collect(Collectors.toList());
+                        	if(!CollectionUtils.isEmpty(newTLs)) {
+                        		expireLicenses(requestInfo, newTLs);	
+                        	}
+                        	licenses.removeAll(newTLs);
+                        	if(!CollectionUtils.isEmpty(licenses)) {
+                        		expireLicenses(requestInfo, licenses);	
+                        	} 
+                        }
                     }
                         
+                    
+                                            
 
                     offSet = offSet + config.getPaginationSize();
 

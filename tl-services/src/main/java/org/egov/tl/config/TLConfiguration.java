@@ -285,7 +285,9 @@ public class TLConfiguration {
 
     @Value("${egov.tl.batch.expire.error.topic}")
     private String expiryErrorTopic;
-
+    
+    @Value("${egov.tl.reminder.application.status}")
+    private String reminderApplicationStatus;
 
 
     // url shortner
