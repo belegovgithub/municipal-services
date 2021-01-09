@@ -714,6 +714,13 @@ public class TLValidator {
 	private String getStateLevelTenant(String tenantId) {
 		return tenantId.split("\\.")[0];
 	}
+
+	public void validateRenewalApplication(TradeLicenseRequest request) {
+      boolean alreadyRenewed = tlRepository.checkAlreadyRenewed(request);
+      if(alreadyRenewed) {
+    	  throw new CustomException("ALREADY_RENEWED", " Renewed application instance already exists.");
+      }
+	}
 }
 
 
