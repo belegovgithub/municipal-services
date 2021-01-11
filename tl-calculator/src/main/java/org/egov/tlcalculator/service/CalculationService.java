@@ -166,6 +166,11 @@ public class CalculationService {
     		  if(garbageCharges!=null && garbageCharges.length()!=0) {
     			  estimates.add(getGarbageCharges(calulationCriteria));
     		  }
+    		  
+    		  String miscCharges =  JsonPath.using(conf).parse(additionalData).read("$.miscCharges");
+    		  if(miscCharges!=null && miscCharges.length()!=0) {
+    			  estimates.add(getMiscCharges(calulationCriteria));
+    		  }
     	  	
       	}
       
@@ -281,6 +286,21 @@ public class CalculationService {
         estimate.setEstimateAmount(new BigDecimal(garbageCharges));
         estimate.setTaxHeadCode(config.getGarbageChargesTaxHead());
         estimate.setCategory(Category.FEE);
+        return estimate;
+    }
+    
+    /**
+     *  Creates taxHeadEstimates for Miscellaneous Charges
+     * @param calulationCriteria CalculationCriteria containing the tradeLicense or applicationNumber
+     * @return Miscellaneous Charges taxHeadEstimates
+     */
+    private TaxHeadEstimate getMiscCharges(CalulationCriteria calulationCriteria){
+        TaxHeadEstimate estimate = new TaxHeadEstimate();
+        Object additionalData = calulationCriteria.getTradelicense().getTradeLicenseDetail().getAdditionalDetail();
+        String miscCharges =  JsonPath.read(additionalData, "$.miscCharges");
+        estimate.setEstimateAmount(new BigDecimal(miscCharges));
+        estimate.setTaxHeadCode(config.getMiscChargesTaxHead());
+        estimate.setCategory(Category.CHARGES);
         return estimate;
     }
 

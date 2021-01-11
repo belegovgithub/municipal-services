@@ -1,6 +1,10 @@
 package org.egov.tlcalculator.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
+
 import org.apache.commons.lang3.StringUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
@@ -238,6 +242,18 @@ public class DemandService {
                 throw new CustomException("INVALID UPDATE","No demand exists for applicationNumber: "+calculation.getTradeLicense().getApplicationNumber());
 
             Demand demand = searchResult.get(0);
+            Object additionalData = calculation.getTradeLicense().getTradeLicenseDetail().getAdditionalDetail();
+            System.out.println("additionalData=="+additionalData);
+            if(additionalData!=null) {
+          	  Configuration conf = Configuration.builder().options(Option.DEFAULT_PATH_LEAF_TO_NULL).build();
+          	  
+          		  String miscCharges =  JsonPath.using(conf).parse(additionalData).read("$.miscCharges");
+          		  if(miscCharges!=null && miscCharges.length()!=0) {
+          			String miscComments =  JsonPath.using(conf).parse(additionalData).read("$.miscComments");
+          			((Map) demand.getAdditionalDetails()).put("miscComments", miscComments);
+          		  }
+          	  	
+            	}
             List<DemandDetail> demandDetails = demand.getDemandDetails();
             List<DemandDetail> updatedDemandDetails = getUpdatedDemandDetails(calculation,demandDetails);
             demand.setDemandDetails(updatedDemandDetails);
