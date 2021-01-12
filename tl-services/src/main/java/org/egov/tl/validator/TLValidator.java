@@ -696,7 +696,7 @@ public class TLValidator {
                     }
                 }
  
-                if(flag || license.getTradeLicenseDetail().getAuditDetails().getCreatedBy().equals(uuid) || license.getAccountId().equals(uuid)) {
+                if(flag || license.getTradeLicenseDetail().getAuditDetails().getCreatedBy().equals(uuid) || (license.getAccountId()!=null && license.getAccountId().equals(uuid))) {
                     flag=true;
                 }
                 
