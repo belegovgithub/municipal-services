@@ -307,10 +307,8 @@ public class PdfSignUtils {
 			// and document context
 			DOMValidateContext valContext = new DOMValidateContext(publicKey, nl.item(0));
 
-			log.info("val " + nl.item(0).toString());
 			// unmarshal the XMLSignature
 			XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-			log.info("val " + signature);
 			// Validate the XMLSignature (generated above)
 			return (signature.validate(valContext));
 
