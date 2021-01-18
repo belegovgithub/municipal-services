@@ -2,6 +2,7 @@ package org.egov.lams.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -161,8 +162,24 @@ public class PdfSignUtils {
 			Calendar now = Calendar.getInstance();
 			long max = now.getTimeInMillis() - 300000l;
 			appearanceTxnMap.entrySet().removeIf(entry -> {
-				long time = Long.valueOf(entry.getKey().split("A")[0]);
-				return (time < max ? true : false);
+				try {
+					long time = Long.valueOf(entry.getKey().split("A")[0]);
+					if(time < max)
+					{
+						ByteArrayOutputStream byteArrayOutputStream =
+								byteArrayOutputStreamMap.get(entry.getKey());
+
+						byteArrayOutputStream.flush();
+
+						byteArrayOutputStream.close();
+						byteArrayOutputStreamMap.remove(entry.getKey());
+						return true;
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return false;
 			});
 			log.info("size after " + appearanceTxnMap.keySet().size());
 		} catch (Exception e) {
@@ -193,8 +210,6 @@ public class PdfSignUtils {
 					ByteArrayOutputStream byteArrayOutputStream =
 							byteArrayOutputStreamMap.get(txnid);
 					uploadFile(byteArrayOutputStream);
-					byteArrayOutputStream.flush();
-					byteArrayOutputStream.close();
 					byteArrayOutputStreamMap.remove(txnid);
 					checkandupdatemap();
 				} 
