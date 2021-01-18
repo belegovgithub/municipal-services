@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMValidateContext;
@@ -55,47 +56,53 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class PdfSignUtils {
-	
+
 	@Value("${bel.sign.publickey}")  
-	private String publicKey;
+	private String pubKey;
 
 	@Value("${bel.sign.privatekey}")  
 	private String privKey;
 
 	@Value("${bel.sign.filestore.host}")  
 	private String filestoreHost;
-	
+
 	@Value("${bel.sign.filestore.getendpoint}")  
 	private String filestoreGetendpoint;
 
 	@Value("${bel.sign.filestore.postendpoint}")  
 	private String filestorePostendpoint;
-	
-	public static Map<String, PdfSignatureAppearance> appearanceTxnMap = new HashMap<String, PdfSignatureAppearance>();
-	
-	public static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
+
+	@Value("${bel.session.max.time.diffinmilli:300000l}")  
+	private Long esignMaxTimeMilli;
 
 	@Autowired
 	private PdfSignXmlUtils pdfSignXmlUtils;
-	
+
+	private static Map<String, PdfSignatureAppearance> appearanceTxnMap = new HashMap<String, PdfSignatureAppearance>();
+
+	private static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
+
+	private static int contentEstimated = 8192;
+
+	private PrivateKey privateKey;
+
+	private PublicKey publicKey;
+
 	public String pdfSigner(String txnid) {
 
 		String hashDocument = null;
 		PdfReader reader;
+		Path tempFile = null;
 		try {
-
+			tempFile = Files.createTempFile("esign", ".pdf");
 			String url = filestoreHost +  filestoreGetendpoint + "?fileStoreId=2a0f410b-1c19-4a2a-bcaf-f50927874ddb&tenantId=pb";
-			System.out.println("url " + url);
 			RestTemplate restTemplate = new RestTemplate();
-			byte[] imageBytes = restTemplate.getForObject(url, byte[].class);
-			Path testFile = Files.createTempFile("test-file", ".pdf");
-			Files.write(testFile, imageBytes);
-			
-			String sourcefile = testFile.toString();
+			byte[] pdfBytes = restTemplate.getForObject(url, byte[].class);
+
+			Files.write(tempFile, pdfBytes);
+
+			String sourcefile = tempFile.toString();
 			log.info("Path--->" + sourcefile);
-//			String destFile = sourcefile.replace(file.getName(), "Esigned" + request.getAttribute("txnid") + ".pdf");
-			// destFile=sourcefile.replace(file.getName(), "/Signed_Pdf.pdf");
-			// request.getSession().setAttribute("fileName","/Signed_Pdf.pdf");
 			reader = new PdfReader(sourcefile);
 
 			Rectangle cropBox = reader.getCropBox(1);
@@ -103,7 +110,7 @@ public class PdfSignUtils {
 			String user = null;
 			rectangle = new Rectangle(cropBox.getLeft(), cropBox.getBottom(), cropBox.getLeft(100),
 					cropBox.getBottom(90));
-//			FileOutputStream fout = new FileOutputStream(destFile);
+			//			FileOutputStream fout = new FileOutputStream(destFile);
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			PdfStamper stamper = PdfStamper.createSignature(reader, byteArrayOutputStream, '\0', null, true);
 
@@ -128,8 +135,7 @@ public class PdfSignUtils {
 			appearance.setImage(null);
 			appearance.setVisibleSignature(rectangle, reader.getNumberOfPages(), null);
 
-			int contentEstimated = 8192;
-			HashMap<PdfName, Integer> exc = new HashMap();
+			HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
 			exc.put(PdfName.CONTENTS, contentEstimated * 2 + 2);
 
 			PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
@@ -139,19 +145,24 @@ public class PdfSignUtils {
 
 			appearance.setCryptoDictionary(dic);
 			appearance.preClose(exc);
+
 			checkandupdatemap();
 			appearanceTxnMap.put(txnid, appearance);
 			byteArrayOutputStreamMap.put(txnid, byteArrayOutputStream);
 
 			InputStream is = appearance.getRangeStream();
-
 			hashDocument = DigestUtils.sha256Hex(is);
-			log.info("hex:    " + is.toString());
-			Files.delete(testFile);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.info("Error in signing doc.");
-
+		}
+		finally {
+			try {
+				Files.deleteIfExists(tempFile);
+			} catch (IOException e) {
+				log.error("temp file deletion failed");
+			}
 		}
 		return hashDocument;
 	}
@@ -160,23 +171,19 @@ public class PdfSignUtils {
 		try {
 			log.info("size b4 " + appearanceTxnMap.keySet().size());
 			Calendar now = Calendar.getInstance();
-			long max = now.getTimeInMillis() - 300000l;
+			long max = now.getTimeInMillis() - esignMaxTimeMilli;
 			appearanceTxnMap.entrySet().removeIf(entry -> {
 				try {
 					long time = Long.valueOf(entry.getKey().split("A")[0]);
 					if(time < max)
 					{
-						ByteArrayOutputStream byteArrayOutputStream =
-								byteArrayOutputStreamMap.get(entry.getKey());
-
-						byteArrayOutputStream.flush();
-
-						byteArrayOutputStream.close();
-						byteArrayOutputStreamMap.remove(entry.getKey());
+						if(byteArrayOutputStreamMap.containsKey(entry.getKey()))
+						{
+							byteArrayOutputStreamMap.remove(entry.getKey());
+						}
 						return true;
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				return false;
@@ -191,28 +198,42 @@ public class PdfSignUtils {
 		if(verifySignature(response))
 		{
 			log.info("verify signature succeeded");
-			int contentEstimated = 8192;
+
 			try {
 				String errorCode = response.substring(response.indexOf("errCode"), response.indexOf("errMsg"));
 				errorCode = errorCode.trim();
-				if (errorCode.contains("NA")) {
-					String pkcsResponse = pdfSignXmlUtils.parseXml(response.trim());
-					byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
-					byte[] paddedSig = new byte[contentEstimated];
-					System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
-					PdfDictionary dic2 = new PdfDictionary();
-					dic2.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
-					// fout.close();
-					PdfSignatureAppearance appearance1 = appearanceTxnMap.get(txnid);
+				if (errorCode.contains("NA")) 
+				{
+					if(appearanceTxnMap.containsKey(txnid) && byteArrayOutputStreamMap.containsKey(txnid))
+					{
+						String pkcsResponse = pdfSignXmlUtils.parseXml(response.trim());
+						byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
+						byte[] paddedSig = new byte[contentEstimated];
+						System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
+						PdfDictionary pdfDictionary = new PdfDictionary();
+						pdfDictionary.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
 
-					appearance1.close(dic2);
+						PdfSignatureAppearance signatureAppearance = appearanceTxnMap.get(txnid);
 
-					ByteArrayOutputStream byteArrayOutputStream =
-							byteArrayOutputStreamMap.get(txnid);
-					uploadFile(byteArrayOutputStream);
-					byteArrayOutputStreamMap.remove(txnid);
-					checkandupdatemap();
-				} 
+						signatureAppearance.close(pdfDictionary);
+
+						ByteArrayOutputStream byteArrayOutputStream =
+								byteArrayOutputStreamMap.get(txnid);
+						uploadFile(byteArrayOutputStream);
+
+						byteArrayOutputStreamMap.remove(txnid);
+						appearanceTxnMap.remove(txnid);
+						checkandupdatemap();
+					}
+					else
+					{
+						log.error("keys missing in appearanceTxnMap or byteArrayOutputStreamMap");
+					}
+				}
+				else
+				{
+					log.error("esign error occured " + errorCode);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -222,52 +243,52 @@ public class PdfSignUtils {
 			log.info("verify signature failed");
 		}
 	}
-	
+
 	public void uploadFile(ByteArrayOutputStream byteArrayOutputStream) {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-            String url = filestoreHost + filestorePostendpoint;
-            HttpMethod requestMethod = HttpMethod.POST;
+		Path tempFile = null;
+		try {
+			tempFile = Files.createTempFile("esign", ".pdf");
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+			RestTemplate restTemplate = new RestTemplate();
+			String url = filestoreHost + filestorePostendpoint;
+			HttpMethod requestMethod = HttpMethod.POST;
 
-            log.info("byte arr size " + byteArrayOutputStream.toByteArray().length);
-            HttpEntity<byte[]> fileEntity = new HttpEntity<>(byteArrayOutputStream.toByteArray());
-            
-            Path testFile = Files.createTempFile("test-file", ".pdf");
-            log.info("Creating and Uploading Test File: " + testFile);
-            Files.write(testFile,byteArrayOutputStream.toByteArray());
-           
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file",  new FileSystemResource(testFile.toFile()));
-            body.add("tenantId", "pb");
-            body.add("module", "rainmaker-pgr");
-            
+//			HttpEntity<byte[]> fileEntity = new HttpEntity<>(byteArrayOutputStream.toByteArray());
 
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+			log.info("Creating and Uploading Test File: " + tempFile);
+			Files.write(tempFile,byteArrayOutputStream.toByteArray());
 
-            ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
-            
-            Files.delete(testFile);
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			body.add("file",  new FileSystemResource(tempFile.toFile()));
+			body.add("tenantId", "pb");
+			body.add("module", "lams-esign");
 
-            log.info("file upload status code: " + response);
+			HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
 
-}
+			log.info("file upload status code: " + response);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally {
+			try {
+				Files.deleteIfExists(tempFile);
+			} catch (IOException e) {
+				log.error("temp file deletion failed");
+			}
+		}
+
+	}
 
 	private boolean verifySignature(String response) {
 		try {
 			log.info("verify sig ");
 
-			CertificateFactory f = CertificateFactory.getInstance("X.509");
-			X509Certificate certificate = (X509Certificate) f
-					.generateCertificate(new ByteArrayInputStream(java.util.Base64.getDecoder().decode(publicKey)));
-			PublicKey pk = certificate.getPublicKey();
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setNamespaceAware(true);
 			Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
@@ -284,7 +305,7 @@ public class PdfSignUtils {
 
 			// Create a DOMValidateContext and specify a KeyValue KeySelector
 			// and document context
-			DOMValidateContext valContext = new DOMValidateContext(pk, nl.item(0));
+			DOMValidateContext valContext = new DOMValidateContext(publicKey, nl.item(0));
 
 			log.info("val " + nl.item(0).toString());
 			// unmarshal the XMLSignature
@@ -299,16 +320,34 @@ public class PdfSignUtils {
 		}
 		return false;
 	}
-	
-	public PrivateKey getBase64PrivateKey()
-			throws Exception {
 
-		byte[] keyBytes =  java.util.Base64.getDecoder().decode(privKey);
+	public PrivateKey getBase64PrivateKey() 
+	{
+		return privateKey;
+	}
 
-		PKCS8EncodedKeySpec spec =
-				new PKCS8EncodedKeySpec(keyBytes);
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		return kf.generatePrivate(spec);
+	@PostConstruct
+	private void postConstruct() {
+		try
+		{
+			byte[] keyBytes =  java.util.Base64.getDecoder().decode(privKey);
+
+			PKCS8EncodedKeySpec spec =
+					new PKCS8EncodedKeySpec(keyBytes);
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			privateKey =  kf.generatePrivate(spec);
+		}catch (Exception e) {
+			log.error("failed to load private key");
+		}
+		try
+		{
+			CertificateFactory f = CertificateFactory.getInstance("X.509");
+			X509Certificate certificate = (X509Certificate) f
+					.generateCertificate(new ByteArrayInputStream(java.util.Base64.getDecoder().decode(pubKey)));
+			publicKey = certificate.getPublicKey();
+		}catch (Exception e) {
+			log.error("failed to load public key");
+		}
 	}
 
 }
