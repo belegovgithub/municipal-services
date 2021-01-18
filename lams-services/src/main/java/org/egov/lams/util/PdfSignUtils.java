@@ -289,7 +289,7 @@ public class PdfSignUtils {
 
 			ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
 
-			filestoreRespMap.put(txnid, response.toString());
+			filestoreRespMap.put(txnid, response.getBody());
 			
 			log.info("file upload status code: " + response);
 
