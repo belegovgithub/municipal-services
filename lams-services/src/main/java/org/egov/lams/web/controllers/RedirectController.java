@@ -41,12 +41,12 @@ public class RedirectController {
     	
     	log.info("err occured " + error);
     	
-    	pdfSignService.prepareResponse(eSignResponse,espTxnID);
+    	boolean response = pdfSignService.prepareResponse(eSignResponse,espTxnID);
     	
         HttpHeaders httpHeaders = new HttpHeaders();
-        String redirectUrl = uiHost + lamsUiUrl + "?espTxnID="+espTxnID;
+        String redirectUrl = uiHost + lamsUiUrl + "?espTxnID="+espTxnID+"&success="+response;
         httpHeaders.setLocation(UriComponentsBuilder.fromHttpUrl(redirectUrl)
-                .build().encode().toUri());
+                .build().toUri());
         log.info(httpHeaders!=null ? httpHeaders.toString(): "http header is null ");
         return new ResponseEntity<>(httpHeaders, HttpStatus.FOUND);
     }

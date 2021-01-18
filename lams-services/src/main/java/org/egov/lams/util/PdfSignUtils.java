@@ -213,7 +213,7 @@ public class PdfSignUtils {
 		}
 	}
 
-	public void signPdfwithDS(String response, String txnid) {
+	public boolean signPdfwithDS(String response, String txnid) {
 		if(verifySignature(response))
 		{
 			log.info("verify signature succeeded");
@@ -241,6 +241,7 @@ public class PdfSignUtils {
 						byteArrayOutputStreamMap.remove(txnid);
 						appearanceTxnMap.remove(txnid);
 						checkandupdatemap();
+						return true;
 					}
 					else
 					{
@@ -259,6 +260,7 @@ public class PdfSignUtils {
 		{
 			log.info("verify signature failed");
 		}
+		return false;
 	}
 
 	public void uploadFile(String txnid) {
