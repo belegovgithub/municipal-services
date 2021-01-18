@@ -11,14 +11,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestXmlForm {
-	public String id;
-	public String type;
-	public String description;
-	public String eSignRequest;
-	public String aspTxnID;
-	
-	@JsonProperty("Content-Type")
-	public String contentType = "application/xml";
+public class PdfXmlResp {
 
+  @JsonProperty("dSignInfo")
+  private RequestXmlForm dSignInfo;
+  
+  @JsonProperty("fileStoreInfo")
+  private String fileStoreInfo;
+  
+  @JsonProperty("error")
+  private String error;
+  
 }
