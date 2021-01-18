@@ -5,8 +5,10 @@ import org.egov.lams.service.PdfSignService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -23,4 +25,10 @@ public class LamsPdfSign {
         PdfXmlResp pdfXmlResp = pdfSignService.prepareRequest();
         return new ResponseEntity<PdfXmlResp>(pdfXmlResp, HttpStatus.OK);
     }
+	
+	@PostMapping("/getApplicationfile")
+	public ResponseEntity<String> create(@RequestParam("txnid") String txnid) {
+		String pdfXmlResp = pdfSignService.getApplicationfile(txnid);
+		return new ResponseEntity<String>(pdfXmlResp, HttpStatus.OK);
+	}
 }

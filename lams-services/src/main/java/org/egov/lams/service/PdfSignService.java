@@ -99,5 +99,9 @@ public class PdfSignService {
 	public void prepareResponse(String eSignResponse, String espTxnID) {
 		pdfSignUtils.signPdfwithDS(eSignResponse, espTxnID);
 	}
+
+	public String getApplicationfile(String txnid) {
+		return pdfSignUtils.signPdfwithDS(txnid);
+	}
 }
 

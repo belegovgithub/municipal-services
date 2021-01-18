@@ -24,6 +24,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -82,6 +83,8 @@ public class PdfSignUtils {
 
 	private static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
 
+	private static Map<String, String> filestoreRespMap = new HashMap<String, String>();
+	
 	private static int contentEstimated = 8192;
 
 	private PrivateKey privateKey;
@@ -181,6 +184,22 @@ public class PdfSignUtils {
 						{
 							byteArrayOutputStreamMap.remove(entry.getKey());
 						}
+						if(filestoreRespMap.containsKey(entry.getKey()))
+						{
+							filestoreRespMap.remove(entry.getKey());
+						}
+						return true;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			});
+			filestoreRespMap.entrySet().removeIf(entry -> {
+				try {
+					long time = Long.valueOf(entry.getKey().split("A")[0]);
+					if(time < max)
+					{
 						return true;
 					}
 				} catch (Exception e) {
@@ -217,9 +236,7 @@ public class PdfSignUtils {
 
 						signatureAppearance.close(pdfDictionary);
 
-						ByteArrayOutputStream byteArrayOutputStream =
-								byteArrayOutputStreamMap.get(txnid);
-						uploadFile(byteArrayOutputStream);
+						uploadFile(txnid);
 
 						byteArrayOutputStreamMap.remove(txnid);
 						appearanceTxnMap.remove(txnid);
@@ -244,9 +261,11 @@ public class PdfSignUtils {
 		}
 	}
 
-	public void uploadFile(ByteArrayOutputStream byteArrayOutputStream) {
+	public void uploadFile(String txnid) {
 		Path tempFile = null;
 		try {
+			ByteArrayOutputStream byteArrayOutputStream =
+					byteArrayOutputStreamMap.get(txnid);
 			tempFile = Files.createTempFile("esign", ".pdf");
 
 			RestTemplate restTemplate = new RestTemplate();
@@ -270,6 +289,8 @@ public class PdfSignUtils {
 
 			ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
 
+			filestoreRespMap.put(txnid, response.toString());
+			
 			log.info("file upload status code: " + response);
 
 		} catch (Exception e) {
@@ -346,6 +367,14 @@ public class PdfSignUtils {
 		}catch (Exception e) {
 			log.error("failed to load public key");
 		}
+	}
+
+	public String signPdfwithDS(String txnid) {
+		if(filestoreRespMap.containsKey(txnid))
+		{
+			return filestoreRespMap.get(txnid);
+		}
+		return "error";
 	}
 
 }
