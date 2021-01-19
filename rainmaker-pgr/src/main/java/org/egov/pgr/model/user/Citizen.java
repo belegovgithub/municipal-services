@@ -21,12 +21,12 @@ public class Citizen {
 	private Long id;
 	private String uuid;
 	
-	@Pattern(regexp= "([^-!#$%&()*,./:;?@[\\\\]_{|}¨ˇ“”€+<=>§°\\\\d\\\\s¤®™©]| )+$", message="Invalid Citizen Name!")
+	@Pattern(regexp= "([^-!\\#\\$\\%\\&\\(\\)\\*,\\./:;\\?\\@\\[\\]_\\{\\|\\}¨ˇ“”€+<=>§°\\d\\s¤®™©]| )+$", message="Invalid Citizen Name!")
 	@Size(max=30)
 	private String name;
 	
 	@JsonProperty("permanentAddress")
-	@Pattern(regexp = "^[\\p{L}\\p{M}\\p{Zs}a-zA-Z0-9!@#.,/: ()&'-]*$", message="Invalid Address")
+	@Pattern(regexp = "^[\\p{L}\\p{M}\\p{Zs}a-zA-Z0-9!@#\\.,/: ()&'-]*$", message="Invalid Address")
 	@Size(max=160)
 	private String address;
 	
