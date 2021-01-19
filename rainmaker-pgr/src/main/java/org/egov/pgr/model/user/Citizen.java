@@ -21,7 +21,7 @@ public class Citizen {
 	private Long id;
 	private String uuid;
 	
-	@Pattern(regexp= "([^-!\\#\\$\\%\\&\\(\\)\\*,\\./:;\\?\\@\\[\\]_\\{\\|\\}¨ˇ“”€+<=>§°\\d\\s¤®™©]| )+$", message="Invalid Citizen Name!")
+	@Pattern(regexp= "([^-!\\#\\$\\%\\&\\(\\)\\*,/:;\\?\\@\\[\\]_\\{\\|\\}¨ˇ“”€+<=>§°\\d\\s¤®™©]| )+$", message="Invalid Citizen Name!")
 	@Size(max=30)
 	private String name;
 	
