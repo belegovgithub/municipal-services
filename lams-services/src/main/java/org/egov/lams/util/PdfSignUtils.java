@@ -31,6 +31,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -172,7 +173,9 @@ public class PdfSignUtils {
 
 	private void checkandupdatemap() {
 		try {
-			log.info("size b4 " + appearanceTxnMap.keySet().size());
+			log.info("b4 appearanceTxnMap size " + appearanceTxnMap.keySet().size());
+			log.info("b4 byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
+			log.info("b4 filestoreRespMap size " + filestoreRespMap.keySet().size());
 			Calendar now = Calendar.getInstance();
 			long max = now.getTimeInMillis() - esignMaxTimeMilli;
 			appearanceTxnMap.entrySet().removeIf(entry -> {
@@ -207,25 +210,28 @@ public class PdfSignUtils {
 				}
 				return false;
 			});
-			log.info("size after " + appearanceTxnMap.keySet().size());
+			log.info("after appearanceTxnMap size " + appearanceTxnMap.keySet().size());
+			log.info("after byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
+			log.info("after filestoreRespMap size " + filestoreRespMap.keySet().size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public boolean signPdfwithDS(String response, String txnid) {
-		if(verifySignature(response))
+		Document xmlDoc = pdfSignXmlUtils.parseXmlString(response);
+		if(null!=xmlDoc && pdfSignXmlUtils.verifySignature(xmlDoc, publicKey))
 		{
 			log.info("verify signature succeeded");
 
 			try {
-				String errorCode = response.substring(response.indexOf("errCode"), response.indexOf("errMsg"));
+				String errorCode = pdfSignXmlUtils.getErrorCode(xmlDoc);
 				errorCode = errorCode.trim();
-				if (errorCode.contains("NA")) 
+				if ("NA".equalsIgnoreCase(errorCode)) 
 				{
 					if(appearanceTxnMap.containsKey(txnid) && byteArrayOutputStreamMap.containsKey(txnid))
 					{
-						String pkcsResponse = pdfSignXmlUtils.parseXml(response.trim());
+						String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
 						byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
 						byte[] paddedSig = new byte[contentEstimated];
 						System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
@@ -236,12 +242,12 @@ public class PdfSignUtils {
 
 						signatureAppearance.close(pdfDictionary);
 
-						uploadFile(txnid);
+						boolean retval = uploadFile(txnid);
 
 						byteArrayOutputStreamMap.remove(txnid);
 						appearanceTxnMap.remove(txnid);
 						checkandupdatemap();
-						return true;
+						return retval;
 					}
 					else
 					{
@@ -263,7 +269,7 @@ public class PdfSignUtils {
 		return false;
 	}
 
-	public void uploadFile(String txnid) {
+	public boolean uploadFile(String txnid) {
 		Path tempFile = null;
 		try {
 			ByteArrayOutputStream byteArrayOutputStream =
@@ -291,10 +297,11 @@ public class PdfSignUtils {
 
 			ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
 
-			filestoreRespMap.put(txnid, response.getBody());
-			
 			log.info("file upload status code: " + response);
-
+			if(response.getStatusCode().equals(HttpStatus.CREATED)) {
+				filestoreRespMap.put(txnid, response.getBody());
+				return true;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -304,40 +311,6 @@ public class PdfSignUtils {
 			} catch (IOException e) {
 				log.error("temp file deletion failed");
 			}
-		}
-
-	}
-
-	private boolean verifySignature(String response) {
-		try {
-			log.info("verify sig ");
-
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			dbf.setNamespaceAware(true);
-			Document doc = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
-
-			// Find Signature element
-			NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
-			if (nl.getLength() == 0) {
-				throw new Exception("Cannot find Signature element");
-			}
-
-			// Create a DOM XMLSignatureFactory that will be used to unmarshal the
-			// document containing the XMLSignature
-			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-
-			// Create a DOMValidateContext and specify a KeyValue KeySelector
-			// and document context
-			DOMValidateContext valContext = new DOMValidateContext(publicKey, nl.item(0));
-
-			// unmarshal the XMLSignature
-			XMLSignature signature = fac.unmarshalXMLSignature(valContext);
-			// Validate the XMLSignature (generated above)
-			return (signature.validate(valContext));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-
 		}
 		return false;
 	}
@@ -371,7 +344,7 @@ public class PdfSignUtils {
 		}
 	}
 
-	public String signPdfwithDS(String txnid) {
+	public String getApplicationfile(String txnid) {
 		if(filestoreRespMap.containsKey(txnid))
 		{
 			return filestoreRespMap.get(txnid);

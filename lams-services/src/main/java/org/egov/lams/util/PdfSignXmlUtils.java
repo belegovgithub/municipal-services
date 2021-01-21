@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collections;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -16,6 +17,7 @@ import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
@@ -91,19 +93,59 @@ public class PdfSignXmlUtils {
     	return os.toString();
       }
     
-    public String parseXml(String esignResponse)throws Exception {
-    
-    	DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader(esignResponse));
-
-        Document doc = db.parse(is);
-    	//Document doc = getXmlDocument(esignResponse);
+    public String getSignatureStr(Document doc)throws Exception {
     	NodeList node = doc.getElementsByTagName("DocSignature");
     	String sig = node.item(0).getTextContent();
     	return sig;  
     }
     
+    public Document parseXmlString(String xmlString)
+    {
+    	Document retDoc = null;
+    	try {
+    		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    		dbf.setNamespaceAware(true);
+
+    		InputSource is = new InputSource();
+            is.setCharacterStream(new StringReader(xmlString));
+
+    		retDoc = dbf.newDocumentBuilder().parse(is);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	} 
+    	return retDoc;
+    }
+    
+	public boolean verifySignature(Document doc,PublicKey publicKey) {
+		try {
+			log.info("verify sig ");
+
+			// Find Signature element
+			NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+			if (nl.getLength() == 0) {
+				throw new Exception("Cannot find Signature element");
+			}
+
+			// Create a DOM XMLSignatureFactory that will be used to unmarshal the
+			// document containing the XMLSignature
+			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
+
+			// Create a DOMValidateContext and specify a KeyValue KeySelector
+			// and document context
+			DOMValidateContext valContext = new DOMValidateContext(publicKey, nl.item(0));
+
+			// unmarshal the XMLSignature
+			XMLSignature signature = fac.unmarshalXMLSignature(valContext);
+			// Validate the XMLSignature (generated above)
+			return (signature.validate(valContext));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return false;
+	}
+	
     public String generateAspXml(FormXmlDataAsp aspXmlDetais, String txnId) {
     	try {
 
@@ -205,4 +247,21 @@ public class PdfSignXmlUtils {
     		return "";
     	}
     }
+
+	public String getErrorCode(Document xmlDoc) {
+		NodeList node = xmlDoc.getElementsByTagName("EsignResp");
+		if(null != node && node.getLength()>0 && node.item(0).hasAttributes())
+		{
+			if(null==node.item(0).getAttributes().getNamedItem("errCode"))
+			{
+				return "NA";
+			}
+			else if ( null!=node.item(0).getAttributes().getNamedItem("errCode").getNodeValue() && "NA".equalsIgnoreCase(node.item(0).getAttributes().getNamedItem("errCode").getNodeValue()))
+			{
+				return "NA";
+			}
+		}
+    	System.out.println("ecode " + node.item(0).getAttributes().getNamedItem("errCode").getNodeValue());
+		return "error";
+	}
 }

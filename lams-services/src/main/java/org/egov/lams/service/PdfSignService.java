@@ -72,7 +72,7 @@ public class PdfSignService {
 
 		//Get encrypted string/ signed data for xml signature tag
 		String strToEncrypt = pdfSignXmlUtils.generateAspXml(formXmalDataAsp,txnId);
-		System.out.println(" strToEncrypt " + strToEncrypt);
+
 		String xmlData = "";
 		try {
 			PrivateKey rsaPrivateKey =  pdfSignUtils.getBase64PrivateKey();
@@ -101,7 +101,7 @@ public class PdfSignService {
 	}
 
 	public String getApplicationfile(String txnid) {
-		return pdfSignUtils.signPdfwithDS(txnid);
+		return pdfSignUtils.getApplicationfile(txnid);
 	}
 }
 
