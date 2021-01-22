@@ -90,6 +90,7 @@ public class PdfSignService {
 				formXmalDataAsp.setResponseUrl(uiHost + lamsRespUrl);
 				formXmalDataAsp.setDocInfo("My Document");
 				formXmalDataAsp.setDocHashHex(fileHash);
+				formXmalDataAsp.setTs(dateFormat.format(now));
 
 				//Get encrypted string/ signed data for xml signature tag
 				String strToEncrypt = pdfSignXmlUtils.generateAspXml(formXmalDataAsp,txnId);
