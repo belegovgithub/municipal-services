@@ -17,7 +17,7 @@ public class PdfXmlResp {
   private RequestXmlForm dSignInfo;
   
   @JsonProperty("fileStoreInfo")
-  private String fileStoreInfo;
+  private EgovPdfResp fileStoreInfo;
   
   @JsonProperty("error")
   private String error;

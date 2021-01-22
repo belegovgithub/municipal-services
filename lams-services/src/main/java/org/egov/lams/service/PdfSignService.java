@@ -3,14 +3,14 @@ package org.egov.lams.service;
 import java.security.PrivateKey;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 
+import org.apache.http.impl.client.HttpClients;
+import org.egov.lams.models.pdfsign.EgovPdfResp;
 import org.egov.lams.models.pdfsign.FormXmlDataAsp;
 import org.egov.lams.models.pdfsign.LeasePdfApplicationRequest;
 import org.egov.lams.models.pdfsign.PdfXmlResp;
@@ -22,13 +22,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,19 +58,13 @@ public class PdfSignService {
 		PdfXmlResp response = new PdfXmlResp();
 		if(null!=leasePdfApplication && !leasePdfApplication.getLeaseApplication().isEmpty())
 		{
-			String applResp =  getApplFile(leasePdfApplication);
+			EgovPdfResp egovPdfResp =  getApplFile(leasePdfApplication);
 			if(!leasePdfApplication.getLeaseApplication().get(0).isForEsign())
 			{
-				response.setFileStoreInfo(applResp);
-				
+				response.setFileStoreInfo(egovPdfResp);
 			}
 			else
 			{
-				Gson gson = new Gson();
-				HashMap<String, Object> fileRespMap = (HashMap<String, Object>) gson.fromJson(applResp, HashMap.class);
-				List<String> filestoreids = (List) fileRespMap.get("filestoreIds");
-				log.info("filestoreids " + filestoreids.get(0));
-				
 				String fileHash = "";
 				Random randNum = new Random();
 				int randInt = randNum.nextInt();
@@ -79,7 +73,7 @@ public class PdfSignService {
 				txnId = txnId.replaceAll("-", "");
 				log.info("txnid " + txnId);
 
-				String filestoreId = filestoreids.get(0);
+				String filestoreId = egovPdfResp.getFilestoreIds().get(0);
 				fileHash = pdfSignUtils.pdfSigner(txnId,filestoreId);
 				Date now = new Date();
 				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -128,26 +122,30 @@ public class PdfSignService {
 		return pdfSignUtils.getApplicationfile(txnid);
 	}
 	
-	public String getApplFile(LeasePdfApplicationRequest leasePdfApplication)
+	public EgovPdfResp getApplFile(LeasePdfApplicationRequest leasePdfApplication)
 	{
+		EgovPdfResp egovPdfResp = null;
 		try
 		{
 			RestTemplate restTemplate = new RestTemplate();
+			MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
+			mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
+			restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
 			String url = egovpdfHost + egovpdfPostendpoint;
 			HttpMethod requestMethod = HttpMethod.POST;
 
 			HttpEntity<LeasePdfApplicationRequest> requestEntity = new HttpEntity<LeasePdfApplicationRequest>(leasePdfApplication);
 
-			ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
+			ResponseEntity<EgovPdfResp> response = restTemplate.exchange(url, requestMethod, requestEntity, EgovPdfResp.class);
 
 			log.info("file upload status code: " + response);
 			if(response.getStatusCode().equals(HttpStatus.OK)) {
-				return response.getBody().toString();
+				return response.getBody();
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return "error";
+		return egovPdfResp;
 	}
 }
 
