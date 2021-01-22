@@ -256,9 +256,9 @@ public class PdfSignXmlUtils {
 			{
 				return "NA";
 			}
-			else if ( null!=node.item(0).getAttributes().getNamedItem("errCode").getNodeValue() && "NA".equalsIgnoreCase(node.item(0).getAttributes().getNamedItem("errCode").getNodeValue()))
+			else if ( null!=node.item(0).getAttributes().getNamedItem("errCode").getNodeValue())
 			{
-				return "NA";
+				return node.item(0).getAttributes().getNamedItem("errCode").getNodeValue();
 			}
 		}
     	System.out.println("ecode " + node.item(0).getAttributes().getNamedItem("errCode").getNodeValue());

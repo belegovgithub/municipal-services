@@ -92,14 +92,14 @@ public class PdfSignUtils {
 
 	private PublicKey publicKey;
 
-	public String pdfSigner(String txnid) {
+	public String pdfSigner(String txnid , String fileStoreId) {
 
 		String hashDocument = null;
 		PdfReader reader;
 		Path tempFile = null;
 		try {
 			tempFile = Files.createTempFile("esign", ".pdf");
-			String url = filestoreHost +  filestoreGetendpoint + "?fileStoreId=2a0f410b-1c19-4a2a-bcaf-f50927874ddb&tenantId=pb";
+			String url = filestoreHost +  filestoreGetendpoint + "?fileStoreId="+fileStoreId+"&tenantId=pb";
 			RestTemplate restTemplate = new RestTemplate();
 			byte[] pdfBytes = restTemplate.getForObject(url, byte[].class);
 
@@ -171,7 +171,7 @@ public class PdfSignUtils {
 		return hashDocument;
 	}
 
-	private void checkandupdatemap() {
+	public void checkandupdatemap() {
 		try {
 			log.info("b4 appearanceTxnMap size " + appearanceTxnMap.keySet().size());
 			log.info("b4 byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
@@ -219,53 +219,56 @@ public class PdfSignUtils {
 	}
 
 	public boolean signPdfwithDS(String response, String txnid) {
+		if(!appearanceTxnMap.containsKey(txnid) || !byteArrayOutputStreamMap.containsKey(txnid))
+		{
+			byteArrayOutputStreamMap.remove(txnid);
+			appearanceTxnMap.remove(txnid);
+			//record in db as error happened with errorCode as probable duplicate call
+			return false;
+		}
 		Document xmlDoc = pdfSignXmlUtils.parseXmlString(response);
 		if(null!=xmlDoc && pdfSignXmlUtils.verifySignature(xmlDoc, publicKey))
 		{
 			log.info("verify signature succeeded");
-
 			try {
 				String errorCode = pdfSignXmlUtils.getErrorCode(xmlDoc);
 				errorCode = errorCode.trim();
 				if ("NA".equalsIgnoreCase(errorCode)) 
 				{
-					if(appearanceTxnMap.containsKey(txnid) && byteArrayOutputStreamMap.containsKey(txnid))
-					{
-						String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
-						byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
-						byte[] paddedSig = new byte[contentEstimated];
-						System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
-						PdfDictionary pdfDictionary = new PdfDictionary();
-						pdfDictionary.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
+					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
+					byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
+					byte[] paddedSig = new byte[contentEstimated];
+					System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
+					PdfDictionary pdfDictionary = new PdfDictionary();
+					pdfDictionary.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
 
-						PdfSignatureAppearance signatureAppearance = appearanceTxnMap.get(txnid);
+					PdfSignatureAppearance signatureAppearance = appearanceTxnMap.get(txnid);
 
-						signatureAppearance.close(pdfDictionary);
+					signatureAppearance.close(pdfDictionary);
 
-						boolean retval = uploadFile(txnid);
+					boolean retval = uploadFile(txnid);
 
-						byteArrayOutputStreamMap.remove(txnid);
-						appearanceTxnMap.remove(txnid);
-						checkandupdatemap();
-						return retval;
-					}
-					else
-					{
-						log.error("keys missing in appearanceTxnMap or byteArrayOutputStreamMap");
-					}
+					//record in db as success with filestoreid
+					return retval;
 				}
 				else
 				{
 					log.error("esign error occured " + errorCode);
+					//record in db as error happened with errorCode
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				//record in db as error happened in processing
 			}
 		}
 		else
 		{
 			log.info("verify signature failed");
+			//record in db as error happened with signature verification failed
 		}
+		byteArrayOutputStreamMap.remove(txnid);
+		appearanceTxnMap.remove(txnid);
+		checkandupdatemap();
 		return false;
 	}
 
