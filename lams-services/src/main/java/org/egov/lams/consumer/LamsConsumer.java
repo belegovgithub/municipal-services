@@ -3,6 +3,7 @@ package org.egov.lams.consumer;
 
 import java.util.HashMap;
 
+import org.egov.lams.config.LamsConfiguration;
 import org.egov.lams.notification.LAMSNotificationService;
 import org.egov.lams.web.models.LamsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 public class LamsConsumer {
 
     private LAMSNotificationService notificationService;
+    private LamsConfiguration config;
 
     @Autowired
-    public LamsConsumer(LAMSNotificationService notificationService) {
+    public LamsConsumer(LAMSNotificationService notificationService,LamsConfiguration config) {
         this.notificationService = notificationService;
+        this.config=config;
     }
 
-    @KafkaListener(topics = {"${persister.update.lamsLR.topic}","${persister.save.lamsLR.topic}","${persister.update.lamsLR.workflow.topic}"})
+    @KafkaListener(topics = {"${persister.update.lamsLR.topic}","${persister.save.lamsLR.topic}","${persister.update.lamsLR.workflow.topic}",
+    		"${persister.save.lams.esign.topic}","${persister.update.lams.esign.topic}"})
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    	if(!(topic.equalsIgnoreCase(config.getSaveLamsEsignTopic()) || topic.equalsIgnoreCase(config.getUpdateLamsEsignTopic()))) {
         ObjectMapper mapper = new ObjectMapper();
         LamsRequest lamsRequest = new LamsRequest();
         try {
@@ -39,5 +44,8 @@ public class LamsConsumer {
         }
         log.info(" Received: "+lamsRequest.getLeases().get(0).getApplicationNumber());
         notificationService.process(lamsRequest);
+    	}
+    	else
+    		log.info("Consuming record: " + record);
     }
 }
