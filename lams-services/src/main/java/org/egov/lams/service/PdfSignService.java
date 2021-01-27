@@ -8,15 +8,20 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.apache.http.impl.client.HttpClients;
 import org.egov.lams.models.pdfsign.EgovPdfResp;
 import org.egov.lams.models.pdfsign.FormXmlDataAsp;
+import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.models.pdfsign.LeasePdfApplicationRequest;
 import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.models.pdfsign.RequestXmlForm;
+import org.egov.lams.repository.LamsRepository;
+import org.egov.lams.util.CommonUtils;
 import org.egov.lams.util.PdfSignUtils;
 import org.egov.lams.util.PdfSignXmlUtils;
+import org.egov.lams.web.models.AuditDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -41,6 +46,12 @@ public class PdfSignService {
 	
 	@Autowired
 	private PdfSignXmlUtils pdfSignXmlUtils;
+	
+	@Autowired
+	private LamsRepository repository;
+	
+	@Autowired
+    private CommonUtils commUtils;
 
     @Value("${bel.default.lams.resp.url}")
     private String lamsRespUrl;
@@ -72,8 +83,18 @@ public class PdfSignService {
 				String txnId = "" + timenow.getTimeInMillis() + "A" + randInt;
 				txnId = txnId.replaceAll("-", "");
 				log.info("txnid " + txnId);
-
 				String filestoreId = egovPdfResp.getFilestoreIds().get(0);
+
+				LamsEsignDtls lamsEsignDetals= new LamsEsignDtls();
+				lamsEsignDetals.setId(UUID.randomUUID().toString());
+				lamsEsignDetals.setTxnId(txnId);
+				lamsEsignDetals.setFileStoreId(filestoreId);
+				AuditDetails auditDetails = commUtils.getAuditDetails(leasePdfApplication.getRequestInfo().getUserInfo().getUuid(), true);
+				lamsEsignDetals.setAuditDetails(auditDetails);
+				lamsEsignDetals.setStatus("INITIATED");
+				lamsEsignDetals.setSurveyId(leasePdfApplication.getLeaseApplication().get(0).getSurveyId());
+				repository.saveEsignDtls(lamsEsignDetals);
+				
 				fileHash = pdfSignUtils.pdfSigner(txnId,filestoreId);
 				Date now = new Date();
 				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

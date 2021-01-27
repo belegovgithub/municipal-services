@@ -27,7 +27,7 @@ public class LamsConsumer {
         this.notificationService = notificationService;
     }
 
-    @KafkaListener(topics = {"${persister.update.lamsLR.topic}","${persister.save.lamsLR.topic}","${persister.update.lamsLR.workflow.topic}","${persister.update.lamssurvey.topic}"})
+    @KafkaListener(topics = {"${persister.update.lamsLR.topic}","${persister.save.lamsLR.topic}","${persister.update.lamsLR.workflow.topic}"})
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
         ObjectMapper mapper = new ObjectMapper();
         LamsRequest lamsRequest = new LamsRequest();

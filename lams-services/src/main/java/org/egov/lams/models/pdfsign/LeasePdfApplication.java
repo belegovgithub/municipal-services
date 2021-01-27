@@ -41,4 +41,11 @@ public class LeasePdfApplication {
 	@JsonProperty("months")
 	private String months;
 	
+	@JsonProperty("surveyId")
+	private String surveyId;
+	
+	@JsonProperty("area")
+	private String area;
+	
+	
 }

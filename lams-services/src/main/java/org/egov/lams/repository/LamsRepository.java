@@ -12,6 +12,7 @@ import java.util.Set;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.lams.config.LamsConfiguration;
 import org.egov.lams.model.SearchCriteria;
+import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.producer.Producer;
 import org.egov.lams.repository.builder.LamsQueryBuilder;
 import org.egov.lams.repository.builder.LamsQueryBuilderMaster;
@@ -124,4 +125,11 @@ public class LamsRepository {
         parameterJdbcTemplate.update(query, namedParameters);
 	}
     
+	public void saveEsignDtls(LamsEsignDtls lamsEsignDetals) {
+        producer.push(config.getSaveLamsEsignTopic(), lamsEsignDetals);
+    }
+
+	public void updateEsignDtls(LamsEsignDtls lamsEsignDetals) {
+		producer.push(config.getUpdateLamsEsignTopic(), lamsEsignDetals);
+	}
 }

@@ -146,4 +146,10 @@ public class LamsConfiguration {
     @Value("${notification.sms.enabled}")
     private Boolean isSMSEnabled;
     
+    @Value("${persister.save.lams.esign.topic}")
+    private String saveLamsEsignTopic;
+    
+    @Value("${persister.update.lams.esign.topic}")
+    private String updateLamsEsignTopic;
+    
 }
