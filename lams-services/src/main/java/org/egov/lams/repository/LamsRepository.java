@@ -19,6 +19,7 @@ import org.egov.lams.repository.builder.LamsQueryBuilderMaster;
 import org.egov.lams.rowmapper.LamsRowMapper;
 import org.egov.lams.rowmapper.LamsRowMapperMaster;
 import org.egov.lams.util.LRConstants;
+import org.egov.lams.web.models.EsignLamsRequest;
 import org.egov.lams.web.models.LamsRequest;
 import org.egov.lams.web.models.LeaseAgreementRenewal;
 import org.egov.lams.web.models.LeaseAgreementRenewalDetail;
@@ -125,11 +126,11 @@ public class LamsRepository {
         parameterJdbcTemplate.update(query, namedParameters);
 	}
     
-	public void saveEsignDtls(LamsEsignDtls lamsEsignDetals) {
-        producer.push(config.getSaveLamsEsignTopic(), lamsEsignDetals);
+	public void saveEsignDtls(EsignLamsRequest esignRequest) {
+        producer.push(config.getSaveLamsEsignTopic(), esignRequest);
     }
 
-	public void updateEsignDtls(LamsEsignDtls lamsEsignDetals) {
-		producer.push(config.getUpdateLamsEsignTopic(), lamsEsignDetals);
+	public void updateEsignDtls(EsignLamsRequest esignRequest) {
+		producer.push(config.getUpdateLamsEsignTopic(), esignRequest);
 	}
 }

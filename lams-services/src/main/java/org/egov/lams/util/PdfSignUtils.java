@@ -28,6 +28,7 @@ import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.repository.LamsRepository;
 import org.egov.lams.web.models.AuditDetails;
+import org.egov.lams.web.models.EsignLamsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -225,6 +226,7 @@ public class PdfSignUtils {
 	}
 
 	public boolean signPdfwithDS(String response, String txnid) {
+		EsignLamsRequest esignLamsRequest = new EsignLamsRequest();
 		LamsEsignDtls esignDtls = new LamsEsignDtls();
 		esignDtls.setTxnId(txnid);
 		esignDtls.setAuditDetails(AuditDetails.builder().lastModifiedTime(System.currentTimeMillis()).build());
@@ -235,7 +237,8 @@ public class PdfSignUtils {
 			//record in db as error happened with errorCode as probable duplicate call
 			esignDtls.setStatus("FAILED");
 			esignDtls.setErrorCode("DUPLICATE CALL");
-			updateEsignDetails(esignDtls);
+			esignLamsRequest.setLamsEsignDtls(esignDtls);
+			updateEsignDetails(esignLamsRequest);
 			return false;
 		}
 		Document xmlDoc = pdfSignXmlUtils.parseXmlString(response);
@@ -262,7 +265,8 @@ public class PdfSignUtils {
 
 					//record in db as success with filestoreid
 					esignDtls.setStatus("SUCCESS");
-					updateEsignDetails(esignDtls);
+					esignLamsRequest.setLamsEsignDtls(esignDtls);
+					updateEsignDetails(esignLamsRequest);
 					return retval;
 				}
 				else
@@ -271,14 +275,16 @@ public class PdfSignUtils {
 					//record in db as error happened with errorCode
 					esignDtls.setStatus("FAILED");
 					esignDtls.setErrorCode(errorCode);
-					updateEsignDetails(esignDtls);
+					esignLamsRequest.setLamsEsignDtls(esignDtls);
+					updateEsignDetails(esignLamsRequest);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				//record in db as error happened in processing
 				esignDtls.setStatus("FAILED");
 				esignDtls.setErrorCode("PROCESSING ERROR");
-				updateEsignDetails(esignDtls);
+				esignLamsRequest.setLamsEsignDtls(esignDtls);
+				updateEsignDetails(esignLamsRequest);
 				
 			}
 		}
@@ -288,7 +294,8 @@ public class PdfSignUtils {
 			//record in db as error happened with signature verification failed
 			esignDtls.setStatus("FAILED");
 			esignDtls.setErrorCode("SIGNATURE VERIFICATION FAILED");
-			updateEsignDetails(esignDtls);
+			esignLamsRequest.setLamsEsignDtls(esignDtls);
+			updateEsignDetails(esignLamsRequest);
 		}
 		byteArrayOutputStreamMap.remove(txnid);
 		appearanceTxnMap.remove(txnid);
@@ -379,8 +386,8 @@ public class PdfSignUtils {
 		return "error";
 	}
 
-	private void updateEsignDetails(LamsEsignDtls esignDtls) {
-		repository.updateEsignDtls(esignDtls);
+	private void updateEsignDetails(EsignLamsRequest esignRequest) {
+		repository.updateEsignDtls(esignRequest);
 	}
 }
 

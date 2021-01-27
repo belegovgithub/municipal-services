@@ -22,6 +22,7 @@ import org.egov.lams.util.CommonUtils;
 import org.egov.lams.util.PdfSignUtils;
 import org.egov.lams.util.PdfSignXmlUtils;
 import org.egov.lams.web.models.AuditDetails;
+import org.egov.lams.web.models.EsignLamsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -84,7 +85,7 @@ public class PdfSignService {
 				txnId = txnId.replaceAll("-", "");
 				log.info("txnid " + txnId);
 				String filestoreId = egovPdfResp.getFilestoreIds().get(0);
-
+				
 				LamsEsignDtls lamsEsignDetals= new LamsEsignDtls();
 				lamsEsignDetals.setId(UUID.randomUUID().toString());
 				lamsEsignDetals.setTxnId(txnId);
@@ -93,7 +94,9 @@ public class PdfSignService {
 				lamsEsignDetals.setAuditDetails(auditDetails);
 				lamsEsignDetals.setStatus("INITIATED");
 				lamsEsignDetals.setSurveyId(leasePdfApplication.getLeaseApplication().get(0).getSurveyId());
-				repository.saveEsignDtls(lamsEsignDetals);
+				EsignLamsRequest esignRequest = new EsignLamsRequest();
+				esignRequest.setLamsEsignDtls(lamsEsignDetals);
+				repository.saveEsignDtls(esignRequest);
 				
 				fileHash = pdfSignUtils.pdfSigner(txnId,filestoreId);
 				Date now = new Date();
