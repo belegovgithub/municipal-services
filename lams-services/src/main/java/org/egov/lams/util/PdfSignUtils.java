@@ -45,6 +45,7 @@ import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfDate;
@@ -54,6 +55,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignature;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfSignatureAppearance.RenderingMode;
+import com.jayway.jsonpath.JsonPath;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfString;
 
@@ -91,8 +93,6 @@ public class PdfSignUtils {
 
 	private static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
 
-	private static Map<String, String> filestoreRespMap = new HashMap<String, String>();
-	
 	private static int contentEstimated = 8192;
 
 	private PrivateKey privateKey;
@@ -182,7 +182,6 @@ public class PdfSignUtils {
 		try {
 			log.info("b4 appearanceTxnMap size " + appearanceTxnMap.keySet().size());
 			log.info("b4 byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
-			log.info("b4 filestoreRespMap size " + filestoreRespMap.keySet().size());
 			Calendar now = Calendar.getInstance();
 			long max = now.getTimeInMillis() - esignMaxTimeMilli;
 			appearanceTxnMap.entrySet().removeIf(entry -> {
@@ -194,22 +193,6 @@ public class PdfSignUtils {
 						{
 							byteArrayOutputStreamMap.remove(entry.getKey());
 						}
-						if(filestoreRespMap.containsKey(entry.getKey()))
-						{
-							filestoreRespMap.remove(entry.getKey());
-						}
-						return true;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				return false;
-			});
-			filestoreRespMap.entrySet().removeIf(entry -> {
-				try {
-					long time = Long.valueOf(entry.getKey().split("A")[0]);
-					if(time < max)
-					{
 						return true;
 					}
 				} catch (Exception e) {
@@ -219,7 +202,6 @@ public class PdfSignUtils {
 			});
 			log.info("after appearanceTxnMap size " + appearanceTxnMap.keySet().size());
 			log.info("after byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
-			log.info("after filestoreRespMap size " + filestoreRespMap.keySet().size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -260,14 +242,16 @@ public class PdfSignUtils {
 					PdfSignatureAppearance signatureAppearance = appearanceTxnMap.get(txnid);
 
 					signatureAppearance.close(pdfDictionary);
-
-					boolean retval = uploadFile(txnid);
-
+					String fileStoreId=null;
+					fileStoreId = uploadFile(txnid);
+					if(null!= fileStoreId) {
 					//record in db as success with filestoreid
+					esignDtls.setFileStoreId(fileStoreId);
 					esignDtls.setStatus("SUCCESS");
 					esignLamsRequest.setLamsEsignDtls(esignDtls);
 					updateEsignDetails(esignLamsRequest);
-					return retval;
+					return true;
+					}
 				}
 				else
 				{
@@ -303,7 +287,7 @@ public class PdfSignUtils {
 		return false;
 	}
 
-	public boolean uploadFile(String txnid) {
+	public String uploadFile(String txnid) {
 		Path tempFile = null;
 		try {
 			ByteArrayOutputStream byteArrayOutputStream =
@@ -333,8 +317,9 @@ public class PdfSignUtils {
 
 			log.info("file upload status code: " + response);
 			if(response.getStatusCode().equals(HttpStatus.CREATED)) {
-				filestoreRespMap.put(txnid, response.getBody());
-				return true;
+				String fileStoreId= JsonPath.read(response.getBody(), "$.files[0].fileStoreId");
+				log.info("uploaded fileStoreId"+fileStoreId);
+				return fileStoreId;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -346,7 +331,7 @@ public class PdfSignUtils {
 				log.error("temp file deletion failed");
 			}
 		}
-		return false;
+		return null;
 	}
 
 	public PrivateKey getBase64PrivateKey() 
@@ -376,14 +361,6 @@ public class PdfSignUtils {
 		}catch (Exception e) {
 			log.error("failed to load public key");
 		}
-	}
-
-	public String getApplicationfile(String txnid) {
-		if(filestoreRespMap.containsKey(txnid))
-		{
-			return filestoreRespMap.get(txnid);
-		}
-		return "error";
 	}
 
 	private void updateEsignDetails(EsignLamsRequest esignRequest) {

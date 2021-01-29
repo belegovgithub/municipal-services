@@ -56,6 +56,7 @@ public class LamsRowMapperMaster  implements ResultSetExtractor<List<LeaseAgreem
     					.natureOfHolderRights(rs.getString("natureofholdersrights"))
     					.rentTowardsCentGovt(rs.getString("rent_central_govt"))
     					.rentTowardsCB(rs.getString("rent_cantt_board"))
+    					.locationId(rs.getString("loc_id"))
     					.build();
                 leaseAgreementMap.put(id,currentRenewal);
             }

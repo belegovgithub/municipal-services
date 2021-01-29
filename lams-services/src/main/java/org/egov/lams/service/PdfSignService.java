@@ -6,14 +6,17 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.http.impl.client.HttpClients;
+import org.egov.lams.model.SearchCriteria;
 import org.egov.lams.models.pdfsign.EgovPdfResp;
 import org.egov.lams.models.pdfsign.FormXmlDataAsp;
 import org.egov.lams.models.pdfsign.LamsEsignDtls;
+import org.egov.lams.models.pdfsign.LeasePdfApplication;
 import org.egov.lams.models.pdfsign.LeasePdfApplicationRequest;
 import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.models.pdfsign.RequestXmlForm;
@@ -23,6 +26,7 @@ import org.egov.lams.util.PdfSignUtils;
 import org.egov.lams.util.PdfSignXmlUtils;
 import org.egov.lams.web.models.AuditDetails;
 import org.egov.lams.web.models.EsignLamsRequest;
+import org.egov.lams.web.models.LeaseAgreementRenewalDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -143,7 +147,7 @@ public class PdfSignService {
 	}
 
 	public String getApplicationfile(String txnid) {
-		return pdfSignUtils.getApplicationfile(txnid);
+		return repository.getApplicationfile(txnid);
 	}
 	
 	public EgovPdfResp getApplFile(LeasePdfApplicationRequest leasePdfApplication)
@@ -151,6 +155,21 @@ public class PdfSignService {
 		EgovPdfResp egovPdfResp = null;
 		try
 		{
+			LeasePdfApplication temp = leasePdfApplication.getLeaseApplication().get(0);
+			SearchCriteria criteria = new SearchCriteria();
+			criteria.setSurveyId(temp.getSurveyId());
+			List<LeaseAgreementRenewalDetail> leaseDtls = repository.getLeaseDetails(criteria);
+			temp.setMobileNo(leasePdfApplication.getRequestInfo().getUserInfo().getMobileNumber());
+			temp.setArea(leaseDtls.get(0).getArea());
+			temp.setSurveyNo(leaseDtls.get(0).getSurveyNo());
+			if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("1")) {
+				temp.setAddressee("The Chief Executive Officer");
+				temp.setInstruction("within the civil area");
+			}
+			else if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("2")) {
+				temp.setAddressee("The Defence Estates Officer");
+				temp.setInstruction("outside civil area");
+			}
 			RestTemplate restTemplate = new RestTemplate();
 			MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 			mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));

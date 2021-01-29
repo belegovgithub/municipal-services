@@ -1,36 +1,34 @@
 package org.egov.lams.repository;
 
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.lams.config.LamsConfiguration;
 import org.egov.lams.model.SearchCriteria;
-import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.producer.Producer;
 import org.egov.lams.repository.builder.LamsQueryBuilder;
 import org.egov.lams.repository.builder.LamsQueryBuilderMaster;
 import org.egov.lams.rowmapper.LamsRowMapper;
 import org.egov.lams.rowmapper.LamsRowMapperMaster;
-import org.egov.lams.util.LRConstants;
 import org.egov.lams.web.models.EsignLamsRequest;
 import org.egov.lams.web.models.LamsRequest;
 import org.egov.lams.web.models.LeaseAgreementRenewal;
 import org.egov.lams.web.models.LeaseAgreementRenewalDetail;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -132,5 +130,20 @@ public class LamsRepository {
 
 	public void updateEsignDtls(EsignLamsRequest esignRequest) {
 		producer.push(config.getUpdateLamsEsignTopic(), esignRequest);
+	}
+
+	public String getApplicationfile(String txnid) {
+		String sql = "SELECT filestoreid FROM eg_lams_esign_detail WHERE txnid=?";
+
+	    String filestoreid = (String) jdbcTemplate.queryForObject(
+	            sql, new Object[] { txnid }, String.class);
+	    JsonObject obj= new JsonObject();
+	    JsonArray array = new JsonArray();
+	    JsonObject o = new JsonObject();
+	    o.addProperty("fileStoreId", filestoreid);
+	    o.addProperty("tenantId", "pb");
+	    array.add(o);
+	    obj.add("files", array);
+	    return new Gson().toJson(obj);
 	}
 }

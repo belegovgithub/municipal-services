@@ -52,6 +52,9 @@ public class LeaseAgreementRenewalDetail   {
         @JsonProperty("located")
         private String located;
         
+        @JsonProperty("locationId")
+        private String locationId;
+        
         @Size(max=64)
         @JsonProperty("category")
         private String category;

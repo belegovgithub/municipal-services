@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Data
 @Getter
@@ -15,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class LeasePdfApplication {
 
 	@JsonProperty("tenantId")
@@ -47,5 +49,10 @@ public class LeasePdfApplication {
 	@JsonProperty("area")
 	private String area;
 	
+	@JsonProperty("addressee")
+	private String addressee;
+	
+	@JsonProperty("instruction")
+	private String instruction;
 	
 }

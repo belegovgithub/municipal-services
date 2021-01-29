@@ -86,6 +86,11 @@ public class LamsQueryBuilderMaster {
 			builder.append("  survey.surveyno = ? ");
 			preparedStmtList.add(criteria.getSurveyNo());
 		}
+		if (criteria.getSurveyId()!= null) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append("  survey.id = ? ");
+			preparedStmtList.add(criteria.getSurveyId());
+		}
 		//return addPaginationWrapper(builder.toString(), preparedStmtList, criteria );
 		builder.append(" order by surveyno");
 		return builder.toString();

@@ -80,6 +80,9 @@ public class SearchCriteria {
 
     @JsonProperty("toDate")
     private Long toDate = null;
+    
+    @JsonProperty("surveyId")
+	private String surveyId;
 	
 	@Override
 	public String toString() {
