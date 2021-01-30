@@ -134,10 +134,10 @@ public class LamsRepository {
 		//producer.push(config.getUpdateLamsEsignTopic(), esignRequest);
 		try {
 		LamsEsignDtls le =esignRequest.getLamsEsignDtls();
-		String updateSQL = "UPDATE eg_lams_esign_detail SET errorcode = ?, filestoreid =? , status = ?,  lastmodifiedtime = ? WHERE txnid=? ;";
-		int Updresult = jdbcTemplate.update(updateSQL, le.getErrorCode(),le.getFileStoreId(),le.getStatus(),le.getAuditDetails().getLastModifiedTime(),le.getTxnId());
 		String insertSQL = "INSERT INTO eg_lams_esign_detail_audit SELECT * FROM eg_lams_esign_detail WHERE txnid = ?";
 		int insResult = jdbcTemplate.update(insertSQL, le.getTxnId());
+		String updateSQL = "UPDATE eg_lams_esign_detail SET errorcode = ?, filestoreid =? , status = ?,  lastmodifiedtime = ? WHERE txnid=? ;";
+		int Updresult = jdbcTemplate.update(updateSQL, le.getErrorCode(),le.getFileStoreId(),le.getStatus(),le.getAuditDetails().getLastModifiedTime(),le.getTxnId());
 		log.info("insresult : "+insResult +" and updResult : "+Updresult);
 		}
 		catch(Exception e) {
