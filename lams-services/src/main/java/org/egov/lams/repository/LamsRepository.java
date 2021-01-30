@@ -10,11 +10,13 @@ import java.util.Map;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.lams.config.LamsConfiguration;
 import org.egov.lams.model.SearchCriteria;
+import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.producer.Producer;
 import org.egov.lams.repository.builder.LamsQueryBuilder;
 import org.egov.lams.repository.builder.LamsQueryBuilderMaster;
 import org.egov.lams.rowmapper.LamsRowMapper;
 import org.egov.lams.rowmapper.LamsRowMapperMaster;
+import org.egov.lams.web.models.AuditDetails;
 import org.egov.lams.web.models.EsignLamsRequest;
 import org.egov.lams.web.models.LamsRequest;
 import org.egov.lams.web.models.LeaseAgreementRenewal;
@@ -129,7 +131,18 @@ public class LamsRepository {
     }
 
 	public void updateEsignDtls(EsignLamsRequest esignRequest) {
-		producer.push(config.getUpdateLamsEsignTopic(), esignRequest);
+		//producer.push(config.getUpdateLamsEsignTopic(), esignRequest);
+		try {
+		LamsEsignDtls le =esignRequest.getLamsEsignDtls();
+		String updateSQL = "UPDATE eg_lams_esign_detail SET errorcode = ?, filestoreid =? , status = ?,  lastmodifiedtime = ? WHERE txnid=? ;";
+		int Updresult = jdbcTemplate.update(updateSQL, le.getErrorCode(),le.getFileStoreId(),le.getStatus(),le.getAuditDetails().getLastModifiedTime(),le.getTxnId());
+		String insertSQL = "INSERT INTO eg_lams_esign_detail_audit SELECT * FROM eg_lams_esign_detail WHERE txnid = ?";
+		int insResult = jdbcTemplate.update(insertSQL, le.getTxnId());
+		log.info("insresult : "+insResult +" and updResult : "+Updresult);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getApplicationfile(String txnid) {
