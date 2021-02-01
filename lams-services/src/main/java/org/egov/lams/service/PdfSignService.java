@@ -22,6 +22,7 @@ import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.models.pdfsign.RequestXmlForm;
 import org.egov.lams.repository.LamsRepository;
 import org.egov.lams.util.CommonUtils;
+import org.egov.lams.util.LRConstants;
 import org.egov.lams.util.PdfSignUtils;
 import org.egov.lams.util.PdfSignXmlUtils;
 import org.egov.lams.web.models.AuditDetails;
@@ -170,6 +171,8 @@ public class PdfSignService {
 				temp.setAddressee("The Defence Estates Officer");
 				temp.setInstruction("outside civil area");
 			}
+			if(leasePdfApplication.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(LRConstants.ROLE_CITIZEN)) 
+				temp.setName(leasePdfApplication.getRequestInfo().getUserInfo().getName());
 			RestTemplate restTemplate = new RestTemplate();
 			MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 			mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));

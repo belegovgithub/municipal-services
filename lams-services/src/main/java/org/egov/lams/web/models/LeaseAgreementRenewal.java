@@ -137,5 +137,11 @@ public class  LeaseAgreementRenewal   {
         
         @JsonProperty("userDetails")
         private List<UserInfo> userDetails;
+        
+        @JsonProperty("fatherOrHusbandName")
+        private String fatherOrHusbandName;
+        
+        @JsonProperty("months")
+        private String months;
 }
 

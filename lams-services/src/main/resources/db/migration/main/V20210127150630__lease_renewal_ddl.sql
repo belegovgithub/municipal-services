@@ -26,3 +26,9 @@ CREATE TABLE public.eg_lams_esign_detail_audit
     createdtime bigint,
     lastmodifiedtime bigint
 );
+
+ALTER TABLE public.eg_lams_leaserenewal
+    ADD COLUMN fatherorhusbandname character varying(64);
+
+ALTER TABLE public.eg_lams_leaserenewal
+    ADD COLUMN months character varying(5);
