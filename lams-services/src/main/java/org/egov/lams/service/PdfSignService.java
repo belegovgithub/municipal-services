@@ -160,7 +160,6 @@ public class PdfSignService {
 			SearchCriteria criteria = new SearchCriteria();
 			criteria.setSurveyId(temp.getSurveyId());
 			List<LeaseAgreementRenewalDetail> leaseDtls = repository.getLeaseDetails(criteria);
-			temp.setMobileNo(leasePdfApplication.getRequestInfo().getUserInfo().getMobileNumber());
 			temp.setArea(leaseDtls.get(0).getArea());
 			temp.setSurveyNo(leaseDtls.get(0).getSurveyNo());
 			if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("1")) {
@@ -171,8 +170,10 @@ public class PdfSignService {
 				temp.setAddressee("The Defence Estates Officer");
 				temp.setInstruction("outside civil area");
 			}
-			if(leasePdfApplication.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(LRConstants.ROLE_CITIZEN)) 
+			if(leasePdfApplication.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(LRConstants.ROLE_CITIZEN)) {
+				temp.setMobileNo(leasePdfApplication.getRequestInfo().getUserInfo().getMobileNumber());
 				temp.setName(leasePdfApplication.getRequestInfo().getUserInfo().getName());
+			}
 			RestTemplate restTemplate = new RestTemplate();
 			MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 			mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));

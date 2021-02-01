@@ -21,11 +21,13 @@ import org.egov.lams.util.LRConstants;
 import org.egov.lams.web.models.LamsRequest;
 import org.egov.lams.web.models.user.CreateUserRequest;
 import org.egov.lams.web.models.user.UserDetailResponse;
+import org.egov.lams.web.models.user.UserResponse;
 import org.egov.lams.web.models.user.UserSearchRequest;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -60,9 +62,13 @@ public class UserService {
 		request.getLeases().forEach(leaseRenewal -> {
 			if (roles.contains(LRConstants.LR_COUNTER_EMPLOYEE)) {
 				leaseRenewal.getUserDetails().forEach(userDetail -> {
-
-					if (userDetail.getUuid() == null)
-						leaseRenewal.setAccountId(createUser(userDetail, requestInfo, leaseRenewal.getTenantId()));
+					if (userDetail.getUuid() == null) {
+						String userUUid=null;
+						userUUid = isUserPresent(userDetail, requestInfo, leaseRenewal.getTenantId());
+						if(userUUid==null)
+							userUUid = createUser(userDetail, requestInfo, leaseRenewal.getTenantId());
+						leaseRenewal.setAccountId(userUUid);
+					}
 					else
 						leaseRenewal.setAccountId(userDetail.getUuid());
 				});
@@ -76,16 +82,16 @@ public class UserService {
 		});
 	}
 	
-	/*private String isUserPresent(UserInfo userInfo, RequestInfo requestInfo, String tenantId) {
+	private String isUserPresent(UserInfo userInfo, RequestInfo requestInfo, String tenantId) {
 		UserSearchRequest searchRequest = UserSearchRequest.builder().userName(userInfo.getMobileNumber())
 				.tenantId(tenantId).userType(LRConstants.ROLE_CITIZEN).requestInfo(requestInfo).build();
 		StringBuilder url = new StringBuilder(userHost+userSearchEndpoint); 
 		UserResponse res = mapper.convertValue(serviceRequestRepository.fetchResult(url, searchRequest), UserResponse.class);
 		if(CollectionUtils.isEmpty(res.getUser())) {
-			throw new CustomException("INVALID USER","UUID does not exists");
+			return null;
 		}
 		return res.getUser().get(0).getUuid().toString();
-	}*/
+	}
 
 	private String createUser(UserInfo userInfo, RequestInfo requestInfo, String tenantId) {
 		userInfo.setUserName(UUID.randomUUID().toString());
