@@ -81,6 +81,9 @@ public class UserService{
                         }
                         break;
                 }
+                if (owner.getUuid() != null && !owner.getMobileNumber().equals(owner.getUserName())) {
+                		owner.setUuid(null);
+                }
                 if (owner.getUuid() == null) {
                     addUserDefaultFields(tradeLicense.getTenantId(), role, owner, businessService);
                     //  UserDetailResponse userDetailResponse = userExists(owner,requestInfo);
