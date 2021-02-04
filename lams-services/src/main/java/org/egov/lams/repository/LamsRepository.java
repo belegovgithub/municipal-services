@@ -21,6 +21,7 @@ import org.egov.lams.web.models.EsignLamsRequest;
 import org.egov.lams.web.models.LamsRequest;
 import org.egov.lams.web.models.LeaseAgreementRenewal;
 import org.egov.lams.web.models.LeaseAgreementRenewalDetail;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -158,5 +159,18 @@ public class LamsRepository {
 	    array.add(o);
 	    obj.add("files", array);
 	    return new Gson().toJson(obj);
+	}
+	
+	public String getApplicationfileUUID(String txnid) {
+		try {
+		String sql = "SELECT createdby FROM eg_lams_esign_detail WHERE txnid=?";
+	    String createdby = (String) jdbcTemplate.queryForObject(
+	            sql, new Object[] { txnid }, String.class);
+	    return createdby;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("INVALID INPUT","Error occured while fetching data");
+		}
 	}
 }

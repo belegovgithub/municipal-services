@@ -3,6 +3,8 @@ package org.egov.lams.web.controllers;
 import org.egov.lams.models.pdfsign.LeasePdfApplicationRequest;
 import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.service.PdfSignService;
+import org.egov.lams.web.models.RequestInfoWrapper;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,9 @@ public class LamsPdfSign {
     }
 	
 	@PostMapping("/getApplicationfile")
-	public ResponseEntity<String> create(@RequestParam("txnid") String txnid) {
+	public ResponseEntity<String> create(@RequestBody RequestInfoWrapper requestInfoWrapper, @RequestParam("txnid") String txnid) {
+		if(!pdfSignService.validateUser(requestInfoWrapper.getRequestInfo(),txnid))
+		throw new CustomException("UNAUTHORIZED USER","Unauthorized user to access the application");
 		String pdfXmlResp = pdfSignService.getApplicationfile(txnid);
 		return new ResponseEntity<String>(pdfXmlResp, HttpStatus.OK);
 	}

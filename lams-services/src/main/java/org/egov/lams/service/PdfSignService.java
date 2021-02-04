@@ -12,6 +12,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.http.impl.client.HttpClients;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.lams.model.SearchCriteria;
 import org.egov.lams.models.pdfsign.EgovPdfResp;
 import org.egov.lams.models.pdfsign.FormXmlDataAsp;
@@ -193,6 +194,12 @@ public class PdfSignService {
 			e.printStackTrace();
 		}
 		return egovPdfResp;
+	}
+
+	public boolean validateUser(RequestInfo requestInfo, String txnid) {
+		String uuid= repository.getApplicationfileUUID(txnid);
+		log.info(uuid+" : "+requestInfo.getUserInfo().getUuid());
+		return uuid.equalsIgnoreCase(requestInfo.getUserInfo().getUuid());
 	}
 }
 
