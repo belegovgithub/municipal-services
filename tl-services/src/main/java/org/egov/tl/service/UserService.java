@@ -81,7 +81,7 @@ public class UserService{
                         }
                         break;
                 }
-                if (owner.getUuid() != null && !owner.getMobileNumber().equals(owner.getUserName())) {
+                if (owner.getUuid() != null && owner.getUserName().length()==10 && !owner.getMobileNumber().equals(owner.getUserName())) {
                 		owner.setUuid(null);
                 }
                 if (owner.getUuid() == null) {
