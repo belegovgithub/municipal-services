@@ -119,8 +119,8 @@ public class PdfSignUtils {
 			Rectangle cropBox = reader.getCropBox(1);
 			Rectangle rectangle = null;
 			String user = null;
-			rectangle = new Rectangle(cropBox.getLeft(), cropBox.getBottom(), cropBox.getLeft(100),
-					cropBox.getBottom(90));
+			rectangle = new Rectangle(cropBox.getRight(25), cropBox.getBottom(275), cropBox.getRight(125),
+					cropBox.getBottom(365));
 			//			FileOutputStream fout = new FileOutputStream(destFile);
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 			PdfStamper stamper = PdfStamper.createSignature(reader, byteArrayOutputStream, '\0', null, true);
