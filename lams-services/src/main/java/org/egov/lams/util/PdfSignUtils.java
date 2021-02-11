@@ -395,9 +395,9 @@ public class PdfSignUtils {
 	public String uploadFile(String txnid) {
 		Path tempFile = null;
 		try {
-			ByteArrayOutputStream byteArrayOutputStream =
-					byteArrayOutputStreamMap.get(txnid);
-			tempFile = Files.createTempFile("esign", ".pdf");
+//			ByteArrayOutputStream byteArrayOutputStream =
+//					byteArrayOutputStreamMap.get(txnid);
+//			tempFile = Files.createTempFile("esign", ".pdf");
 
 			RestTemplate restTemplate = new RestTemplate();
 			String url = filestoreHost + filestorePostendpoint;
@@ -410,13 +410,13 @@ public class PdfSignUtils {
 
 			log.info("Creating and Uploading Test File: " + tempFile);
 			
-			try(FileOutputStream outputStream = new FileOutputStream(tempFile.toFile())) {
-				byteArrayOutputStream.writeTo(outputStream); 
-				byteArrayOutputStream.flush();
-				byteArrayOutputStream.close();
-				outputStream.flush();
-				outputStream.close();
-			} 
+//			try(FileOutputStream outputStream = new FileOutputStream(tempFile.toFile())) {
+//				byteArrayOutputStream.writeTo(outputStream); 
+//				byteArrayOutputStream.flush();
+//				byteArrayOutputStream.close();
+//				outputStream.flush();
+//				outputStream.close();
+//			} 
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			body.add("file",  new FileSystemResource(tempFileMap.get(txnid).toFile()));
