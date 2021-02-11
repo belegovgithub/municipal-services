@@ -333,9 +333,6 @@ public class PdfSignUtils {
 	                raf.seek(offsetMap.get(txnid));
 	                raf.write(Hex.getBytes(cmsSignature));
 	                raf.close();
-					externalSigning.setSignature(cmsSignature);
-					pDDocumentMap.get(txnid).close();
-		    		IOUtils.closeQuietly(signatureOptionsMap.get(txnid));
 		    		
 					String fileStoreId=null;
 					fileStoreId = uploadFile(txnid);
@@ -422,7 +419,7 @@ public class PdfSignUtils {
 			} 
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file",  new FileSystemResource(tempFile.toFile()));
+			body.add("file",  new FileSystemResource(tempFileMap.get(txnid).toFile()));
 			body.add("tenantId", "pb");
 			body.add("module", "lams-esign");
 
