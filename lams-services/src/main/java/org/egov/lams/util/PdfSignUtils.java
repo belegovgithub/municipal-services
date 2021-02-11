@@ -2,6 +2,7 @@ package org.egov.lams.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -17,15 +18,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignatureFactory;
-import javax.xml.crypto.dsig.dom.DOMValidateContext;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.ExternalSigningSupport;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSigProperties;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSignDesigner;
+import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.egov.lams.models.pdfsign.LamsEsignDtls;
-import org.egov.lams.models.pdfsign.PdfXmlResp;
 import org.egov.lams.repository.LamsRepository;
 import org.egov.lams.web.models.AuditDetails;
 import org.egov.lams.web.models.EsignLamsRequest;
@@ -43,21 +48,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfDate;
-import com.itextpdf.text.pdf.PdfDictionary;
-import com.itextpdf.text.pdf.PdfName;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSignature;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfSignatureAppearance.RenderingMode;
 import com.jayway.jsonpath.JsonPath;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfString;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,20 +81,22 @@ public class PdfSignUtils {
 	@Autowired
 	private LamsRepository repository;
 
-	private static Map<String, PdfSignatureAppearance> appearanceTxnMap = new HashMap<String, PdfSignatureAppearance>();
-
 	private static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
+	private static Map<String, SignatureOptions> signatureOptionsMap = new HashMap<String, SignatureOptions>();
+	private static Map<String, PDDocument> pDDocumentMap = new HashMap<String, PDDocument>();
+	private static Map<String, ExternalSigningSupport> externalSigningSupportMap = new HashMap<String, ExternalSigningSupport>();
 
 	private static int contentEstimated = 8192;
 
 	private PrivateKey privateKey;
 
 	private PublicKey publicKey;
+	
+	
 
 	public String pdfSigner(String txnid , String fileStoreId) {
 
 		String hashDocument = null;
-		PdfReader reader;
 		Path tempFile = null;
 		try {
 			tempFile = Files.createTempFile("esign", ".pdf");
@@ -112,57 +106,114 @@ public class PdfSignUtils {
 
 			Files.write(tempFile, pdfBytes);
 
-			String sourcefile = tempFile.toString();
-			log.info("Path--->" + sourcefile);
-			reader = new PdfReader(sourcefile);
+			File documentFile = new File(tempFile.toString());
+    		InputStream imageStream = getClass().getClassLoader().getResourceAsStream("profile.png");
 
-			Rectangle cropBox = reader.getCropBox(1);
-			Rectangle rectangle = null;
-			String user = null;
-			rectangle = new Rectangle(cropBox.getRight(25), cropBox.getBottom(275), cropBox.getRight(125),
-					cropBox.getBottom(365));
-			//			FileOutputStream fout = new FileOutputStream(destFile);
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			PdfStamper stamper = PdfStamper.createSignature(reader, byteArrayOutputStream, '\0', null, true);
+    		String name = documentFile.getName();
 
-			PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
-			appearance.setRenderingMode(RenderingMode.DESCRIPTION);
-			appearance.setAcro6Layers(false);
-			Font font = new Font();
-			font.setSize(6);
-			font.setFamily("Helvetica");
-			font.setStyle("italic");
-			appearance.setLayer2Font(font);
-			Calendar currentDat = Calendar.getInstance();
-			currentDat.add(currentDat.MINUTE, 5);
-			appearance.setSignDate(currentDat);
+    		// page is 1-based here
+    		int page = 1;
+    		PDVisibleSignDesigner visibleSignDesigner = new PDVisibleSignDesigner(tempFile.toString(), imageStream, page);
+    		PDVisibleSigProperties visibleSignatureProperties = new PDVisibleSigProperties();
+    		visibleSignDesigner.xAxis(470).yAxis(490).zoom(-60).adjustForRotation();
+    		imageStream.close();
+    		visibleSignatureProperties.signerName(name).signerLocation("location").signatureReason("Security").
+    		preferredSize(0).page(1).visualSignEnabled(true).
+    		setPdVisibleSignature(visibleSignDesigner);
 
-			if (user == null || user == "null" || user.equals(null) || user.equals("null")) {
-				appearance.setLayer2Text("Signed");
-			} else {
-				appearance.setLayer2Text("Signed by " + user);
-			}
-			appearance.setCertificationLevel(PdfSignatureAppearance.NOT_CERTIFIED);
-			appearance.setImage(null);
-			appearance.setVisibleSignature(rectangle, reader.getNumberOfPages(), null);
+    		// creating output document and prepare the IO streams.
+    		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-			HashMap<PdfName, Integer> exc = new HashMap<PdfName, Integer>();
-			exc.put(PdfName.CONTENTS, contentEstimated * 2 + 2);
+    		// load document
+    		PDDocument doc = PDDocument.load(documentFile);
 
-			PdfSignature dic = new PdfSignature(PdfName.ADOBE_PPKLITE, PdfName.ADBE_PKCS7_DETACHED);
-			dic.setReason(appearance.getReason());
-			dic.setLocation(appearance.getLocation());
-			dic.setDate(new PdfDate(appearance.getSignDate()));
+    		int accessPermissions = SigUtils.getMDPPermission(doc);
+    		if (accessPermissions == 1)
+    		{
+    			throw new IllegalStateException("No changes to the document are permitted due to DocMDP transform parameters dictionary");
+    		}
+    		// Note that PDFBox has a bug that visual signing on certified files with permission 2
+    		// doesn't work properly, see PDFBOX-3699. As long as this issue is open, you may want to 
+    		// be careful with such files.        
 
-			appearance.setCryptoDictionary(dic);
-			appearance.preClose(exc);
+    		PDSignature signature;
 
-			checkandupdatemap();
-			appearanceTxnMap.put(txnid, appearance);
-			byteArrayOutputStreamMap.put(txnid, byteArrayOutputStream);
+    		// sign a PDF with an existing empty signature, as created by the CreateEmptySignatureForm example. 
+    		signature = new PDSignature();
 
-			InputStream is = appearance.getRangeStream();
+    		// Optional: certify
+    		// can be done only if version is at least 1.5 and if not already set
+    		// doing this on a PDF/A-1b file fails validation by Adobe preflight (PDFBOX-3821)
+    		// PDF/A-1b requires PDF version 1.4 max, so don't increase the version on such files.
+    		if (doc.getVersion() >= 1.5f && accessPermissions == 0)
+    		{
+    			SigUtils.setMDPPermission(doc, signature, 2);
+    		}
+
+    		PDAcroForm acroForm = doc.getDocumentCatalog().getAcroForm();
+    		if (acroForm != null && acroForm.getNeedAppearances())
+    		{
+    			// PDFBOX-3738 NeedAppearances true results in visible signature becoming invisible 
+    			// with Adobe Reader
+    			if (acroForm.getFields().isEmpty())
+    			{
+    				// we can safely delete it if there are no fields
+    				acroForm.getCOSObject().removeItem(COSName.NEED_APPEARANCES);
+    				// note that if you've set MDP permissions, the removal of this item
+    				// may result in Adobe Reader claiming that the document has been changed.
+    				// and/or that field content won't be displayed properly.
+    				// ==> decide what you prefer and adjust your code accordingly.
+    			}
+    			else
+    			{
+    				System.out.println("/NeedAppearances is set, signature may be ignored by Adobe Reader");
+    			}
+    		}
+
+    		// default filter
+    		signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE);
+
+    		// subfilter for basic and PAdES Part 2 signatures
+    		signature.setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED);
+
+    		if (visibleSignatureProperties != null)
+    		{
+    			// this builds the signature structures in a separate document
+    			visibleSignatureProperties.buildSignature();
+
+    			signature.setName(visibleSignatureProperties.getSignerName());
+    			signature.setLocation(visibleSignatureProperties.getSignerLocation());
+    			signature.setReason(visibleSignatureProperties.getSignatureReason());
+    		}
+
+    		// the signing date, needed for valid signature
+    		signature.setSignDate(Calendar.getInstance());
+
+    		SignatureOptions signatureOptions = new SignatureOptions();
+    		signatureOptions.setVisualSignature(visibleSignatureProperties.getVisibleSignature());
+    		signatureOptions.setPage(visibleSignatureProperties.getPage() - 1);
+    		doc.addSignature(signature, null, signatureOptions);
+
+    		ExternalSigningSupport externalSigning = doc.saveIncrementalForExternalSigning(byteArrayOutputStream);
+    		externalSigningSupportMap.put(String.valueOf(txnid), externalSigning);
+    		byteArrayOutputStreamMap.put(String.valueOf(txnid), byteArrayOutputStream);
+    		signatureOptionsMap.put(String.valueOf(txnid), signatureOptions);
+    		pDDocumentMap.put(String.valueOf(txnid), doc);
+    		InputStream is = externalSigning.getContent();
 			hashDocument = DigestUtils.sha256Hex(is);
+			
+			
+			
+			System.out.println("hex:    " + is.toString());
+    		// Do not close signatureOptions before saving, because some COSStream objects within
+    		// are transferred to the signed document.
+    		// Do not allow signatureOptions get out of scope before saving, because then the COSDocument
+    		// in signature options might by closed by gc, which would close COSStream objects prematurely.
+    		// See https://issues.apache.org/jira/browse/PDFBOX-3743
+
+			hashDocument = DigestUtils.sha256Hex(is);
+			
+			return hashDocument;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -180,11 +231,13 @@ public class PdfSignUtils {
 
 	public void checkandupdatemap() {
 		try {
-			log.info("b4 appearanceTxnMap size " + appearanceTxnMap.keySet().size());
+			log.info("b4 appearanceTxnMap size " + externalSigningSupportMap.keySet().size());
 			log.info("b4 byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
+			log.info("b4 signatureOptionsMap size " + signatureOptionsMap.keySet().size());
+			log.info("b4 pDDocumentMap size " + pDDocumentMap.keySet().size());
 			Calendar now = Calendar.getInstance();
 			long max = now.getTimeInMillis() - esignMaxTimeMilli;
-			appearanceTxnMap.entrySet().removeIf(entry -> {
+			externalSigningSupportMap.entrySet().removeIf(entry -> {
 				try {
 					long time = Long.valueOf(entry.getKey().split("A")[0]);
 					if(time < max)
@@ -193,6 +246,14 @@ public class PdfSignUtils {
 						{
 							byteArrayOutputStreamMap.remove(entry.getKey());
 						}
+						if(signatureOptionsMap.containsKey(entry.getKey()))
+						{
+							signatureOptionsMap.remove(entry.getKey());
+						}
+						if(pDDocumentMap.containsKey(entry.getKey()))
+						{
+							pDDocumentMap.remove(entry.getKey());
+						}
 						return true;
 					}
 				} catch (Exception e) {
@@ -200,8 +261,10 @@ public class PdfSignUtils {
 				}
 				return false;
 			});
-			log.info("after appearanceTxnMap size " + appearanceTxnMap.keySet().size());
+			log.info("after appearanceTxnMap size " + externalSigningSupportMap.keySet().size());
 			log.info("after byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
+			log.info("after signatureOptionsMap size " + signatureOptionsMap.keySet().size());
+			log.info("after pDDocumentMap size " + pDDocumentMap.keySet().size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -212,10 +275,12 @@ public class PdfSignUtils {
 		LamsEsignDtls esignDtls = new LamsEsignDtls();
 		esignDtls.setTxnId(txnid);
 		esignDtls.setAuditDetails(AuditDetails.builder().lastModifiedTime(System.currentTimeMillis()).build());
-		if(!appearanceTxnMap.containsKey(txnid) || !byteArrayOutputStreamMap.containsKey(txnid))
+		if(!externalSigningSupportMap.containsKey(txnid) || !byteArrayOutputStreamMap.containsKey(txnid) || !signatureOptionsMap.containsKey(txnid) || !pDDocumentMap.containsKey(txnid))
 		{
 			byteArrayOutputStreamMap.remove(txnid);
-			appearanceTxnMap.remove(txnid);
+			externalSigningSupportMap.remove(txnid);
+			signatureOptionsMap.remove(txnid);
+			pDDocumentMap.remove(txnid);
 			//record in db as error happened with errorCode as probable duplicate call
 			esignDtls.setStatus("FAILED");
 			esignDtls.setErrorCode("DUPLICATE CALL");
@@ -233,15 +298,11 @@ public class PdfSignUtils {
 				if ("NA".equalsIgnoreCase(errorCode)) 
 				{
 					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
-					byte[] sigbytes = Base64.decodeBase64(pkcsResponse);
-					byte[] paddedSig = new byte[contentEstimated];
-					System.arraycopy(sigbytes, 0, paddedSig, 0, sigbytes.length);
-					PdfDictionary pdfDictionary = new PdfDictionary();
-					pdfDictionary.put(PdfName.CONTENTS, new PdfString(paddedSig).setHexWriting(true));
-
-					PdfSignatureAppearance signatureAppearance = appearanceTxnMap.get(txnid);
-
-					signatureAppearance.close(pdfDictionary);
+					byte[] cmsSignature =  Base64.decodeBase64(pkcsResponse);
+					externalSigningSupportMap.get(txnid).setSignature(cmsSignature);
+					pDDocumentMap.get(txnid).close();
+		    		IOUtils.closeQuietly(signatureOptionsMap.get(txnid));
+		    		
 					String fileStoreId=null;
 					fileStoreId = uploadFile(txnid);
 					if(null!= fileStoreId) {
@@ -282,7 +343,9 @@ public class PdfSignUtils {
 			updateEsignDetails(esignLamsRequest);
 		}
 		byteArrayOutputStreamMap.remove(txnid);
-		appearanceTxnMap.remove(txnid);
+		externalSigningSupportMap.remove(txnid);
+		signatureOptionsMap.remove(txnid);
+		pDDocumentMap.remove(txnid);
 		checkandupdatemap();
 		return false;
 	}
