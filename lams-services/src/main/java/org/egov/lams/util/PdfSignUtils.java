@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
@@ -31,6 +32,7 @@ import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSigProperties;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.visible.PDVisibleSignDesigner;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
+import org.apache.pdfbox.util.Hex;
 import org.egov.lams.models.pdfsign.LamsEsignDtls;
 import org.egov.lams.repository.LamsRepository;
 import org.egov.lams.web.models.AuditDetails;
@@ -86,8 +88,9 @@ public class PdfSignUtils {
 	private static Map<String, SignatureOptions> signatureOptionsMap = new HashMap<String, SignatureOptions>();
 	private static Map<String, PDDocument> pDDocumentMap = new HashMap<String, PDDocument>();
 	private static Map<String, ExternalSigningSupport> externalSigningSupportMap = new HashMap<String, ExternalSigningSupport>();
+	
 	private static Map<String, Path> tempFileMap = new HashMap<String, Path>();
-
+	public static Map<String, Integer> offsetMap = new HashMap<String, Integer>();
 	private PrivateKey privateKey;
 
 	private PublicKey publicKey;
@@ -97,8 +100,10 @@ public class PdfSignUtils {
 
 		String hashDocument = null;
 		Path tempFile = null;
+		Path tempFileSigned = null;
 		try {
 			tempFile = Files.createTempFile("esign", ".pdf");
+			tempFileSigned = Files.createTempFile("esigned", ".pdf");
 			String url = filestoreHost +  filestoreGetendpoint + "?fileStoreId="+fileStoreId+"&tenantId=pb";
 			RestTemplate restTemplate = new RestTemplate();
 			byte[] pdfBytes = restTemplate.getForObject(url, byte[].class);
@@ -193,14 +198,23 @@ public class PdfSignUtils {
     		signatureOptions.setPage(visibleSignatureProperties.getPage() - 1);
     		doc.addSignature(signature, null, signatureOptions);
 
-    		ExternalSigningSupport externalSigning = doc.saveIncrementalForExternalSigning(byteArrayOutputStream);
+    		FileOutputStream fos = new FileOutputStream(tempFileSigned.toFile());
+    		ExternalSigningSupport externalSigning = doc.saveIncrementalForExternalSigning(fos);
     		externalSigningSupportMap.put(String.valueOf(txnid), externalSigning);
     		byteArrayOutputStreamMap.put(String.valueOf(txnid), byteArrayOutputStream);
     		signatureOptionsMap.put(String.valueOf(txnid), signatureOptions);
     		pDDocumentMap.put(String.valueOf(txnid), doc);
-    		tempFileMap.put(String.valueOf(txnid), tempFile);
+    		tempFileMap.put(String.valueOf(txnid), tempFileSigned);
+
+
     		InputStream is = externalSigning.getContent();
 			hashDocument = DigestUtils.sha256Hex(is);
+			
+            externalSigning.setSignature(new byte[0]);
+            int offset = signature.getByteRange()[1] + 1;
+            doc.close();
+            IOUtils.closeQuietly(signatureOptions);
+            offsetMap.put(String.valueOf(txnid), offset);
 			
 			
 			
@@ -314,6 +328,11 @@ public class PdfSignUtils {
 					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
 					ExternalSigningSupport externalSigning =  externalSigningSupportMap.get(txnid);
 					byte[] cmsSignature =  Base64.decodeBase64(pkcsResponse);
+					
+	                RandomAccessFile raf = new RandomAccessFile(tempFileMap.get(txnid).toFile(), "rw");
+	                raf.seek(offsetMap.get(txnid));
+	                raf.write(Hex.getBytes(cmsSignature));
+	                raf.close();
 					externalSigning.setSignature(cmsSignature);
 					pDDocumentMap.get(txnid).close();
 		    		IOUtils.closeQuietly(signatureOptionsMap.get(txnid));
