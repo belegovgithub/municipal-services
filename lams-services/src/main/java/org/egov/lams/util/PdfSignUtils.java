@@ -85,13 +85,11 @@ public class PdfSignUtils {
 	private static Map<String, SignatureOptions> signatureOptionsMap = new HashMap<String, SignatureOptions>();
 	private static Map<String, PDDocument> pDDocumentMap = new HashMap<String, PDDocument>();
 	private static Map<String, ExternalSigningSupport> externalSigningSupportMap = new HashMap<String, ExternalSigningSupport>();
-
-	private static int contentEstimated = 8192;
+	private static Map<String, Path> tempFileMap = new HashMap<String, Path>();
 
 	private PrivateKey privateKey;
 
 	private PublicKey publicKey;
-	
 	
 
 	public String pdfSigner(String txnid , String fileStoreId) {
@@ -199,6 +197,7 @@ public class PdfSignUtils {
     		byteArrayOutputStreamMap.put(String.valueOf(txnid), byteArrayOutputStream);
     		signatureOptionsMap.put(String.valueOf(txnid), signatureOptions);
     		pDDocumentMap.put(String.valueOf(txnid), doc);
+    		tempFileMap.put(String.valueOf(txnid), tempFile);
     		InputStream is = externalSigning.getContent();
 			hashDocument = DigestUtils.sha256Hex(is);
 			
@@ -254,6 +253,11 @@ public class PdfSignUtils {
 						{
 							pDDocumentMap.remove(entry.getKey());
 						}
+						if(tempFileMap.containsKey(entry.getKey()))
+						{
+							Files.deleteIfExists(tempFileMap.get(entry.getKey()));
+							tempFileMap.remove(entry.getKey());
+						}
 						return true;
 					}
 				} catch (Exception e) {
@@ -277,15 +281,31 @@ public class PdfSignUtils {
 		esignDtls.setAuditDetails(AuditDetails.builder().lastModifiedTime(System.currentTimeMillis()).build());
 		if(!externalSigningSupportMap.containsKey(txnid) || !byteArrayOutputStreamMap.containsKey(txnid) || !signatureOptionsMap.containsKey(txnid) || !pDDocumentMap.containsKey(txnid))
 		{
-			byteArrayOutputStreamMap.remove(txnid);
-			externalSigningSupportMap.remove(txnid);
-			signatureOptionsMap.remove(txnid);
-			pDDocumentMap.remove(txnid);
-			//record in db as error happened with errorCode as probable duplicate call
-			esignDtls.setStatus("FAILED");
-			esignDtls.setErrorCode("DUPLICATE CALL");
-			esignLamsRequest.setLamsEsignDtls(esignDtls);
-			updateEsignDetails(esignLamsRequest);
+			try
+			{
+				byteArrayOutputStreamMap.remove(txnid);
+				externalSigningSupportMap.remove(txnid);
+				signatureOptionsMap.remove(txnid);
+				pDDocumentMap.remove(txnid);
+				if(tempFileMap.containsKey(txnid))
+				{
+					Files.deleteIfExists(tempFileMap.get(txnid));
+					tempFileMap.remove(txnid);
+				}
+				//record in db as error happened with errorCode as probable duplicate call
+				esignDtls.setStatus("FAILED");
+				esignDtls.setErrorCode("DUPLICATE CALL");
+				esignLamsRequest.setLamsEsignDtls(esignDtls);
+				updateEsignDetails(esignLamsRequest);
+			}catch (Exception e) {
+				e.printStackTrace();
+				//record in db as error happened in processing
+				esignDtls.setStatus("FAILED");
+				esignDtls.setErrorCode("PROCESSING ERROR INIT");
+				esignLamsRequest.setLamsEsignDtls(esignDtls);
+				updateEsignDetails(esignLamsRequest);
+				
+			}
 			return false;
 		}
 		Document xmlDoc = pdfSignXmlUtils.parseXmlString(response);
@@ -346,6 +366,18 @@ public class PdfSignUtils {
 		externalSigningSupportMap.remove(txnid);
 		signatureOptionsMap.remove(txnid);
 		pDDocumentMap.remove(txnid);
+		try
+		{
+			Files.deleteIfExists(tempFileMap.get(txnid));
+			tempFileMap.remove(txnid);
+		}catch (Exception e) {
+			esignDtls.setStatus("FAILED");
+			esignDtls.setErrorCode("PROCESSING ERROR");
+			esignLamsRequest.setLamsEsignDtls(esignDtls);
+			updateEsignDetails(esignLamsRequest);
+			return false;
+		}
+		tempFileMap.remove(txnid);
 		checkandupdatemap();
 		return false;
 	}
