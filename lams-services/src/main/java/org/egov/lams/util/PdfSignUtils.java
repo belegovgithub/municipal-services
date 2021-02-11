@@ -3,6 +3,7 @@ package org.egov.lams.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -311,8 +312,9 @@ public class PdfSignUtils {
 				if ("NA".equalsIgnoreCase(errorCode)) 
 				{
 					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
+					ExternalSigningSupport externalSigning =  externalSigningSupportMap.get(txnid);
 					byte[] cmsSignature =  Base64.decodeBase64(pkcsResponse);
-					externalSigningSupportMap.get(txnid).setSignature(cmsSignature);
+					externalSigning.setSignature(cmsSignature);
 					pDDocumentMap.get(txnid).close();
 		    		IOUtils.closeQuietly(signatureOptionsMap.get(txnid));
 		    		
@@ -355,16 +357,21 @@ public class PdfSignUtils {
 			esignLamsRequest.setLamsEsignDtls(esignDtls);
 			updateEsignDetails(esignLamsRequest);
 		}
-		/*
-		 * byteArrayOutputStreamMap.remove(txnid);
-		 * externalSigningSupportMap.remove(txnid); signatureOptionsMap.remove(txnid);
-		 * pDDocumentMap.remove(txnid); try {
-		 * Files.deleteIfExists(tempFileMap.get(txnid)); tempFileMap.remove(txnid);
-		 * }catch (Exception e) { esignDtls.setStatus("FAILED");
-		 * esignDtls.setErrorCode("PROCESSING ERROR");
-		 * esignLamsRequest.setLamsEsignDtls(esignDtls);
-		 * updateEsignDetails(esignLamsRequest); return false; }
-		 */
+		byteArrayOutputStreamMap.remove(txnid);
+		externalSigningSupportMap.remove(txnid);
+		signatureOptionsMap.remove(txnid);
+		pDDocumentMap.remove(txnid);
+		try
+		{
+			Files.deleteIfExists(tempFileMap.get(txnid));
+			tempFileMap.remove(txnid);
+		}catch (Exception e) {
+			esignDtls.setStatus("FAILED");
+			esignDtls.setErrorCode("PROCESSING ERROR");
+			esignLamsRequest.setLamsEsignDtls(esignDtls);
+			updateEsignDetails(esignLamsRequest);
+			return false;
+		}
 		checkandupdatemap();
 		return false;
 	}
@@ -386,7 +393,14 @@ public class PdfSignUtils {
 //			HttpEntity<byte[]> fileEntity = new HttpEntity<>(byteArrayOutputStream.toByteArray());
 
 			log.info("Creating and Uploading Test File: " + tempFile);
-			Files.write(tempFile,byteArrayOutputStream.toByteArray());
+			
+			try(FileOutputStream outputStream = new FileOutputStream(tempFile.toFile())) {
+				byteArrayOutputStream.writeTo(outputStream); 
+				byteArrayOutputStream.flush();
+				byteArrayOutputStream.close();
+				outputStream.flush();
+				outputStream.close();
+			} 
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
 			body.add("file",  new FileSystemResource(tempFile.toFile()));
@@ -401,6 +415,11 @@ public class PdfSignUtils {
 			if(response.getStatusCode().equals(HttpStatus.CREATED)) {
 				String fileStoreId= JsonPath.read(response.getBody(), "$.files[0].fileStoreId");
 				log.info("uploaded fileStoreId"+fileStoreId);
+				try {
+					Files.deleteIfExists(tempFile);
+				} catch (IOException e) {
+					log.error("temp file deletion failed");
+				}
 				return fileStoreId;
 			}
 		} catch (Exception e) {
