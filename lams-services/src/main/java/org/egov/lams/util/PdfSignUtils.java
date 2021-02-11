@@ -355,22 +355,16 @@ public class PdfSignUtils {
 			esignLamsRequest.setLamsEsignDtls(esignDtls);
 			updateEsignDetails(esignLamsRequest);
 		}
-		byteArrayOutputStreamMap.remove(txnid);
-		externalSigningSupportMap.remove(txnid);
-		signatureOptionsMap.remove(txnid);
-		pDDocumentMap.remove(txnid);
-		try
-		{
-			Files.deleteIfExists(tempFileMap.get(txnid));
-			tempFileMap.remove(txnid);
-		}catch (Exception e) {
-			esignDtls.setStatus("FAILED");
-			esignDtls.setErrorCode("PROCESSING ERROR");
-			esignLamsRequest.setLamsEsignDtls(esignDtls);
-			updateEsignDetails(esignLamsRequest);
-			return false;
-		}
-		tempFileMap.remove(txnid);
+		/*
+		 * byteArrayOutputStreamMap.remove(txnid);
+		 * externalSigningSupportMap.remove(txnid); signatureOptionsMap.remove(txnid);
+		 * pDDocumentMap.remove(txnid); try {
+		 * Files.deleteIfExists(tempFileMap.get(txnid)); tempFileMap.remove(txnid);
+		 * }catch (Exception e) { esignDtls.setStatus("FAILED");
+		 * esignDtls.setErrorCode("PROCESSING ERROR");
+		 * esignLamsRequest.setLamsEsignDtls(esignDtls);
+		 * updateEsignDetails(esignLamsRequest); return false; }
+		 */
 		checkandupdatemap();
 		return false;
 	}
