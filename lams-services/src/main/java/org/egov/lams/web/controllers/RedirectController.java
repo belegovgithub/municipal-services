@@ -44,7 +44,8 @@ public class RedirectController {
     	boolean response = pdfSignService.prepareResponse(eSignResponse,espTxnID);
     	
         HttpHeaders httpHeaders = new HttpHeaders();
-        String redirectUrl = uiHost + lamsUiUrl + "?espTxnID="+espTxnID+"&success="+response;
+//        String redirectUrl = uiHost + lamsUiUrl + "?espTxnID="+espTxnID+"&success="+response;
+        String redirectUrl = uiHost + lamsUiUrl + "?success="+response;
         httpHeaders.setLocation(UriComponentsBuilder.fromHttpUrl(redirectUrl)
                 .build().toUri());
         log.info(httpHeaders!=null ? httpHeaders.toString(): "http header is null ");
