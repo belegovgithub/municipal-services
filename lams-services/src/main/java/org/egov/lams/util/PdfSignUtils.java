@@ -218,13 +218,6 @@ public class PdfSignUtils {
 			e.printStackTrace();
 			log.info("Error in signing doc.");
 		}
-		finally {
-			try {
-				Files.deleteIfExists(tempFile);
-			} catch (IOException e) {
-				log.error("temp file deletion failed");
-			}
-		}
 		return hashDocument;
 	}
 
