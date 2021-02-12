@@ -1,7 +1,6 @@
 package org.egov.lams.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -84,13 +83,9 @@ public class PdfSignUtils {
 	@Autowired
 	private LamsRepository repository;
 
-	private static Map<String, ByteArrayOutputStream> byteArrayOutputStreamMap = new HashMap<String, ByteArrayOutputStream>();
-	private static Map<String, SignatureOptions> signatureOptionsMap = new HashMap<String, SignatureOptions>();
-	private static Map<String, PDDocument> pDDocumentMap = new HashMap<String, PDDocument>();
-	private static Map<String, ExternalSigningSupport> externalSigningSupportMap = new HashMap<String, ExternalSigningSupport>();
-	
-	private static Map<String, Path> tempFileMap = new HashMap<String, Path>();
+	private static Map<String, Path> signedTempFileMap = new HashMap<String, Path>();
 	public static Map<String, Integer> offsetMap = new HashMap<String, Integer>();
+	
 	private PrivateKey privateKey;
 
 	private PublicKey publicKey;
@@ -100,10 +95,10 @@ public class PdfSignUtils {
 
 		String hashDocument = null;
 		Path tempFile = null;
-		Path tempFileSigned = null;
+		Path signedTempFile = null;
 		try {
 			tempFile = Files.createTempFile("esign", ".pdf");
-			tempFileSigned = Files.createTempFile("esigned", ".pdf");
+			signedTempFile = Files.createTempFile("esigned", ".pdf");
 			String url = filestoreHost +  filestoreGetendpoint + "?fileStoreId="+fileStoreId+"&tenantId=pb";
 			RestTemplate restTemplate = new RestTemplate();
 			byte[] pdfBytes = restTemplate.getForObject(url, byte[].class);
@@ -125,9 +120,6 @@ public class PdfSignUtils {
     		preferredSize(0).page(1).visualSignEnabled(true).
     		setPdVisibleSignature(visibleSignDesigner);
 
-    		// creating output document and prepare the IO streams.
-    		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
     		// load document
     		PDDocument doc = PDDocument.load(documentFile);
 
@@ -140,10 +132,7 @@ public class PdfSignUtils {
     		// doesn't work properly, see PDFBOX-3699. As long as this issue is open, you may want to 
     		// be careful with such files.        
 
-    		PDSignature signature;
-
-    		// sign a PDF with an existing empty signature, as created by the CreateEmptySignatureForm example. 
-    		signature = new PDSignature();
+    		PDSignature signature  = new PDSignature();
 
     		// Optional: certify
     		// can be done only if version is at least 1.5 and if not already set
@@ -170,7 +159,7 @@ public class PdfSignUtils {
     			}
     			else
     			{
-    				System.out.println("/NeedAppearances is set, signature may be ignored by Adobe Reader");
+    				log.info("/NeedAppearances is set, signature may be ignored by Adobe Reader");
     			}
     		}
 
@@ -198,14 +187,8 @@ public class PdfSignUtils {
     		signatureOptions.setPage(visibleSignatureProperties.getPage() - 1);
     		doc.addSignature(signature, null, signatureOptions);
 
-    		FileOutputStream fos = new FileOutputStream(tempFileSigned.toFile());
+    		FileOutputStream fos = new FileOutputStream(signedTempFile.toFile());
     		ExternalSigningSupport externalSigning = doc.saveIncrementalForExternalSigning(fos);
-    		externalSigningSupportMap.put(String.valueOf(txnid), externalSigning);
-    		byteArrayOutputStreamMap.put(String.valueOf(txnid), byteArrayOutputStream);
-    		signatureOptionsMap.put(String.valueOf(txnid), signatureOptions);
-    		pDDocumentMap.put(String.valueOf(txnid), doc);
-    		tempFileMap.put(String.valueOf(txnid), tempFileSigned);
-
 
     		InputStream is = externalSigning.getContent();
 			hashDocument = DigestUtils.sha256Hex(is);
@@ -214,47 +197,40 @@ public class PdfSignUtils {
             int offset = signature.getByteRange()[1] + 1;
             doc.close();
             IOUtils.closeQuietly(signatureOptions);
+            
+            signedTempFileMap.put(String.valueOf(txnid), signedTempFile);
             offsetMap.put(String.valueOf(txnid), offset);
 			
-			return hashDocument;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.info("Error in signing doc.");
+		}
+		finally {
+			try {
+				Files.deleteIfExists(tempFile);
+			} catch (IOException e) {
+				log.error("temp file deletion failed");
+			}
 		}
 		return hashDocument;
 	}
 
 	public void checkandupdatemap() {
 		try {
-			log.info("b4 appearanceTxnMap size " + externalSigningSupportMap.keySet().size());
-			log.info("b4 byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
-			log.info("b4 signatureOptionsMap size " + signatureOptionsMap.keySet().size());
-			log.info("b4 pDDocumentMap size " + pDDocumentMap.keySet().size());
+			log.info("b4 signedTempFileMap size " + signedTempFileMap.keySet().size());
+			log.info("b4 offsetMap size " + offsetMap.keySet().size());
 			Calendar now = Calendar.getInstance();
 			long max = now.getTimeInMillis() - esignMaxTimeMilli;
-			externalSigningSupportMap.entrySet().removeIf(entry -> {
+			signedTempFileMap.entrySet().removeIf(entry -> {
 				try {
 					long time = Long.valueOf(entry.getKey().split("A")[0]);
 					if(time < max)
 					{
-						if(byteArrayOutputStreamMap.containsKey(entry.getKey()))
+						if(offsetMap.containsKey(entry.getKey()))
 						{
-							byteArrayOutputStreamMap.remove(entry.getKey());
+							offsetMap.remove(entry.getKey());
 						}
-						if(signatureOptionsMap.containsKey(entry.getKey()))
-						{
-							signatureOptionsMap.remove(entry.getKey());
-						}
-						if(pDDocumentMap.containsKey(entry.getKey()))
-						{
-							pDDocumentMap.remove(entry.getKey());
-						}
-						if(tempFileMap.containsKey(entry.getKey()))
-						{
-							Files.deleteIfExists(tempFileMap.get(entry.getKey()));
-							tempFileMap.remove(entry.getKey());
-						}
+						Files.deleteIfExists(signedTempFileMap.get(entry.getKey()));
 						return true;
 					}
 				} catch (Exception e) {
@@ -262,10 +238,8 @@ public class PdfSignUtils {
 				}
 				return false;
 			});
-			log.info("after appearanceTxnMap size " + externalSigningSupportMap.keySet().size());
-			log.info("after byteArrayOutputStreamMap size " + byteArrayOutputStreamMap.keySet().size());
-			log.info("after signatureOptionsMap size " + signatureOptionsMap.keySet().size());
-			log.info("after pDDocumentMap size " + pDDocumentMap.keySet().size());
+			log.info("after signedTempFileMap size " + signedTempFileMap.keySet().size());
+			log.info("after offsetMap size " + offsetMap.keySet().size());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -276,19 +250,16 @@ public class PdfSignUtils {
 		LamsEsignDtls esignDtls = new LamsEsignDtls();
 		esignDtls.setTxnId(txnid);
 		esignDtls.setAuditDetails(AuditDetails.builder().lastModifiedTime(System.currentTimeMillis()).build());
-		if(!externalSigningSupportMap.containsKey(txnid) || !byteArrayOutputStreamMap.containsKey(txnid) || !signatureOptionsMap.containsKey(txnid) || !pDDocumentMap.containsKey(txnid))
+		if(!signedTempFileMap.containsKey(txnid) || !offsetMap.containsKey(txnid))
 		{
 			try
 			{
-				byteArrayOutputStreamMap.remove(txnid);
-				externalSigningSupportMap.remove(txnid);
-				signatureOptionsMap.remove(txnid);
-				pDDocumentMap.remove(txnid);
-				if(tempFileMap.containsKey(txnid))
+				if(signedTempFileMap.containsKey(txnid))
 				{
-					Files.deleteIfExists(tempFileMap.get(txnid));
-					tempFileMap.remove(txnid);
+					Files.deleteIfExists(signedTempFileMap.get(txnid));
+					signedTempFileMap.remove(txnid);
 				}
+				offsetMap.remove(txnid);
 				//record in db as error happened with errorCode as probable duplicate call
 				esignDtls.setStatus("FAILED");
 				esignDtls.setErrorCode("DUPLICATE CALL");
@@ -315,10 +286,9 @@ public class PdfSignUtils {
 				if ("NA".equalsIgnoreCase(errorCode)) 
 				{
 					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
-					ExternalSigningSupport externalSigning =  externalSigningSupportMap.get(txnid);
 					byte[] cmsSignature =  Base64.decodeBase64(pkcsResponse);
 					
-	                RandomAccessFile raf = new RandomAccessFile(tempFileMap.get(txnid).toFile(), "rw");
+	                RandomAccessFile raf = new RandomAccessFile(signedTempFileMap.get(txnid).toFile(), "rw");
 	                raf.seek(offsetMap.get(txnid));
 	                raf.write(Hex.getBytes(cmsSignature));
 	                raf.close();
@@ -350,7 +320,6 @@ public class PdfSignUtils {
 				esignDtls.setErrorCode("PROCESSING ERROR");
 				esignLamsRequest.setLamsEsignDtls(esignDtls);
 				updateEsignDetails(esignLamsRequest);
-				
 			}
 		}
 		else
@@ -362,14 +331,14 @@ public class PdfSignUtils {
 			esignLamsRequest.setLamsEsignDtls(esignDtls);
 			updateEsignDetails(esignLamsRequest);
 		}
-		byteArrayOutputStreamMap.remove(txnid);
-		externalSigningSupportMap.remove(txnid);
-		signatureOptionsMap.remove(txnid);
-		pDDocumentMap.remove(txnid);
 		try
 		{
-			Files.deleteIfExists(tempFileMap.get(txnid));
-			tempFileMap.remove(txnid);
+			if(signedTempFileMap.containsKey(txnid))
+			{
+				Files.deleteIfExists(signedTempFileMap.get(txnid));
+				signedTempFileMap.remove(txnid);
+			}
+			offsetMap.remove(txnid);
 		}catch (Exception e) {
 			esignDtls.setStatus("FAILED");
 			esignDtls.setErrorCode("PROCESSING ERROR");
@@ -382,12 +351,7 @@ public class PdfSignUtils {
 	}
 
 	public String uploadFile(String txnid) {
-		Path tempFile = null;
 		try {
-//			ByteArrayOutputStream byteArrayOutputStream =
-//					byteArrayOutputStreamMap.get(txnid);
-//			tempFile = Files.createTempFile("esign", ".pdf");
-
 			RestTemplate restTemplate = new RestTemplate();
 			String url = filestoreHost + filestorePostendpoint;
 			HttpMethod requestMethod = HttpMethod.POST;
@@ -395,20 +359,10 @@ public class PdfSignUtils {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-//			HttpEntity<byte[]> fileEntity = new HttpEntity<>(byteArrayOutputStream.toByteArray());
-
-			log.info("Creating and Uploading Test File: " + tempFile);
-			
-//			try(FileOutputStream outputStream = new FileOutputStream(tempFile.toFile())) {
-//				byteArrayOutputStream.writeTo(outputStream); 
-//				byteArrayOutputStream.flush();
-//				byteArrayOutputStream.close();
-//				outputStream.flush();
-//				outputStream.close();
-//			} 
+			log.info("Creating and Uploading Test File: " + signedTempFileMap.get(txnid));
 
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			body.add("file",  new FileSystemResource(tempFileMap.get(txnid).toFile()));
+			body.add("file",  new FileSystemResource(signedTempFileMap.get(txnid).toFile()));
 			body.add("tenantId", "pb");
 			body.add("module", "lams-esign");
 
@@ -419,9 +373,9 @@ public class PdfSignUtils {
 			log.info("file upload status code: " + response);
 			if(response.getStatusCode().equals(HttpStatus.CREATED)) {
 				String fileStoreId= JsonPath.read(response.getBody(), "$.files[0].fileStoreId");
-				log.info("uploaded fileStoreId"+fileStoreId);
+				log.info("uploaded fileStoreId "+fileStoreId);
 				try {
-					Files.deleteIfExists(tempFile);
+					Files.deleteIfExists(signedTempFileMap.get(txnid));
 				} catch (IOException e) {
 					log.error("temp file deletion failed");
 				}
@@ -432,7 +386,7 @@ public class PdfSignUtils {
 		}
 		finally {
 			try {
-				Files.deleteIfExists(tempFile);
+				Files.deleteIfExists(signedTempFileMap.get(txnid));
 			} catch (IOException e) {
 				log.error("temp file deletion failed");
 			}
