@@ -216,17 +216,6 @@ public class PdfSignUtils {
             IOUtils.closeQuietly(signatureOptions);
             offsetMap.put(String.valueOf(txnid), offset);
 			
-			
-			
-			System.out.println("hex:    " + is.toString());
-    		// Do not close signatureOptions before saving, because some COSStream objects within
-    		// are transferred to the signed document.
-    		// Do not allow signatureOptions get out of scope before saving, because then the COSDocument
-    		// in signature options might by closed by gc, which would close COSStream objects prematurely.
-    		// See https://issues.apache.org/jira/browse/PDFBOX-3743
-
-			hashDocument = DigestUtils.sha256Hex(is);
-			
 			return hashDocument;
 
 		} catch (Exception e) {
