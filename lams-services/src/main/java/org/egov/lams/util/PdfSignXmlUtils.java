@@ -7,6 +7,8 @@ import java.io.StringWriter;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -248,20 +250,32 @@ public class PdfSignXmlUtils {
     	}
     }
 
-	public String getErrorCode(Document xmlDoc) {
+	public Map<String,String> getErrorCode(Document xmlDoc) {
+		Map<String,String> retMap = new HashMap<String, String>();
 		NodeList node = xmlDoc.getElementsByTagName("EsignResp");
 		if(null != node && node.getLength()>0 && node.item(0).hasAttributes())
 		{
 			if(null==node.item(0).getAttributes().getNamedItem("errCode"))
 			{
-				return "NA";
+				retMap.put("errCode", "NA");
+				return retMap;
 			}
 			else if ( null!=node.item(0).getAttributes().getNamedItem("errCode").getNodeValue())
 			{
-				return node.item(0).getAttributes().getNamedItem("errCode").getNodeValue();
+				retMap.put("errCode", node.item(0).getAttributes().getNamedItem("errCode").getNodeValue());
+				if ( null!=node.item(0).getAttributes().getNamedItem("errMsg").getNodeValue())
+				{
+					retMap.put("errMsg", node.item(0).getAttributes().getNamedItem("errMsg").getNodeValue());
+				}
+				else
+				{
+					retMap.put("errMsg", "CDAC MSG MISSING");
+				}
+				return retMap;
 			}
 		}
-    	System.out.println("ecode " + node.item(0).getAttributes().getNamedItem("errCode").getNodeValue());
-		return "error";
+		retMap.put("errCode", "XML PARSE Failed");
+		retMap.put("errMsg", "XML PARSE Failed");
+		return retMap;
 	}
 }

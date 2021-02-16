@@ -281,9 +281,9 @@ public class PdfSignUtils {
 		{
 			log.info("verify signature succeeded");
 			try {
-				String errorCode = pdfSignXmlUtils.getErrorCode(xmlDoc);
-				errorCode = errorCode.trim();
-				if ("NA".equalsIgnoreCase(errorCode)) 
+				Map<String, String> errorCodeMap = pdfSignXmlUtils.getErrorCode(xmlDoc);
+				String errorCode = errorCodeMap.get("errCode").trim();
+				if ("NA". equalsIgnoreCase(errorCode)) 
 				{
 					String pkcsResponse = pdfSignXmlUtils.getSignatureStr(xmlDoc);
 					byte[] cmsSignature =  Base64.decodeBase64(pkcsResponse);
@@ -308,7 +308,7 @@ public class PdfSignUtils {
 				{
 					log.error("esign error occured " + errorCode);
 					//record in db as error happened with errorCode
-					esignDtls.setStatus("FAILED");
+					esignDtls.setStatus(errorCodeMap.get("errMsg").trim());
 					esignDtls.setErrorCode(errorCode);
 					esignLamsRequest.setLamsEsignDtls(esignDtls);
 					updateEsignDetails(esignLamsRequest);

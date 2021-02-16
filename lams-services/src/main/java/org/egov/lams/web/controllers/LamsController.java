@@ -39,7 +39,6 @@ public class LamsController {
 
 	@PostMapping("/_create")
 	public ResponseEntity<LamsResponse> create(@RequestBody LamsRequest lamsRequest) {
-		System.out.println("in service");
 		List<LeaseAgreementRenewal> leaseRenewal = lamsService.create(lamsRequest);
 		LamsResponse response = LamsResponse.builder().leases(leaseRenewal).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(lamsRequest.getRequestInfo(), true))
