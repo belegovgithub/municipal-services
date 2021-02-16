@@ -109,7 +109,7 @@ public class PdfSignUtils {
 			Files.write(tempFile, pdfBytes);
 
 			File documentFile = new File(tempFile.toString());
-    		InputStream imageStream = getClass().getClassLoader().getResourceAsStream("profile.png");
+    		InputStream imageStream = getClass().getClassLoader().getResourceAsStream("digiSign.png");
 
     		String name = documentFile.getName();
 
