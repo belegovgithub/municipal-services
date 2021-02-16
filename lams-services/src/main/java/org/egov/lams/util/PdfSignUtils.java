@@ -77,6 +77,9 @@ public class PdfSignUtils {
 	@Value("${bel.session.max.time.diffinmilli:300000l}")  
 	private Long esignMaxTimeMilli;
 
+	@Value("${bel.sign.time.offsetinmilli:600000l}")  
+	private Long esignSignOffset;
+	
 	@Autowired
 	private PdfSignXmlUtils pdfSignXmlUtils;
 	
@@ -180,7 +183,9 @@ public class PdfSignUtils {
     		}
 
     		// the signing date, needed for valid signature
-    		signature.setSignDate(Calendar.getInstance());
+    		Calendar timenow = Calendar.getInstance();
+    		timenow.setTimeInMillis(timenow.getTimeInMillis() + esignSignOffset);
+    		signature.setSignDate(timenow);
 
     		SignatureOptions signatureOptions = new SignatureOptions();
     		signatureOptions.setVisualSignature(visibleSignatureProperties.getVisibleSignature());
