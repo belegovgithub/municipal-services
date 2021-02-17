@@ -55,4 +55,10 @@ public class LeasePdfApplication {
 	@JsonProperty("instruction")
 	private String instruction;
 	
+	@JsonProperty("instruction1")
+	private String instruction1;
+	
+	@JsonProperty("instruction2")
+	private String instruction2;
+	
 }
