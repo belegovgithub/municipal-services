@@ -166,16 +166,16 @@ public class PdfSignService {
 			if(temp.isForEsign()) 
 				temp.setInstruction1("");
 			else
-				temp.setInstruction1("1.	The above application form is to be signed by the original lessee or his/her successors/heir");
+				temp.setInstruction1("1.The above application form is to be signed by the original lessee or his/her successors/heir");
 			if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("1")) {
 				temp.setAddressee("The Chief Executive Officer");
 				//temp.setInstruction("within the civil area");
-				temp.setInstruction2("2.	The application form is applicable for properties within the civil area of the Cantonment");
+				temp.setInstruction2("2.The application form is applicable for properties within the civil area of the Cantonment");
 			}
 			else if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("2")) {
 				temp.setAddressee("The Defence Estates Officer");
 				//temp.setInstruction("outside civil area");
-				temp.setInstruction2("2.	The application form is applicable for properties outside civil area of the Cantonment");
+				temp.setInstruction2("2.The application form is applicable for properties outside civil area of the Cantonment");
 			}
 			if(leasePdfApplication.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(LRConstants.ROLE_CITIZEN)) {
 				temp.setMobileNo(leasePdfApplication.getRequestInfo().getUserInfo().getMobileNumber());
@@ -187,7 +187,6 @@ public class PdfSignService {
 			restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
 			String url = egovpdfHost + egovpdfPostendpoint;
 			HttpMethod requestMethod = HttpMethod.POST;
-
 			HttpEntity<LeasePdfApplicationRequest> requestEntity = new HttpEntity<LeasePdfApplicationRequest>(leasePdfApplication);
 
 			ResponseEntity<EgovPdfResp> response = restTemplate.exchange(url, requestMethod, requestEntity, EgovPdfResp.class);
