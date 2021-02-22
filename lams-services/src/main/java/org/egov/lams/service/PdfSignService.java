@@ -170,12 +170,18 @@ public class PdfSignService {
 			if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("1")) {
 				temp.setAddressee("The Chief Executive Officer");
 				//temp.setInstruction("within the civil area");
-				temp.setInstruction2("2.The application form is applicable for properties within the civil area of the Cantonment");
+				if(temp.isForEsign()) 
+					temp.setInstruction2("1.The application form is applicable for properties within the civil area of the Cantonment");
+				else
+					temp.setInstruction2("2.The application form is applicable for properties within the civil area of the Cantonment");
 			}
 			else if(leaseDtls.get(0).getLocationId().equalsIgnoreCase("2")) {
 				temp.setAddressee("The Defence Estates Officer");
 				//temp.setInstruction("outside civil area");
-				temp.setInstruction2("2.The application form is applicable for properties outside civil area of the Cantonment");
+				if(temp.isForEsign()) 
+					temp.setInstruction2("1.The application form is applicable for properties outside civil area of the Cantonment");
+				else
+					temp.setInstruction2("2.The application form is applicable for properties outside civil area of the Cantonment");
 			}
 			if(leasePdfApplication.getRequestInfo().getUserInfo().getType().equalsIgnoreCase(LRConstants.ROLE_CITIZEN)) {
 				temp.setMobileNo(leasePdfApplication.getRequestInfo().getUserInfo().getMobileNumber());
