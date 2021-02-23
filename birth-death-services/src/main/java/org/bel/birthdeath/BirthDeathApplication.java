@@ -36,7 +36,7 @@ public class BirthDeathApplication {
                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     }
 	
-	@PostConstruct
+	/*@PostConstruct
 	private void start() {
 		System.out.println("in");
 		SearchCriteria criteria = new SearchCriteria();
@@ -44,5 +44,5 @@ public class BirthDeathApplication {
 		criteria.setMotherName("a");
 		criteria.setDateofbirth("22-02-2021");
 		System.out.println(new Gson().toJson(birthService.search(criteria).get(0)));
-	}
+	}*/
 }
