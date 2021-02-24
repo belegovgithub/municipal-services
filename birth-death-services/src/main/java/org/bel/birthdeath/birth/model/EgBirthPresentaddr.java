@@ -21,7 +21,7 @@ public class EgBirthPresentaddr {
 
 	private String createdby;
 
-	private Long createdon;
+	private Long createdtime;
 
 	private String district;
 
@@ -37,8 +37,8 @@ public class EgBirthPresentaddr {
 
 	private String tehsil;
 
-	private String updatedby;
+	private String lastmodifiedby;
 
-	private Long updatedon;
+	private Long lastmodifiedtime;
 
 }

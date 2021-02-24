@@ -16,7 +16,7 @@ public class BirthCertRequest {
 
 	private String createdby;
 
-	private Long createdon;
+	private Long createdtime;
 	
 	private EgBirthDtl birthdtlid;
 

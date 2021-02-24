@@ -17,7 +17,7 @@ public class EgBirthFatherInfo {
 
 	private String createdby;
 
-	private Long createdon;
+	private Long createdtime;
 
 	private String education;
 
@@ -37,8 +37,8 @@ public class EgBirthFatherInfo {
 
 	private String religion;
 
-	private String updatedby;
+	private String lastmodifiedby;
 
-	private Long updatedon;
+	private Long lastmodifiedtime;
 
 }

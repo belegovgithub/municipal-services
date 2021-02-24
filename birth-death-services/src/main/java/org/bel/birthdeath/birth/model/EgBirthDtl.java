@@ -17,7 +17,7 @@ public class EgBirthDtl{
 
 	private String createdby;
 
-	private Long createdon;
+	private Long createdtime;
 
 	private Timestamp dateofbirth;
 
@@ -43,9 +43,9 @@ public class EgBirthDtl{
 
 	private String remarks;
 
-	private String updatedby;
+	private String lastmodifiedby;
 
-	private Long updatedon;
+	private Long lastmodifiedtime;
 
 	private Integer counter;
 	
