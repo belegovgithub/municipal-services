@@ -23,19 +23,19 @@ public class BirthDtlsRowMapper implements ResultSetExtractor<List<EgBirthDtl>> 
 		Map<String, EgBirthDtl> birthDtlMap = new LinkedHashMap<>();
 		try {
 			while (rs.next()) {
-				String regNo = rs.getString("registrationno");
-				EgBirthDtl birthDtl = birthDtlMap.get(regNo);
+				String birthdtlid = rs.getString("birthdtlid");
+				EgBirthDtl birthDtl = birthDtlMap.get(birthdtlid);
 
 				if (birthDtl == null) {
 					EgBirthMotherInfo motherInfo = EgBirthMotherInfo.builder().firstname(rs.getString("bmotfn"))
 							.build();
 					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn"))
 							.build();
-					birthDtl = EgBirthDtl.builder().registrationno(rs.getString("registrationno"))
+					birthDtl = EgBirthDtl.builder().id(birthdtlid).registrationno(rs.getString("registrationno"))
 							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter"))
 							.firstname(rs.getString("bdtlfn")).birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
 							.build();
-					birthDtlMap.put(regNo, birthDtl);
+					birthDtlMap.put(birthdtlid, birthDtl);
 				}
 
 			}

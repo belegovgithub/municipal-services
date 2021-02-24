@@ -42,4 +42,7 @@ public class SearchCriteria {
 	@JsonProperty("hospitalname")
 	private String hospitalname;
 	
+	@JsonProperty("birthDtlId")
+	private String birthDtlId;
+	
 }

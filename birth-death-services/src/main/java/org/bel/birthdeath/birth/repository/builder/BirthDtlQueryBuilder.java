@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthDtlQueryBuilder {
 
 
-    private static final String QUERY_Master = "SELECT registrationno, dateofbirth, counter , "+
+    private static final String QUERY_Master = "SELECT bdtl.id birthdtlid, registrationno, dateofbirth, counter , "+
     		"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn "+
     		"FROM public.eg_birth_dtls bdtl " + 
     		"left join eg_birth_father_info bfat on bfat.birthdtlid = bdtl.id " + 
@@ -51,7 +51,7 @@ public class BirthDtlQueryBuilder {
 		}
 		if (criteria.getHospitalname() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
-			builder.append(" bdtl.registrationno=? ");
+			builder.append(" bdtl.hospitalname=? ");
 			preparedStmtList.add(criteria.getHospitalname());
 		}
 		if (criteria.getMotherName() != null) {
