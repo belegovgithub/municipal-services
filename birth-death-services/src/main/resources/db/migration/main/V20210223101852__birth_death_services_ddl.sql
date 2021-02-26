@@ -24,10 +24,13 @@ CREATE TABLE public.eg_birth_dtls
 CREATE TABLE public.eg_birth_cert_request
 (
     id character varying(64)  NOT NULL,
-    applicationno character varying(25) ,
+    birthcertificateno character varying(25) ,
     createdby character varying(64) ,
     createdtime bigint,
     birthdtlid character varying(64) ,
+    lastmodifiedtime bigint,
+    lastmodifiedby character varying(64) ,
+    filestoreid character varying(256) ,
     CONSTRAINT eg_birth_cert_request_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_cert_request_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
@@ -139,3 +142,19 @@ CREATE TABLE public.eg_birth_presentaddr
         ON DELETE NO ACTION
         NOT VALID
 );
+
+CREATE SEQUENCE public.seq_eg_bnd_br_apl
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+    
+ALTER TABLE public.eg_birth_dtls
+    ADD COLUMN hospitalid character varying(64);
+ALTER TABLE public.eg_birth_dtls
+    ADD CONSTRAINT eg_birth_dtls_fkey1 FOREIGN KEY (hospitalid)
+    REFERENCES public.eg_birth_death_hospitals (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;

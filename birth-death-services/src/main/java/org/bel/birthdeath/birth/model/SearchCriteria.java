@@ -27,8 +27,8 @@ public class SearchCriteria {
 	@JsonProperty("tenantId")
 	private String tenantId;
 
-	@JsonProperty("dateofbirth")
-	private String dateofbirth;
+	@JsonProperty("dateOfBirth")
+	private String dateOfBirth;
 	
 	@JsonProperty("motherName")
 	private String motherName;
@@ -39,10 +39,13 @@ public class SearchCriteria {
 	@JsonProperty("gender")
 	private Integer gender;
 	
-	@JsonProperty("hospitalname")
-	private String hospitalname;
+	@JsonProperty("hospitalName")
+	private String hospitalName;
 	
 	@JsonProperty("birthDtlId")
 	private String birthDtlId;
+	
+	@JsonProperty("id")
+	private String id;
 	
 }

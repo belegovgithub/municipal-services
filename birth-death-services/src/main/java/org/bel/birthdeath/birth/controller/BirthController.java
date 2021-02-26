@@ -4,11 +4,14 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.bel.birthdeath.birth.contract.BirthResponse;
-import org.bel.birthdeath.birth.contract.RequestInfoWrapper;
+import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
+import org.bel.birthdeath.birth.certmodel.BirthCertResponse;
+import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.service.BirthService;
+import org.bel.birthdeath.common.contract.BirthResponse;
+import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,4 +43,14 @@ public class BirthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 	
+	@RequestMapping(value = { "/_download"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthCertResponse> download(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                       @Valid @ModelAttribute SearchCriteria criteria) {
+		
+        BirthCertificate birthCert = birthService.download(criteria);
+        BirthCertResponse response = BirthCertResponse.builder().birthCertificate(birthCert).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

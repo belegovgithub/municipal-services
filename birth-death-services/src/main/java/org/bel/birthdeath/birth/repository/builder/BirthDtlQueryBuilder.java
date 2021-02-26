@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthDtlQueryBuilder {
 
 
-    private static final String QUERY_Master = "SELECT bdtl.id birthdtlid, registrationno, dateofbirth, counter , "+
+    private static final String QUERY_Master = "SELECT bdtl.id birthdtlid, registrationno, dateofbirth, counter, gender, "+
     		"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn "+
     		"FROM public.eg_birth_dtls bdtl " + 
     		"left join eg_birth_father_info bfat on bfat.birthdtlid = bdtl.id " + 
@@ -49,20 +49,25 @@ public class BirthDtlQueryBuilder {
 			builder.append(" bdtl.gender=? ");
 			preparedStmtList.add(criteria.getGender());
 		}
-		if (criteria.getHospitalname() != null) {
+		if (criteria.getHospitalName() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" bdtl.hospitalname=? ");
-			preparedStmtList.add(criteria.getHospitalname());
+			preparedStmtList.add(criteria.getHospitalName());
 		}
 		if (criteria.getMotherName() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" bmot.firstname ilike ?");
 			preparedStmtList.add("%"+criteria.getMotherName()+"%");
 		}
-		if (criteria.getDateofbirth() != null) {
+		if (criteria.getId() != null) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" bdtl.id=? ");
+			preparedStmtList.add(criteria.getId());
+		}
+		if (criteria.getDateOfBirth() != null) {
 			SimpleDateFormat sdf= new SimpleDateFormat("dd-MM-yyyy");
 			try {
-				Date dob = sdf.parse(criteria.getDateofbirth());
+				Date dob = sdf.parse(criteria.getDateOfBirth());
 				//Timestamp ts = new Timestamp(dob.getTime());
 				addClauseIfRequired(preparedStmtList, builder);
 				builder.append(" CAST(bdtl.dateofbirth as DATE)=?");

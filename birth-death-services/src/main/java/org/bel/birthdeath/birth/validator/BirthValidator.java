@@ -9,12 +9,12 @@ public class BirthValidator {
 
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
-				|| criteria.getDateofbirth().isEmpty() || criteria.getDateofbirth() == null)
+				|| criteria.getDateOfBirth().isEmpty() || criteria.getDateOfBirth() == null)
 			throw new CustomException("null_input", "Mandatory fileds can not be empty.");
-		if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
+		/*if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
 				&& (criteria.getHospitalname() == null || criteria.getHospitalname().isEmpty() ||
 						criteria.getMotherName() == null || criteria.getMotherName().isEmpty() ))
-			throw new CustomException("null_input", "Search criteria not meeting.");
+			throw new CustomException("null_input", "Search criteria not meeting.");*/
 		return true;
 	}
 }

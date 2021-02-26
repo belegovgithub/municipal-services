@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.service.BirthService;
+import org.bel.birthdeath.common.services.CommonService;
 import org.egov.tracer.config.TracerConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -24,6 +25,9 @@ public class BirthDeathApplication {
 
 	@Autowired
 	BirthService birthService;
+	
+	@Autowired
+	CommonService commonService;
 	public static void main(String[] args) {
 		SpringApplication.run(BirthDeathApplication.class, args);
 	}
@@ -36,13 +40,17 @@ public class BirthDeathApplication {
                 .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
     }
 	
-	/*@PostConstruct
+	//@PostConstruct
 	private void start() {
 		System.out.println("in");
 		SearchCriteria criteria = new SearchCriteria();
 		criteria.setTenantId("pb.testing");
 		criteria.setMotherName("a");
-		criteria.setDateofbirth("22-02-2021");
-		System.out.println(new Gson().toJson(birthService.search(criteria).get(0)));
-	}*/
+		criteria.setDateOfBirth("23-02-2021");
+		criteria.setGender(1);
+		criteria.setHospitalName("bel");
+		//criteria.setRegistrationNo("2021-2");
+		//System.out.println(new Gson().toJson(birthService.search(criteria)));
+		System.out.println(new Gson().toJson(commonService.search(criteria.getTenantId())));
+	}
 }

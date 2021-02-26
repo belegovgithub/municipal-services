@@ -1,4 +1,4 @@
-package org.bel.birthdeath.birth.contract;
+package org.bel.birthdeath.common.contract;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

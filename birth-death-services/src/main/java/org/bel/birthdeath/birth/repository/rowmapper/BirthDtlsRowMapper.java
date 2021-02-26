@@ -32,7 +32,7 @@ public class BirthDtlsRowMapper implements ResultSetExtractor<List<EgBirthDtl>> 
 					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn"))
 							.build();
 					birthDtl = EgBirthDtl.builder().id(birthdtlid).registrationno(rs.getString("registrationno"))
-							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter"))
+							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter")).gender(rs.getInt("gender"))
 							.firstname(rs.getString("bdtlfn")).birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
 							.build();
 					birthDtlMap.put(birthdtlid, birthDtl);

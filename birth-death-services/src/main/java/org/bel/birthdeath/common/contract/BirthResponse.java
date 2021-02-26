@@ -1,9 +1,10 @@
-package org.bel.birthdeath.birth.contract;
+package org.bel.birthdeath.common.contract;
 
 import java.util.List;
 
 import javax.validation.Valid;
 
+import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.egov.common.contract.response.ResponseInfo;
 
