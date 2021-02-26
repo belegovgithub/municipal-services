@@ -47,7 +47,7 @@ public class BirthController {
     public ResponseEntity<BirthCertResponse> download(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
 		
-        BirthCertificate birthCert = birthService.download(criteria);
+        BirthCertificate birthCert = birthService.download(criteria,requestInfoWrapper.getRequestInfo());
         BirthCertResponse response = BirthCertResponse.builder().birthCertificate(birthCert).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();

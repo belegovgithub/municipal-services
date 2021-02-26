@@ -9,6 +9,7 @@ import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,10 @@ public class BirthService {
 		return birthDtls;
 	}
 
-	public BirthCertificate download(SearchCriteria criteria) {
+	public BirthCertificate download(SearchCriteria criteria, RequestInfo requestInfo) {
 		BirthCertificate birthCertificate = new BirthCertificate();
 		birthCertificate.setBirthDtlId(criteria.getId());
-		BirthCertRequest birthCertRequest = BirthCertRequest.builder().birthCertificate(birthCertificate).build();
+		BirthCertRequest birthCertRequest = BirthCertRequest.builder().birthCertificate(birthCertificate).requestInfo(requestInfo).build();
 		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 		if(birtDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
