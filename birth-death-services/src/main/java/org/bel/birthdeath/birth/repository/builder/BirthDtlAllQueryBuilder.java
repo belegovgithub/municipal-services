@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthDtlAllQueryBuilder {
 
 	
-    private static String QUERY_Master = "SELECT bdtl.id birthdtlid, registrationno, dateofbirth, counter, gender, "
+    private static String QUERY_Master = "SELECT bdtl.id birthdtlid, bdtl.tenantid tenantid, registrationno, dateofbirth, counter, gender, "
     		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,placeofbirth ,dateofreport, remarks, "
     		+ "concat(bpmad.houseno,' ',bpmad.buildingno,' ',bpmad.streetname,' ',bpmad.locality,' ',bpmad.tehsil,' ',"
     		+ "bpmad.district,' ',bpmad.city,'',bpmad.state,' ',bpmad.pinno,' ',bpmad.country ) as permaddress ,"
