@@ -19,7 +19,7 @@ CREATE TABLE public.eg_birth_dtls
     tenantid character varying(50) ,
     gender smallint NOT NULL,
     remarks character varying(1000),
-    hospitalid character varying(64)
+    hospitalid character varying(64),
     CONSTRAINT eg_birth_dtls_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_dtls_fkey1 FOREIGN KEY (hospitalid)
 	    REFERENCES public.eg_birth_death_hospitals (id) MATCH SIMPLE
