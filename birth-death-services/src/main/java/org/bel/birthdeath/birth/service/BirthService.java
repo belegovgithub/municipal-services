@@ -39,7 +39,7 @@ public class BirthService {
 		BirthCertificate birthCertificate = new BirthCertificate();
 		birthCertificate.setBirthDtlId(criteria.getId());
 		BirthCertRequest birthCertRequest = BirthCertRequest.builder().birthCertificate(birthCertificate).build();
-		List<EgBirthDtl> birtDtls = repository.getBirthDtls(criteria);
+		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 		if(birtDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
 		enrichmentService.enrichCreateRequest(birthCertRequest);

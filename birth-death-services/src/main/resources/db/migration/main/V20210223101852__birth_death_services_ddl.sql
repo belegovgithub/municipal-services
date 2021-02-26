@@ -18,7 +18,14 @@ CREATE TABLE public.eg_birth_dtls
     counter smallint,
     tenantid character varying(50) ,
     gender smallint NOT NULL,
-    CONSTRAINT eg_birth_dtls_pkey PRIMARY KEY (id)
+    remarks character varying(1000),
+    hospitalid character varying(64)
+    CONSTRAINT eg_birth_dtls_pkey PRIMARY KEY (id),
+    CONSTRAINT eg_birth_dtls_fkey1 FOREIGN KEY (hospitalid)
+	    REFERENCES public.eg_birth_death_hospitals (id) MATCH SIMPLE
+	    ON UPDATE NO ACTION
+	    ON DELETE NO ACTION
+	    NOT VALID
 );
 
 CREATE TABLE public.eg_birth_cert_request
@@ -149,12 +156,3 @@ CREATE SEQUENCE public.seq_eg_bnd_br_apl
     MINVALUE 1
     MAXVALUE 9223372036854775807
     CACHE 1;
-    
-ALTER TABLE public.eg_birth_dtls
-    ADD COLUMN hospitalid character varying(64);
-ALTER TABLE public.eg_birth_dtls
-    ADD CONSTRAINT eg_birth_dtls_fkey1 FOREIGN KEY (hospitalid)
-    REFERENCES public.eg_birth_death_hospitals (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;

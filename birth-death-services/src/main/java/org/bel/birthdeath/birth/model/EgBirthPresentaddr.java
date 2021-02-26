@@ -40,5 +40,7 @@ public class EgBirthPresentaddr {
 	private String lastmodifiedby;
 
 	private Long lastmodifiedtime;
+	
+	private String fullAddress;
 
 }

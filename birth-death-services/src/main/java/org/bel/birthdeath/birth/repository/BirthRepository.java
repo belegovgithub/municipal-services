@@ -7,7 +7,9 @@ import java.util.List;
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
+import org.bel.birthdeath.birth.repository.builder.BirthDtlAllQueryBuilder;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlQueryBuilder;
+import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
 import org.bel.birthdeath.common.calculation.demand.models.DemandRequest;
 import org.bel.birthdeath.common.calculation.demand.models.DemandResponse;
@@ -33,7 +35,13 @@ public class BirthRepository {
 	private BirthDtlQueryBuilder queryBuilder;
 	
 	@Autowired
+	private BirthDtlAllQueryBuilder allqueryBuilder;
+	
+	@Autowired
 	private BirthDtlsRowMapper rowMapper;
+	
+	@Autowired
+	private BirthDtlsAllRowMapper allRowMapper;
 	
 	@Autowired
 	private Producer producer;
@@ -71,6 +79,13 @@ public class BirthRepository {
         }
         return response;
 		
+	}
+
+	public List<EgBirthDtl> getBirthDtlsAll(SearchCriteria criteria) {
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = allqueryBuilder.getBirtDtlsAll(criteria, preparedStmtList);
+        List<EgBirthDtl> birthDtls =  jdbcTemplate.query(query, preparedStmtList.toArray(), allRowMapper);
+        return birthDtls;
 	}
 
 }
