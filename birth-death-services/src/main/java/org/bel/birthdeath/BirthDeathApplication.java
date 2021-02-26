@@ -44,13 +44,15 @@ public class BirthDeathApplication {
 	private void start() {
 		System.out.println("in");
 		SearchCriteria criteria = new SearchCriteria();
-		criteria.setTenantId("pb.testing");
-		criteria.setMotherName("a");
-		criteria.setDateOfBirth("23-02-2021");
-		criteria.setGender(1);
-		criteria.setHospitalName("bel");
+		//criteria.setTenantId("pb.testing");
+		//criteria.setMotherName("a");
+		//criteria.setDateOfBirth("23-02-2021");
+		//criteria.setGender(1);
+		criteria.setHospitalId("1");
 		//criteria.setRegistrationNo("2021-2");
+		//criteria.setId("1");
 		//System.out.println(new Gson().toJson(birthService.search(criteria)));
-		System.out.println(new Gson().toJson(commonService.search(criteria.getTenantId())));
+		//birthService.download(criteria);
+		//System.out.println(new Gson().toJson(commonService.search(criteria.getTenantId())));
 	}
 }
