@@ -2,6 +2,7 @@ package org.bel.birthdeath.birth.repository;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
@@ -11,18 +12,24 @@ import org.bel.birthdeath.birth.repository.builder.BirthDtlAllQueryBuilder;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlQueryBuilder;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
-import org.bel.birthdeath.common.calculation.demand.models.DemandRequest;
-import org.bel.birthdeath.common.calculation.demand.models.DemandResponse;
+import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.common.repository.ServiceRequestRepository;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
-import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 
 @Repository
@@ -66,8 +73,8 @@ public class BirthRepository {
 		producer.push(config.getSaveBirthTopic(), birthCertRequest);
 	}
 
-	public EgovPdfResp saveBirthCertPdf(EgBirthDtl egBirthDtl) {
-		StringBuilder url = new StringBuilder(config.getPdfHost());
+	public EgovPdfResp saveBirthCertPdf(BirthPdfApplicationRequest pdfApplicationRequest) {
+		/*StringBuilder url = new StringBuilder(config.getPdfHost());
         url.append(config.getSaveBirthCertEndpoint());
         Object result = serviceRequestRepository.fetchResult(url,egBirthDtl);
         EgovPdfResp response = null;
@@ -77,7 +84,22 @@ public class BirthRepository {
         catch(IllegalArgumentException e){
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
-        return response;
+        return response;*/
+		System.out.println(new Gson().toJson(pdfApplicationRequest));
+		RestTemplate restTemplate = new RestTemplate();
+		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
+		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
+		restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
+		String url = config.getPdfHost() + config.getSaveBirthCertEndpoint();
+		HttpMethod requestMethod = HttpMethod.POST;
+		HttpEntity<BirthPdfApplicationRequest> requestEntity = new HttpEntity<BirthPdfApplicationRequest>(pdfApplicationRequest);
+
+		ResponseEntity<EgovPdfResp> response = restTemplate.exchange(url, requestMethod, requestEntity, EgovPdfResp.class);
+
+		if(response.getStatusCode().equals(HttpStatus.OK)) {
+			return response.getBody();
+		}
+		return null;
 		
 	}
 

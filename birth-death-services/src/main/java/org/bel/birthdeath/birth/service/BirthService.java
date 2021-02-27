@@ -8,6 +8,7 @@ import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.birth.validator.BirthValidator;
+import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
@@ -45,7 +46,8 @@ public class BirthService {
 		if(birtDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
 		enrichmentService.enrichCreateRequest(birthCertRequest);
-		EgovPdfResp pdfResp = repository.saveBirthCertPdf(birtDtls.get(0));
+		BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
+		EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 		birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 		/*if(birtDtls.get(0).getCounter()>0){
 			calculationService.addCalculation(birthCertRequest);
