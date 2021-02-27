@@ -50,10 +50,11 @@ public class BirthService {
 		birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 		enrichmentService.enrichCreateRequest(birthCertRequest);
 		if(birtDtls.get(0).getCounter()>0){
-			calculationService.addCalculation(birthCertRequest);
+			enrichmentService.setDemandParams(birthCertRequest);
 			enrichmentService.setGLCode(birthCertRequest);
-			birthCertificate.setCounter(birtDtls.get(0).getCounter());
+			calculationService.addCalculation(birthCertRequest);
 		}
+		birthCertificate.setCounter(birtDtls.get(0).getCounter());
 		enrichmentService.setIdgenIds(birthCertRequest);
 		repository.save(birthCertRequest);
 		return birthCertificate;

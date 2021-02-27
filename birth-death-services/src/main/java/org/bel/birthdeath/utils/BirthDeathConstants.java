@@ -31,6 +31,10 @@ public class BirthDeathConstants {
 	public static final String GL_CODE_MASTER = "GLCode";
 
 	public static final String BILLING_SERVICE = "BillingService";
+	
+	public static final String BIRTH_CERT = "BIRTH_CERT";
+	
+	public static final String BIRTH_CERT_FEE = "BIRTH_CERT_FEE";
 
     public BirthDeathConstants() {}
 
