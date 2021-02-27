@@ -45,10 +45,10 @@ public class BirthService {
 		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 		if(birtDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
-		enrichmentService.enrichCreateRequest(birthCertRequest);
 		BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 		EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 		birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
+		enrichmentService.enrichCreateRequest(birthCertRequest);
 		/*if(birtDtls.get(0).getCounter()>0){
 			calculationService.addCalculation(birthCertRequest);
 			enrichmentService.setGLCode(birthCertRequest);
