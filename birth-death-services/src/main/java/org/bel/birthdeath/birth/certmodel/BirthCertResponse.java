@@ -24,5 +24,8 @@ public class BirthCertResponse {
 
   @JsonProperty("birthCertificate")
   private BirthCertificate birthCertificate = null;
+  
+  @JsonProperty("filestoreId")
+  private String filestoreId;
 
 }
