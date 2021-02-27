@@ -55,7 +55,7 @@ public class EnrichmentService {
         birthCert.setAuditDetails(auditDetails);
         birthCert.setId(UUID.randomUUID().toString());
         birthCert.setApplicationStatus(StatusEnum.ACTIVE);
-        setIdgenIds(birthCertRequest);
+        //setIdgenIds(birthCertRequest);
         //setGLCode(birthCertRequest);
     }
 
@@ -70,7 +70,7 @@ public class EnrichmentService {
                 .map(IdResponse::getId).collect(Collectors.toList());
     }
 
-    private void setIdgenIds(BirthCertRequest request) {
+    public void setIdgenIds(BirthCertRequest request) {
         RequestInfo requestInfo = request.getRequestInfo();
         String tenantId = request.getBirthCertificate().getTenantId();
         BirthCertificate birthCert = request.getBirthCertificate();

@@ -49,11 +49,12 @@ public class BirthService {
 		EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 		birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 		enrichmentService.enrichCreateRequest(birthCertRequest);
-		/*if(birtDtls.get(0).getCounter()>0){
+		if(birtDtls.get(0).getCounter()>0){
 			calculationService.addCalculation(birthCertRequest);
 			enrichmentService.setGLCode(birthCertRequest);
-		}*/
-		
+			birthCertificate.setCounter(birtDtls.get(0).getCounter());
+		}
+		enrichmentService.setIdgenIds(birthCertRequest);
 		repository.save(birthCertRequest);
 		return birthCertificate;
 	}

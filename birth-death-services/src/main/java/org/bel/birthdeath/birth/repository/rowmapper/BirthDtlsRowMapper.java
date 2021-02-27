@@ -27,13 +27,14 @@ public class BirthDtlsRowMapper implements ResultSetExtractor<List<EgBirthDtl>> 
 				EgBirthDtl birthDtl = birthDtlMap.get(birthdtlid);
 
 				if (birthDtl == null) {
-					EgBirthMotherInfo motherInfo = EgBirthMotherInfo.builder().firstname(rs.getString("bmotfn"))
+					EgBirthMotherInfo motherInfo = EgBirthMotherInfo.builder().firstname(rs.getString("bmotfn")).middlename(rs.getString("bmotmn")).lastname(rs.getString("bmotln"))
 							.build();
-					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn"))
+					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn")).middlename(rs.getString("bfatmn")).lastname(rs.getString("bfatln"))
 							.build();
 					birthDtl = EgBirthDtl.builder().id(birthdtlid).registrationno(rs.getString("registrationno"))
 							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter")).gender(rs.getInt("gender")).tenantid(rs.getString("tenantid"))
-							.firstname(rs.getString("bdtlfn")).birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
+							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln"))
+							.birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
 							.build();
 					birthDtlMap.put(birthdtlid, birthDtl);
 				}

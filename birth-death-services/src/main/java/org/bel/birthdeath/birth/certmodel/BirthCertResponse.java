@@ -22,10 +22,16 @@ public class BirthCertResponse {
   @JsonProperty("responseInfo")
   private ResponseInfo responseInfo = null;
 
-  @JsonProperty("birthCertificate")
-  private BirthCertificate birthCertificate = null;
+  //@JsonProperty("birthCertificate")
+  //private BirthCertificate birthCertificate = null;
   
   @JsonProperty("filestoreId")
   private String filestoreId;
+  
+  @JsonProperty("consumerCode")
+  private String consumerCode;
+  
+  @JsonProperty("tenantId")
+  private String tenantId;
 
 }

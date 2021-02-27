@@ -48,9 +48,15 @@ public class BirthController {
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
 		
         BirthCertificate birthCert = birthService.download(criteria,requestInfoWrapper.getRequestInfo());
-        BirthCertResponse response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).responseInfo(
+        BirthCertResponse response ;
+        if(birthCert.getCounter()<=0)
+        	response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();
+        else
+        	response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).consumerCode(birthCert.getBirthCertificateNo()).tenantId(birthCert.getTenantId())
+        			.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                    .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

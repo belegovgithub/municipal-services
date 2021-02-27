@@ -108,4 +108,7 @@ public class BirthCertificate {
 
   @JsonProperty("applicationStatus")
   private StatusEnum applicationStatus = null;
+  
+  @JsonProperty("counter")
+  private Integer counter ;
 }

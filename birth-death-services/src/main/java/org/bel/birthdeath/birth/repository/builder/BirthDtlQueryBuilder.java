@@ -17,7 +17,9 @@ public class BirthDtlQueryBuilder {
 
 
     private static final String QUERY_Master = "SELECT bdtl.id birthdtlid, tenantid, registrationno, dateofbirth, counter, gender, "+
-    		"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn "+
+    		"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,"+
+    		"bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn ,"+
+    		"bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln "+
     		"FROM public.eg_birth_dtls bdtl " + 
     		"left join eg_birth_father_info bfat on bfat.birthdtlid = bdtl.id " + 
     		"left join eg_birth_mother_info bmot on bmot.birthdtlid = bdtl.id " ;
