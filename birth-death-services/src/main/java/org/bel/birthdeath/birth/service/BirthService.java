@@ -39,6 +39,7 @@ public class BirthService {
 	public BirthCertificate download(SearchCriteria criteria, RequestInfo requestInfo) {
 		BirthCertificate birthCertificate = new BirthCertificate();
 		birthCertificate.setBirthDtlId(criteria.getId());
+		birthCertificate.setTenantId(criteria.getTenantId());
 		BirthCertRequest birthCertRequest = BirthCertRequest.builder().birthCertificate(birthCertificate).requestInfo(requestInfo).build();
 		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 		if(birtDtls.size()>1) 

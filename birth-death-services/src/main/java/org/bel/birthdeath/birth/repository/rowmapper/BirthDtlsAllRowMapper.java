@@ -33,8 +33,6 @@ public class BirthDtlsAllRowMapper implements ResultSetExtractor<List<EgBirthDtl
 							.build();
 					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn"))
 							.build();
-					System.out.println(": "+rs.getString("permaddress"));
-					System.out.println("presentaddress : "+rs.getString("presentaddress"));
 					EgBirthPermaddr	permaddr = EgBirthPermaddr.builder().fullAddress(rs.getString("permaddress")).build();
 					EgBirthPresentaddr presentaddr= EgBirthPresentaddr.builder().fullAddress(rs.getString("presentaddress")).build();
 					birthDtl = EgBirthDtl.builder().id(birthdtlid).registrationno(rs.getString("registrationno"))

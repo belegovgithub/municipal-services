@@ -55,7 +55,6 @@ public class EnrichmentService {
         birthCert.setAuditDetails(auditDetails);
         birthCert.setId(UUID.randomUUID().toString());
         birthCert.setApplicationStatus(StatusEnum.ACTIVE);
-        birthCert.setFilestoreid(null);
         setIdgenIds(birthCertRequest);
         //setGLCode(birthCertRequest);
     }
