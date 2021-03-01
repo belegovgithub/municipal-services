@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
+import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlAllQueryBuilder;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlQueryBuilder;
+import org.bel.birthdeath.birth.repository.rowmapper.BirthCertRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
@@ -17,6 +19,7 @@ import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.common.repository.ServiceRequestRepository;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -49,6 +52,9 @@ public class BirthRepository {
 	
 	@Autowired
 	private BirthDtlsAllRowMapper allRowMapper;
+	
+	@Autowired
+	private BirthCertRowMapper birthCertRowMapper;
 	
 	@Autowired
 	private Producer producer;
@@ -84,8 +90,8 @@ public class BirthRepository {
         catch(IllegalArgumentException e){
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
-        return response;*/
-		System.out.println(new Gson().toJson(pdfApplicationRequest));
+        return response;
+		System.out.println(new Gson().toJson(pdfApplicationRequest));*/
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
@@ -110,4 +116,22 @@ public class BirthRepository {
         return birthDtls;
 	}
 
+	public BirthCertificate getBirthCertReqByConsumerCode(String consumerCode) {
+		List<Object> preparedStmtList = new ArrayList<>();
+		String query = allqueryBuilder.getBirthCertReq(consumerCode,preparedStmtList);
+		List<BirthCertificate> birthCerts =  jdbcTemplate.query(query, preparedStmtList.toArray(), birthCertRowMapper);
+		return birthCerts.get(0);
+	}
+
+	public void updateCounter(String birthDtlId) {
+		try {
+			String updateQry="UPDATE public.eg_birth_dtls SET counter=counter+1 WHERE id=?";
+			jdbcTemplate.update(updateQry, birthDtlId);
+		}catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("Invalid_data","Error in updating");
+		}
+		
+	}
+	
 }

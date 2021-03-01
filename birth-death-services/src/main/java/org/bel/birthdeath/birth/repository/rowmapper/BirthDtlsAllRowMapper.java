@@ -29,9 +29,9 @@ public class BirthDtlsAllRowMapper implements ResultSetExtractor<List<EgBirthDtl
 				EgBirthDtl birthDtl = birthDtlMap.get(birthdtlid);
 
 				if (birthDtl == null) {
-					EgBirthMotherInfo motherInfo = EgBirthMotherInfo.builder().firstname(rs.getString("bmotfn"))
+					EgBirthMotherInfo motherInfo = EgBirthMotherInfo.builder().firstname(rs.getString("bmotfn")).middlename(rs.getString("bmotmn")).lastname(rs.getString("bmotln"))
 							.build();
-					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn"))
+					EgBirthFatherInfo fatherInfo = EgBirthFatherInfo.builder().firstname(rs.getString("bfatfn")).middlename(rs.getString("bfatmn")).lastname(rs.getString("bfatln"))
 							.build();
 					EgBirthPermaddr	permaddr = EgBirthPermaddr.builder().fullAddress(rs.getString("permaddress")).build();
 					EgBirthPresentaddr presentaddr= EgBirthPresentaddr.builder().fullAddress(rs.getString("presentaddress")).build();

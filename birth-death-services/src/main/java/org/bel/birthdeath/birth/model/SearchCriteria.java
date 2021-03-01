@@ -48,4 +48,7 @@ public class SearchCriteria {
 	@JsonProperty("id")
 	private String id;
 	
+	@JsonProperty("consumerCode")
+	private String consumerCode;
+	
 }

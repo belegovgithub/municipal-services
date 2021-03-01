@@ -17,6 +17,8 @@ public class BirthDtlAllQueryBuilder {
 	
     private static String QUERY_Master = "SELECT bdtl.id birthdtlid, bdtl.tenantid tenantid, registrationno, dateofbirth, counter, gender, "
     		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,placeofbirth ,dateofreport, remarks, "
+    		+ "bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn ,"
+    		+ "bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln ,"
     		+ "concat(bpmad.houseno,' ',bpmad.buildingno,' ',bpmad.streetname,' ',bpmad.locality,' ',bpmad.tehsil,' ',"
     		+ "bpmad.district,' ',bpmad.city,'',bpmad.state,' ',bpmad.pinno,' ',bpmad.country ) as permaddress ,"
     		+ "concat(bpsad.houseno,' ',bpsad.buildingno,' ',bpsad.streetname,' ',bpsad.locality,' ',bpsad.tehsil,' ',"
@@ -36,6 +38,16 @@ public class BirthDtlAllQueryBuilder {
     }
 
 
+	public String getBirthCertReq(String consumerCode, List<Object> preparedStmtList) {
+		StringBuilder builder = new StringBuilder("select * from eg_birth_cert_request ");
+		if (consumerCode != null && !consumerCode.isEmpty()) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" birthcertificateno=? ");
+			preparedStmtList.add(consumerCode);
+		}
+		return builder.toString();
+	}
+
 	public String getBirtDtlsAll(SearchCriteria criteria, List<Object> preparedStmtList) {
 		StringBuilder builder = new StringBuilder(QUERY_Master);
 
@@ -51,5 +63,4 @@ public class BirthDtlAllQueryBuilder {
 		}
 		return builder.toString();
 	}
-
 }

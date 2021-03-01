@@ -38,6 +38,8 @@ CREATE TABLE public.eg_birth_cert_request
     lastmodifiedtime bigint,
     lastmodifiedby character varying(64) ,
     filestoreid character varying(256) ,
+    status character varying(25) ,
+    additionaldetail JSONB,
     CONSTRAINT eg_birth_cert_request_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_cert_request_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE

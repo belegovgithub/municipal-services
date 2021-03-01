@@ -54,7 +54,7 @@ public class BirthController {
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();
         else
-        	response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).consumerCode(birthCert.getBirthCertificateNo()).tenantId(birthCert.getTenantId())
+        	response = BirthCertResponse.builder().consumerCode(birthCert.getBirthCertificateNo()).tenantId(birthCert.getTenantId())
         			.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                     .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
