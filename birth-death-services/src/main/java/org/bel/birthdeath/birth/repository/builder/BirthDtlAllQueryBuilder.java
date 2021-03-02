@@ -1,8 +1,5 @@
 package org.bel.birthdeath.birth.repository.builder;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.bel.birthdeath.birth.model.SearchCriteria;
@@ -15,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 public class BirthDtlAllQueryBuilder {
 
 	
-    private static String QUERY_Master = "SELECT bdtl.id birthdtlid, bdtl.tenantid tenantid, registrationno, dateofbirth, counter, gender, "
+    private static String QUERY_Master = "SELECT bdtl.id birthdtlid, bdtl.tenantid tenantid, registrationno, dateofbirth, now() as dateofissue , counter,  "
+    		+ "CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ,"
+    		+ "CASE WHEN hospitalid = '0' THEN hospitalname ELSE (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid) END AS hospitalname ,"
     		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,placeofbirth ,dateofreport, remarks, "
     		+ "bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn ,"
     		+ "bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln ,"

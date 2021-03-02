@@ -22,10 +22,14 @@ public class EgBirthDtl{
 	private Timestamp dateofbirth;
 
 	private Timestamp dateofreport;
+	
+	private Timestamp dateofissue;
 
 	private String firstname;
 
 	private Integer gender;
+	
+	private String genderStr;
 
 	private String hospitalname;
 

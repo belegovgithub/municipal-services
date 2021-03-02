@@ -76,7 +76,7 @@ public class ReceiptConsumer {
 				    AuditDetails auditDetails = commUtils.getAuditDetails(uuid, false);
 					SearchCriteria criteria=new SearchCriteria();
 					BirthCertificate birthCertificate = repository.getBirthCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode());
-					criteria.setBirthDtlId(birthCertificate.getBirthDtlId());
+					criteria.setId(birthCertificate.getBirthDtlId());
 					List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 					if(birtDtls.size()>1) 
 						throw new CustomException("Invalid_Input","Error in processing data");

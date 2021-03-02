@@ -90,8 +90,8 @@ public class BirthRepository {
         catch(IllegalArgumentException e){
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
-        return response;
-		System.out.println(new Gson().toJson(pdfApplicationRequest));*/
+        return response;*/
+		System.out.println(new Gson().toJson(pdfApplicationRequest));
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
