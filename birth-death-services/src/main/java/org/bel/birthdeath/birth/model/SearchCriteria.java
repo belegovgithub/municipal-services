@@ -51,4 +51,6 @@ public class SearchCriteria {
 	@JsonProperty("consumerCode")
 	private String consumerCode;
 	
+	@JsonProperty("fatherName")
+	private String fatherName;
 }

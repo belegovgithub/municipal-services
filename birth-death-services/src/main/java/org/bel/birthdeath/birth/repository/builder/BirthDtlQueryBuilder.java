@@ -62,6 +62,11 @@ public class BirthDtlQueryBuilder {
 			builder.append(" bmot.firstname ilike ?");
 			preparedStmtList.add("%"+criteria.getMotherName()+"%");
 		}
+		if (criteria.getFatherName() != null) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" bfat.firstname ilike ?");
+			preparedStmtList.add("%"+criteria.getFatherName()+"%");
+		}
 		if (criteria.getId() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" bdtl.id=? ");
