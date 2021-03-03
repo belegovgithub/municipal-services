@@ -39,6 +39,9 @@ public class BirthDeathConfiguration {
 
     @Value("${persister.update.birth.topic}")
     private String updateBirthTopic;
+    
+    @Value("${persister.update.birthdownload.topic}")
+    private String updateBirthDownloadTopic;
 
 
     //MDMS

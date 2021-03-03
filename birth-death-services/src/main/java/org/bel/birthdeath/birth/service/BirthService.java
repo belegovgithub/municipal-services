@@ -2,14 +2,18 @@ package org.bel.birthdeath.birth.service;
 
 import java.util.List;
 
+import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
+import org.bel.birthdeath.birth.certmodel.BirthCertificate.StatusEnum;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
+import org.bel.birthdeath.common.model.AuditDetails;
+import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +33,9 @@ public class BirthService {
 	
 	@Autowired
 	CalculationService calculationService;
+	
+	@Autowired
+	CommonUtils commUtils;
 	
 	public List<EgBirthDtl> search(SearchCriteria criteria) {
 		List<EgBirthDtl> birthDtls = null ;
@@ -51,16 +58,35 @@ public class BirthService {
 			enrichmentService.setDemandParams(birthCertRequest);
 			enrichmentService.setGLCode(birthCertRequest);
 			calculationService.addCalculation(birthCertRequest);
+			birthCertificate.setApplicationStatus(StatusEnum.ACTIVE);
 		}
 		else{
 			BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 			EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 			birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 			repository.updateCounter(birthCertificate.getBirthDtlId());
+			birthCertificate.setApplicationStatus(StatusEnum.FREE_DOWNLOAD);
 			
 		}
 		birthCertificate.setCounter(birtDtls.get(0).getCounter());
 		repository.save(birthCertRequest);
 		return birthCertificate;
+	}
+
+	public BirthCertificate getBirthCertReqByConsumerCode(SearchCriteria criteria, RequestInfo requestInfo) {
+		return repository.getBirthCertReqByConsumerCode(criteria.getConsumerCode());
+	}
+	
+	public List<BirthCertAppln> searchApplications(SearchCriteria criteria, RequestInfo requestInfo) {
+		List<BirthCertAppln> certApplns=null;
+		certApplns = repository.searchApplications(criteria.getTenantId(),requestInfo.getUserInfo().getUuid());
+		return certApplns;
+	}
+
+	public void updateDownloadStatus(BirthCertificate birthCert, RequestInfo requestInfo) {
+		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
+		birthCert.setAuditDetails(auditDetails);
+		birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
+		repository.updateDownloadStatus(birthCert);
 	}
 }

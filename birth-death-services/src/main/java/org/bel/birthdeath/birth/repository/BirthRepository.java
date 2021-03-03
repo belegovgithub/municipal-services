@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlAllQueryBuilder;
-import org.bel.birthdeath.birth.repository.builder.BirthDtlQueryBuilder;
+import org.bel.birthdeath.birth.repository.rowmapper.BirthCertApplnRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthCertRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
@@ -42,9 +43,6 @@ public class BirthRepository {
     private JdbcTemplate jdbcTemplate;
 	
 	@Autowired
-	private BirthDtlQueryBuilder queryBuilder;
-	
-	@Autowired
 	private BirthDtlAllQueryBuilder allqueryBuilder;
 	
 	@Autowired
@@ -55,6 +53,9 @@ public class BirthRepository {
 	
 	@Autowired
 	private BirthCertRowMapper birthCertRowMapper;
+	
+	@Autowired
+	private BirthCertApplnRowMapper certApplnRowMapper;
 	
 	@Autowired
 	private Producer producer;
@@ -70,7 +71,7 @@ public class BirthRepository {
     
 	public List<EgBirthDtl> getBirthDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
-        String query = queryBuilder.getBirtDtls(criteria, preparedStmtList);
+        String query = allqueryBuilder.getBirtDtls(criteria, preparedStmtList);
         List<EgBirthDtl> birthDtls =  jdbcTemplate.query(query, preparedStmtList.toArray(), rowMapper);
         return birthDtls;
 	}
@@ -132,6 +133,25 @@ public class BirthRepository {
 			throw new CustomException("Invalid_data","Error in updating");
 		}
 		
+	}
+
+	public List<BirthCertAppln> searchApplications(String tenantId, String uuid) {
+		List<BirthCertAppln> birthCertAppls = new ArrayList<BirthCertAppln>();
+		try {
+			List<Object> preparedStmtList = new ArrayList<>();
+			String applQuery=allqueryBuilder.searchApplications(tenantId, uuid, preparedStmtList);
+			birthCertAppls = jdbcTemplate.query(applQuery, preparedStmtList.toArray(), certApplnRowMapper);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("Invalid_data","Error in updating");
+		}
+		return birthCertAppls;
+		
+	}
+
+	public void updateDownloadStatus(BirthCertificate birthCert) {
+		producer.push(config.getUpdateBirthDownloadTopic(), birthCert);
 	}
 	
 }

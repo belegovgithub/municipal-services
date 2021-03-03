@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/hospital")
+@RequestMapping("/common")
 public class CommonController {
 	
 	@Autowired
@@ -30,7 +30,7 @@ public class CommonController {
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
 	
-	@RequestMapping(value = { "/_search"}, method = RequestMethod.POST)
+	@RequestMapping(value = { "/getHospitals"}, method = RequestMethod.POST)
     public ResponseEntity<HospitalResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
         List<EgHospitalDtl> hospitalDtls = commonService.search(criteria.getTenantId());
@@ -39,5 +39,4 @@ public class CommonController {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-	
 }

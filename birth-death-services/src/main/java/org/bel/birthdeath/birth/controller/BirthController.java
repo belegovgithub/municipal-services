@@ -4,7 +4,8 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
+import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
+import org.bel.birthdeath.birth.certmodel.BirthCertApplnResponse;
 import org.bel.birthdeath.birth.certmodel.BirthCertResponse;
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
@@ -57,6 +58,31 @@ public class BirthController {
         	response = BirthCertResponse.builder().consumerCode(birthCert.getBirthCertificateNo()).tenantId(birthCert.getTenantId())
         			.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                     .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/getfilestoreid"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthCertResponse> getfilestoreid(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                       @Valid @ModelAttribute SearchCriteria criteria) {
+		
+        BirthCertificate birthCert = birthService.getBirthCertReqByConsumerCode(criteria,requestInfoWrapper.getRequestInfo());
+        BirthCertResponse response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).tenantId(criteria.getTenantId()).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        if(null!=birthCert) {
+        	birthCert.setBirthCertificateNo(criteria.getConsumerCode());
+        	birthService.updateDownloadStatus(birthCert,requestInfoWrapper.getRequestInfo());
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/_searchApplications"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthCertApplnResponse> searchApplications(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                        @ModelAttribute SearchCriteria criteria ) {
+        List<BirthCertAppln> applications = birthService.searchApplications(criteria , requestInfoWrapper.getRequestInfo());
+        BirthCertApplnResponse response = BirthCertApplnResponse.builder().applications(applications).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -78,8 +78,12 @@ public class BirthCertificate {
 
   public enum StatusEnum {
 	  ACTIVE("ACTIVE"),
-
+	  
 	  CANCELLED("CANCELLED"),
+	  
+	  FREE_DOWNLOAD ("FREE_DOWNLOAD "),
+
+	  PAID_DOWNLOAD("PAID_DOWNLOAD"),
 
 	  PAID("PAID");
 
