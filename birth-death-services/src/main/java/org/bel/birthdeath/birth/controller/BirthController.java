@@ -61,7 +61,7 @@ public class BirthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 	
-	@RequestMapping(value = { "/getfilestoreid"}, method = RequestMethod.POST)
+	@RequestMapping(value = { "/_getfilestoreid"}, method = RequestMethod.POST)
     public ResponseEntity<BirthCertResponse> getfilestoreid(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
 		
