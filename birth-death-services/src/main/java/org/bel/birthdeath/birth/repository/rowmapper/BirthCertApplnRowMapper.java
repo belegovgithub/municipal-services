@@ -27,7 +27,7 @@ public class BirthCertApplnRowMapper implements ResultSetExtractor<List<BirthCer
 				if (certReq == null) {
 					certReq = BirthCertAppln.builder().applicationNumber(rs.getString("birthCertificateNo")).applicationDate(rs.getString("createdtime"))
 							.status(rs.getString("status")).regNo(rs.getString("registrationno")).tenantId(rs.getString("tenantid")).name(rs.getString("name"))
-							.applicationCategory("Birth").applicationType("Download Certificate")
+							.applicationCategory("Birth").applicationType("CERT_DOWNLOAD")
 							.build();
 					birthDtlMap.put(applNo, certReq);
 				}

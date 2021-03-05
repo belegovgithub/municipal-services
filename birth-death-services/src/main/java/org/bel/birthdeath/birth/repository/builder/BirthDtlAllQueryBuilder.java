@@ -44,7 +44,7 @@ public class BirthDtlAllQueryBuilder {
     private static String applsQuery ="select breq.birthCertificateNo, breq.createdtime, breq.status, bdtl.registrationno, bdtl.tenantid, "
     		+ "concat(COALESCE(bdtl.firstname,'') , ' ', COALESCE(bdtl.middlename,'') ,' ', COALESCE(bdtl.lastname,'')) as name "
     		+ "from eg_birth_cert_request breq left join eg_birth_dtls bdtl on bdtl.id=breq.birthDtlId where  "
-    		+ "bdtl.tenantid=? and breq.createdby=?";
+    		+ "breq.createdby=?";
     
     private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
         if (values.isEmpty())
@@ -82,9 +82,8 @@ public class BirthDtlAllQueryBuilder {
 	}
 
 
-	public String searchApplications(String tenantId, String uuid, List<Object> preparedStmtList) {
+	public String searchApplications( String uuid, List<Object> preparedStmtList) {
 		StringBuilder builder = new StringBuilder(applsQuery);
-		preparedStmtList.add(tenantId);
 		preparedStmtList.add(uuid);
 		return builder.toString();
 	}

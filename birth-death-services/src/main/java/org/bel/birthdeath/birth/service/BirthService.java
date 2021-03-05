@@ -79,7 +79,7 @@ public class BirthService {
 	
 	public List<BirthCertAppln> searchApplications(SearchCriteria criteria, RequestInfo requestInfo) {
 		List<BirthCertAppln> certApplns=null;
-		certApplns = repository.searchApplications(criteria.getTenantId(),requestInfo.getUserInfo().getUuid());
+		certApplns = repository.searchApplications(requestInfo.getUserInfo().getUuid());
 		return certApplns;
 	}
 

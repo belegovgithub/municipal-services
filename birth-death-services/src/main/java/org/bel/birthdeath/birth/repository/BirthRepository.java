@@ -135,11 +135,11 @@ public class BirthRepository {
 		
 	}
 
-	public List<BirthCertAppln> searchApplications(String tenantId, String uuid) {
+	public List<BirthCertAppln> searchApplications( String uuid) {
 		List<BirthCertAppln> birthCertAppls = new ArrayList<BirthCertAppln>();
 		try {
 			List<Object> preparedStmtList = new ArrayList<>();
-			String applQuery=allqueryBuilder.searchApplications(tenantId, uuid, preparedStmtList);
+			String applQuery=allqueryBuilder.searchApplications(uuid, preparedStmtList);
 			birthCertAppls = jdbcTemplate.query(applQuery, preparedStmtList.toArray(), certApplnRowMapper);
 		}
 		catch(Exception e) {
