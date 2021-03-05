@@ -1,7 +1,5 @@
 package org.egov.lams.models.pdfsign;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,8 +24,7 @@ public class FormXmlDataAsp {
 	public String txn;
 	public String ekycId="";
 	public String ekycIdType="A";
-	@Value("${bel.sign.aspid}")
-	public String aspId;
+	public String aspId="DGDE-001";
 	public String authMode="1";
 	public String responseSigType="pkcs7";
 	public String responseUrl;
