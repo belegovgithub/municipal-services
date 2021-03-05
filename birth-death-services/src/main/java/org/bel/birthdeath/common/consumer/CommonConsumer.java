@@ -15,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class CommonConsumer {
 
-    @KafkaListener(topics = {"${persister.save.birth.topic}","${persister.update.birth.topic}"})
+   /* @KafkaListener(topics = {"${persister.save.birth.topic}","${persister.update.birth.topic}"})
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
     		log.info("Consuming record: " + record);
-    }
+    }*/
 }

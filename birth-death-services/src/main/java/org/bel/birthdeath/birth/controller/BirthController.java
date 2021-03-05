@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
 import org.bel.birthdeath.birth.certmodel.BirthCertApplnResponse;
+import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
 import org.bel.birthdeath.birth.certmodel.BirthCertResponse;
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
@@ -71,7 +72,7 @@ public class BirthController {
                 .build();
         if(null!=birthCert) {
         	birthCert.setBirthCertificateNo(criteria.getConsumerCode());
-        	birthService.updateDownloadStatus(birthCert,requestInfoWrapper.getRequestInfo());
+        	birthService.updateDownloadStatus(BirthCertRequest.builder().birthCertificate(birthCert).requestInfo(requestInfoWrapper.getRequestInfo()).build());
         }
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

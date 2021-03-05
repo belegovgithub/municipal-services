@@ -83,10 +83,11 @@ public class BirthService {
 		return certApplns;
 	}
 
-	public void updateDownloadStatus(BirthCertificate birthCert, RequestInfo requestInfo) {
-		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
+	public void updateDownloadStatus(BirthCertRequest certRequest) {
+		AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
+		BirthCertificate birthCert = certRequest.getBirthCertificate(); 
 		birthCert.setAuditDetails(auditDetails);
 		birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
-		repository.updateDownloadStatus(birthCert);
+		repository.updateDownloadStatus(certRequest);
 	}
 }

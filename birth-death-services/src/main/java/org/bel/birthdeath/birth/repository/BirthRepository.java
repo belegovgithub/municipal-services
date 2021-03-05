@@ -150,8 +150,8 @@ public class BirthRepository {
 		
 	}
 
-	public void updateDownloadStatus(BirthCertificate birthCert) {
-		producer.push(config.getUpdateBirthDownloadTopic(), birthCert);
+	public void updateDownloadStatus(BirthCertRequest certRequest) {
+		producer.push(config.getUpdateBirthDownloadTopic(), certRequest);
 	}
 	
 }
