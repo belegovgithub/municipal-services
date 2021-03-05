@@ -80,7 +80,7 @@ public class BirthController {
 	@RequestMapping(value = { "/_searchApplications"}, method = RequestMethod.POST)
     public ResponseEntity<BirthCertApplnResponse> searchApplications(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
-        List<BirthCertAppln> applications = birthService.searchApplications(criteria , requestInfoWrapper.getRequestInfo());
+        List<BirthCertAppln> applications = birthService.searchApplications(requestInfoWrapper.getRequestInfo());
         BirthCertApplnResponse response = BirthCertApplnResponse.builder().applications(applications).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();

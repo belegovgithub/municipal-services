@@ -35,7 +35,9 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Repository
 public class BirthRepository {
 
@@ -92,7 +94,7 @@ public class BirthRepository {
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
         return response;*/
-		System.out.println(new Gson().toJson(pdfApplicationRequest));
+		log.info(new Gson().toJson(pdfApplicationRequest));
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
@@ -141,6 +143,7 @@ public class BirthRepository {
 			List<Object> preparedStmtList = new ArrayList<>();
 			String applQuery=allqueryBuilder.searchApplications(uuid, preparedStmtList);
 			birthCertAppls = jdbcTemplate.query(applQuery, preparedStmtList.toArray(), certApplnRowMapper);
+			log.info("searchApplications "+birthCertAppls.size());
 		}
 		catch(Exception e) {
 			e.printStackTrace();

@@ -77,7 +77,7 @@ public class BirthService {
 		return repository.getBirthCertReqByConsumerCode(criteria.getConsumerCode());
 	}
 	
-	public List<BirthCertAppln> searchApplications(SearchCriteria criteria, RequestInfo requestInfo) {
+	public List<BirthCertAppln> searchApplications(RequestInfo requestInfo) {
 		List<BirthCertAppln> certApplns=null;
 		certApplns = repository.searchApplications(requestInfo.getUserInfo().getUuid());
 		return certApplns;
