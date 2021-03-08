@@ -44,6 +44,23 @@ public class BirthDeathConfiguration {
     private String updateBirthDownloadTopic;
 
 
+    @Value("${egov.idgen.deathapplnum.name}")
+    private String deathApplNumberIdgenName;
+
+    @Value("${egov.idgen.deathapplnum.format}")
+    private String deathApplNumberIdgenFormat;
+
+
+    //Persister Config
+    @Value("${persister.save.death.topic}")
+    private String saveDeathTopic;
+
+    @Value("${persister.update.death.topic}")
+    private String updateDeathTopic;
+    
+    @Value("${persister.update.deathdownload.topic}")
+    private String updateDeathDownloadTopic;
+    
     //MDMS
     @Value("${egov.mdms.host}")
     private String mdmsHost;

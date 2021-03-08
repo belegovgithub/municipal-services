@@ -4,7 +4,9 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
+import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.HospitalResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
@@ -35,6 +37,17 @@ public class CommonController {
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
         List<EgHospitalDtl> hospitalDtls = commonService.search(criteria.getTenantId());
         HospitalResponse response = HospitalResponse.builder().hospitalDtls(hospitalDtls).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	
+	@RequestMapping(value = { "/saveBirthImport"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthResponse> saveBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                      String importJSon) {
+        List<EgBirthDtl> egBirthDtls = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
+        BirthResponse response = BirthResponse.builder().birthCerts(egBirthDtls).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);

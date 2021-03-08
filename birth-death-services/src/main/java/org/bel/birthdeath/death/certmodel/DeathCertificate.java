@@ -1,10 +1,10 @@
-package org.bel.birthdeath.birth.certmodel;
+package org.bel.birthdeath.death.certmodel;
 
 import java.util.List;
 
-import org.bel.birthdeath.birth.calculation.Calculation;
 import org.bel.birthdeath.common.model.Amount;
 import org.bel.birthdeath.common.model.AuditDetails;
+import org.bel.birthdeath.death.calculation.Calculation;
 import org.egov.common.contract.request.User;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,7 +22,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BirthCertificate {
+public class DeathCertificate {
 
   @JsonProperty("citizen")
 
@@ -40,9 +40,9 @@ public class BirthCertificate {
 
   private String businessService = null;
 
-  @JsonProperty("birthCertificateNo")
+  @JsonProperty("deathCertificateNo")
 
-  private String birthCertificateNo = null;
+  private String deathCertificateNo = null;
 
   @JsonProperty("additionalDetail")
 
@@ -64,9 +64,9 @@ public class BirthCertificate {
   @JsonProperty("amount")
   private List<Amount> amount;
 
-  @JsonProperty("birthDtlId")
+  @JsonProperty("deathDtlId")
 
-  private String birthDtlId = null;
+  private String deathDtlId = null;
   
   @JsonProperty("filestoreid")
 
@@ -81,7 +81,7 @@ public class BirthCertificate {
 	  
 	  CANCELLED("CANCELLED"),
 	  
-	  FREE_DOWNLOAD ("FREE_DOWNLOAD"),
+	  FREE_DOWNLOAD ("FREE_DOWNLOAD "),
 
 	  PAID_DOWNLOAD("PAID_DOWNLOAD"),
 

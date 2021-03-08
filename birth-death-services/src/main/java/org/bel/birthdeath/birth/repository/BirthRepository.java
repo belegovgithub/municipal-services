@@ -18,7 +18,6 @@ import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
-import org.bel.birthdeath.common.repository.ServiceRequestRepository;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
@@ -65,12 +63,6 @@ public class BirthRepository {
 	@Autowired
 	private BirthDeathConfiguration config;
 	
-	@Autowired
-    private ServiceRequestRepository serviceRequestRepository;
-	
-	@Autowired
-    private ObjectMapper mapper;
-    
 	public List<EgBirthDtl> getBirthDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = allqueryBuilder.getBirtDtls(criteria, preparedStmtList);
@@ -94,7 +86,7 @@ public class BirthRepository {
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
         return response;*/
-		log.info(new Gson().toJson(pdfApplicationRequest));
+		//log.info(new Gson().toJson(pdfApplicationRequest));
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
@@ -143,7 +135,7 @@ public class BirthRepository {
 			List<Object> preparedStmtList = new ArrayList<>();
 			String applQuery=allqueryBuilder.searchApplications(uuid, preparedStmtList);
 			birthCertAppls = jdbcTemplate.query(applQuery, preparedStmtList.toArray(), certApplnRowMapper);
-			log.info("searchApplications "+birthCertAppls.size());
+			//log.info("searchApplications "+birthCertAppls.size());
 		}
 		catch(Exception e) {
 			e.printStackTrace();

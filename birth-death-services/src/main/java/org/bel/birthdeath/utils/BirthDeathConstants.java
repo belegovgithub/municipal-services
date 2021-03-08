@@ -35,6 +35,10 @@ public class BirthDeathConstants {
 	public static final String BIRTH_CERT = "BIRTH_CERT";
 	
 	public static final String BIRTH_CERT_FEE = "BIRTH_CERT_FEE";
+	
+	public static final String DEATH_CERT = "DEATH_CERT";
+	
+	public static final String DEATH_CERT_FEE = "DEATH_CERT_FEE";
 
     public BirthDeathConstants() {}
 

@@ -1,10 +1,13 @@
 package org.bel.birthdeath.common.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.CommonRepository;
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,9 +21,15 @@ public class CommonService {
 	BirthRepository birthRepository;
 	
 	public List<EgHospitalDtl> search(String tenantId) {
-		List<EgHospitalDtl> hospitalDtls = null ;
-			hospitalDtls = repository.getHospitalDtls(tenantId);
+		List<EgHospitalDtl> hospitalDtls = new ArrayList<EgHospitalDtl>() ;
+		hospitalDtls = repository.getHospitalDtls(tenantId);
 		return hospitalDtls;
+	}
+
+	public List<EgBirthDtl> saveBirthImport(String importJSon, RequestInfo requestInfo) {
+		ArrayList<EgBirthDtl> birthDtls = new ArrayList<EgBirthDtl>();
+		birthDtls = repository.saveBirthImport(importJSon, requestInfo);
+		return birthDtls;
 	}
 
 }

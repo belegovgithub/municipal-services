@@ -1,6 +1,7 @@
 package org.bel.birthdeath.common.consumer;
 
 import static org.bel.birthdeath.utils.BirthDeathConstants.BIRTH_CERT;
+import static org.bel.birthdeath.utils.BirthDeathConstants.DEATH_CERT;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,10 +15,15 @@ import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.common.calculation.collections.models.PaymentDetail;
 import org.bel.birthdeath.common.calculation.collections.models.PaymentRequest;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
+import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
+import org.bel.birthdeath.death.certmodel.DeathCertRequest;
+import org.bel.birthdeath.death.certmodel.DeathCertificate;
+import org.bel.birthdeath.death.model.EgDeathDtl;
+import org.bel.birthdeath.death.repository.DeathRepository;
 import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
@@ -51,6 +57,9 @@ public class ReceiptConsumer {
 	
 	@Autowired
 	private BirthRepository repository;
+	
+	@Autowired
+	private DeathRepository repositoryDeath;
 	
     @KafkaListener(topics = {"${kafka.topics.receipt.create}"})
     public void listen(final HashMap<String, Object> record, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
@@ -88,6 +97,24 @@ public class ReceiptConsumer {
 					BirthCertRequest request = BirthCertRequest.builder().requestInfo(requestInfo).birthCertificate(birthCertificate).build();
 					producer.push(config.getUpdateBirthTopic(), request);
 					repository.updateCounter(birthCertificate.getBirthDtlId());
+				}
+				if(paymentDetail.getBusinessService().equalsIgnoreCase(DEATH_CERT)) {
+					String uuid = requestInfo.getUserInfo().getUuid();
+				    AuditDetails auditDetails = commUtils.getAuditDetails(uuid, false);
+					org.bel.birthdeath.death.model.SearchCriteria criteria=new org.bel.birthdeath.death.model.SearchCriteria();
+					DeathCertificate deathCertificate = repositoryDeath.getDeathCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode());
+					criteria.setId(deathCertificate.getDeathDtlId());
+					List<EgDeathDtl> birtDtls = repositoryDeath.getDeathDtlsAll(criteria);
+					if(birtDtls.size()>1) 
+						throw new CustomException("Invalid_Input","Error in processing data");
+					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
+					EgovPdfResp pdfResp = repositoryDeath.saveDeathCertPdf(applicationRequest);
+					deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
+					deathCertificate.setAuditDetails(auditDetails);
+					deathCertificate.setApplicationStatus(org.bel.birthdeath.death.certmodel.DeathCertificate.StatusEnum.PAID);
+					DeathCertRequest request = DeathCertRequest.builder().requestInfo(requestInfo).deathCertificate(deathCertificate).build();
+					producer.push(config.getUpdateDeathTopic(), request);
+					repositoryDeath.updateCounter(deathCertificate.getDeathDtlId());
 				}
 			}
 		} catch (Exception e) {
