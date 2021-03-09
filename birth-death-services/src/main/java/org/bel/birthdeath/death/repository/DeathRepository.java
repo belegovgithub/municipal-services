@@ -92,6 +92,7 @@ public class DeathRepository {
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
         return response;*/
+		try {
 		System.out.println(new Gson().toJson(pdfApplicationRequest));
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
@@ -105,6 +106,9 @@ public class DeathRepository {
 
 		if(response.getStatusCode().equals(HttpStatus.OK)) {
 			return response.getBody();
+		}
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 		return null;
 		

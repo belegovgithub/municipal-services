@@ -91,7 +91,8 @@ public class ReceiptConsumer {
 						throw new CustomException("Invalid_Input","Error in processing data");
 					BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
-					birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
+					if(null!=pdfResp)
+						birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 					birthCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
 					birthCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
 					//birthCertificate.setAuditDetails(auditDetails);
@@ -112,7 +113,8 @@ public class ReceiptConsumer {
 						throw new CustomException("Invalid_Input","Error in processing data");
 					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repositoryDeath.saveDeathCertPdf(applicationRequest);
-					deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
+					if(null!=pdfResp)
+						deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 					deathCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
 					deathCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
 					//deathCertificate.setAuditDetails(auditDetails);

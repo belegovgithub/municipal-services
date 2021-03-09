@@ -87,6 +87,7 @@ public class BirthRepository {
         }
         return response;*/
 		//log.info(new Gson().toJson(pdfApplicationRequest));
+		try {
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
@@ -100,8 +101,10 @@ public class BirthRepository {
 		if(response.getStatusCode().equals(HttpStatus.OK)) {
 			return response.getBody();
 		}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		return null;
-		
 	}
 
 	public List<EgBirthDtl> getBirthDtlsAll(SearchCriteria criteria) {
