@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
-import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.CommonRepository;
 import org.egov.common.contract.request.RequestInfo;
@@ -16,9 +15,6 @@ public class CommonService {
 	
 	@Autowired
 	CommonRepository repository;
-	
-	@Autowired
-	BirthRepository birthRepository;
 	
 	public List<EgHospitalDtl> search(String tenantId) {
 		List<EgHospitalDtl> hospitalDtls = new ArrayList<EgHospitalDtl>() ;

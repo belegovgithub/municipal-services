@@ -39,10 +39,6 @@ public class BirthDeathConfiguration {
 
     @Value("${persister.update.birth.topic}")
     private String updateBirthTopic;
-    
-    @Value("${persister.update.birthdownload.topic}")
-    private String updateBirthDownloadTopic;
-
 
     @Value("${egov.idgen.deathapplnum.name}")
     private String deathApplNumberIdgenName;
@@ -57,9 +53,6 @@ public class BirthDeathConfiguration {
 
     @Value("${persister.update.death.topic}")
     private String updateDeathTopic;
-    
-    @Value("${persister.update.deathdownload.topic}")
-    private String updateDeathDownloadTopic;
     
     //MDMS
     @Value("${egov.mdms.host}")

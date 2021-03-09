@@ -85,9 +85,11 @@ public class BirthService {
 
 	public void updateDownloadStatus(BirthCertRequest certRequest) {
 		AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
-		BirthCertificate birthCert = certRequest.getBirthCertificate(); 
-		birthCert.setAuditDetails(auditDetails);
+		BirthCertificate birthCert = certRequest.getBirthCertificate();
+		birthCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+		birthCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+		//birthCert.setAuditDetails(auditDetails);
 		birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
-		repository.updateDownloadStatus(certRequest);
+		repository.update(certRequest);
 	}
 }

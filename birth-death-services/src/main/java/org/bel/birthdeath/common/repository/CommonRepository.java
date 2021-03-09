@@ -10,6 +10,7 @@ import org.bel.birthdeath.birth.model.EgBirthFatherInfo;
 import org.bel.birthdeath.birth.model.EgBirthMotherInfo;
 import org.bel.birthdeath.birth.model.EgBirthPermaddr;
 import org.bel.birthdeath.birth.model.EgBirthPresentaddr;
+import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
@@ -24,6 +25,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +50,9 @@ public class CommonRepository {
 	
 	@Autowired
 	private CommonUtils commUtils;
+	
+	@Autowired
+	BirthValidator birthValidator;
     
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -78,6 +83,8 @@ public class CommonRepository {
 	}
 
 	public ArrayList<EgBirthDtl> saveBirthImport(String importJSon, RequestInfo requestInfo) {
+		ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
+		try {
 		BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
 		List<MapSqlParameterSource> birthDtlSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthFatherInfoSource = new ArrayList<>();
@@ -86,21 +93,27 @@ public class CommonRepository {
 		List<MapSqlParameterSource> birthPresentAddrSource = new ArrayList<>();
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for(EgBirthDtl birthDtl : response.getBirthCerts()) {
-			birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
-			birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
-			birthFatherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
-			birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
-			birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
-			log.info("bdtlid "+birthDtl.getId());
+			if(birthValidator.validateUniqueRegNo(birthDtl)){
+				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
+				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
+				birthMotherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
+				birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
+				birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
+				log.info("bdtlid "+birthDtl.getId());
+				birthArrayList.add(birthDtl);
+			}
 		}
-		
+		log.info(new Gson().toJson(birthDtlSource));
 		namedParameterJdbcTemplate.batchUpdate(birthDtlSaveQry, birthDtlSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthFatherInfoSaveQry, birthFatherInfoSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthMotherInfoSaveQry, birthMotherInfoSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthPermAddrSaveQry, birthPermAddrSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthPresentAddrSaveQry, birthPresentAddrSource.toArray(new MapSqlParameterSource[0]));
-		
-		return null;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		return birthArrayList;
 	}
 
 	private MapSqlParameterSource getParametersForPresentAddr(EgBirthDtl birthDtl, AuditDetails auditDetails) {

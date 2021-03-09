@@ -56,7 +56,7 @@ public class BirthDtlAllQueryBuilder {
 
 
 	public String getBirthCertReq(String consumerCode, List<Object> preparedStmtList) {
-		StringBuilder builder = new StringBuilder("select * from eg_birth_cert_request ");
+		StringBuilder builder = new StringBuilder("select req.*,(select tenantid from eg_birth_dtls dtl where req.birthdtlid=dtl.id) from eg_birth_cert_request req");
 		if (consumerCode != null && !consumerCode.isEmpty()) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" birthcertificateno=? ");

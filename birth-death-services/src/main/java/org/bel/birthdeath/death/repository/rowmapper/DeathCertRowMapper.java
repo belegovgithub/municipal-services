@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.death.certmodel.DeathCertificate;
 import org.egov.tracer.model.CustomException;
 import org.springframework.dao.DataAccessException;
@@ -26,7 +27,8 @@ public class DeathCertRowMapper implements ResultSetExtractor<List<DeathCertific
 
 				if (certReq == null) {
 					certReq = DeathCertificate.builder().id(id).filestoreid(rs.getString("filestoreid"))
-							.deathDtlId(rs.getString("deathdtlid"))
+							.deathDtlId(rs.getString("deathdtlid")).tenantId(rs.getString("tenantid"))
+							.auditDetails(AuditDetails.builder().createdBy(rs.getString("createdBy")).createdTime(rs.getLong("createdtime")).build())
 							.build();
 					deathDtlMap.put(id, certReq);
 				}

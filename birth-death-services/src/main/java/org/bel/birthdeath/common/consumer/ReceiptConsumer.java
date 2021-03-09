@@ -92,8 +92,11 @@ public class ReceiptConsumer {
 					BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 					birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
-					birthCertificate.setAuditDetails(auditDetails);
+					birthCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+					birthCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+					//birthCertificate.setAuditDetails(auditDetails);
 					birthCertificate.setApplicationStatus(StatusEnum.PAID);
+					birthCertificate.setBirthCertificateNo(paymentDetail.getBill().getConsumerCode());
 					BirthCertRequest request = BirthCertRequest.builder().requestInfo(requestInfo).birthCertificate(birthCertificate).build();
 					producer.push(config.getUpdateBirthTopic(), request);
 					repository.updateCounter(birthCertificate.getBirthDtlId());
@@ -110,8 +113,11 @@ public class ReceiptConsumer {
 					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repositoryDeath.saveDeathCertPdf(applicationRequest);
 					deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
-					deathCertificate.setAuditDetails(auditDetails);
+					deathCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+					deathCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+					//deathCertificate.setAuditDetails(auditDetails);
 					deathCertificate.setApplicationStatus(org.bel.birthdeath.death.certmodel.DeathCertificate.StatusEnum.PAID);
+					deathCertificate.setDeathCertificateNo(paymentDetail.getBill().getConsumerCode());
 					DeathCertRequest request = DeathCertRequest.builder().requestInfo(requestInfo).deathCertificate(deathCertificate).build();
 					producer.push(config.getUpdateDeathTopic(), request);
 					repositoryDeath.updateCounter(deathCertificate.getDeathDtlId());

@@ -86,8 +86,10 @@ public class DeathService {
 	public void updateDownloadStatus(DeathCertRequest certRequest) {
 		AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
 		DeathCertificate deathCert = certRequest.getDeathCertificate();
-		deathCert.setAuditDetails(auditDetails);
+		deathCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+		deathCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+		//deathCert.setAuditDetails(auditDetails);
 		deathCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
-		repository.updateDownloadStatus(certRequest);
+		repository.update(certRequest);
 	}
 }

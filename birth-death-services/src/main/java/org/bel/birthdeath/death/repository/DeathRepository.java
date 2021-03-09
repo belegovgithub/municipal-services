@@ -150,8 +150,8 @@ public class DeathRepository {
 		
 	}
 
-	public void updateDownloadStatus(DeathCertRequest certRequest) {
-		producer.push(config.getUpdateDeathDownloadTopic(), certRequest);
+	public void update(DeathCertRequest certRequest) {
+		producer.push(config.getUpdateDeathTopic(), certRequest);
 	}
 	
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
+import org.bel.birthdeath.common.model.AuditDetails;
 import org.egov.tracer.model.CustomException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -26,7 +27,8 @@ public class BirthCertRowMapper implements ResultSetExtractor<List<BirthCertific
 
 				if (certReq == null) {
 					certReq = BirthCertificate.builder().id(id).filestoreid(rs.getString("filestoreid"))
-							.birthDtlId(rs.getString("birthdtlid"))
+							.birthDtlId(rs.getString("birthdtlid")).tenantId(rs.getString("tenantid"))
+							.auditDetails(AuditDetails.builder().createdBy(rs.getString("createdBy")).createdTime(rs.getLong("createdtime")).build())
 							.build();
 					birthDtlMap.put(id, certReq);
 				}

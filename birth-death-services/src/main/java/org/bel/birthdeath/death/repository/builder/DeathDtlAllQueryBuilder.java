@@ -58,7 +58,7 @@ public class DeathDtlAllQueryBuilder {
 
 
 	public String getDeathCertReq(String consumerCode, List<Object> preparedStmtList) {
-		StringBuilder builder = new StringBuilder("select * from eg_death_cert_request ");
+		StringBuilder builder = new StringBuilder("select req.*,(select tenantid from eg_death_dtls dtl where req.deathdtlid=dtl.id) from eg_death_cert_request req");
 		if (consumerCode != null && !consumerCode.isEmpty()) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" deathcertificateno=? ");
