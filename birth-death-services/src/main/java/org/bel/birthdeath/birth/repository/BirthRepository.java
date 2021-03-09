@@ -86,7 +86,7 @@ public class BirthRepository {
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
         return response;*/
-		//log.info(new Gson().toJson(pdfApplicationRequest));
+		log.info(new Gson().toJson(pdfApplicationRequest));
 		try {
 		RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
