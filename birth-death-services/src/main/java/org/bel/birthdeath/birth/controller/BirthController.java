@@ -70,7 +70,7 @@ public class BirthController {
         BirthCertResponse response = BirthCertResponse.builder().filestoreId(birthCert.getFilestoreid()).tenantId(criteria.getTenantId()).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();
-        if(null!=birthCert) {
+        if(null!=birthCert.getFilestoreid()) {
         	birthCert.setBirthCertificateNo(criteria.getConsumerCode());
         	birthService.updateDownloadStatus(BirthCertRequest.builder().birthCertificate(birthCert).requestInfo(requestInfoWrapper.getRequestInfo()).build());
         }

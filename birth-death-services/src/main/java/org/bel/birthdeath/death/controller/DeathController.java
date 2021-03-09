@@ -70,7 +70,7 @@ public class DeathController {
         DeathCertResponse response = DeathCertResponse.builder().filestoreId(deathCert.getFilestoreid()).tenantId(criteria.getTenantId()).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();
-        if(null!=deathCert) {
+        if(null!=deathCert.getFilestoreid()) {
         	deathCert.setDeathCertificateNo(criteria.getConsumerCode());
         	deathService.updateDownloadStatus(DeathCertRequest.builder().deathCertificate(deathCert).requestInfo(requestInfoWrapper.getRequestInfo()).build());
         }
