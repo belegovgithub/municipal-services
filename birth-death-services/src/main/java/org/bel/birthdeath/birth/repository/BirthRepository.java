@@ -1,8 +1,10 @@
 package org.bel.birthdeath.birth.repository;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
@@ -19,6 +21,7 @@ import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
+import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -29,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
@@ -63,6 +67,9 @@ public class BirthRepository {
 	@Autowired
 	private BirthDeathConfiguration config;
 	
+	@Autowired
+	private RestTemplate restTemplate;
+	
 	public List<EgBirthDtl> getBirthDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = allqueryBuilder.getBirtDtls(criteria, preparedStmtList);
@@ -86,9 +93,21 @@ public class BirthRepository {
             throw new CustomException("PARSING ERROR","Failed to parse response of create demand");
         }
         return response;*/
-		log.info(new Gson().toJson(pdfApplicationRequest));
 		try {
-		RestTemplate restTemplate = new RestTemplate();
+		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");	
+		pdfApplicationRequest.getBirthCertificate().forEach(cert-> {
+			String UIHost = config.getUiAppHost();
+			String birthCertPath = config.getBirthCertLink();
+			birthCertPath = birthCertPath.replace("$id",cert.getId());
+			birthCertPath = birthCertPath.replace("$tenantId",cert.getTenantid());
+			birthCertPath = birthCertPath.replace("$regNo",cert.getRegistrationno());
+			birthCertPath = birthCertPath.replace("$dateofbirth",format.format(cert.getDateofbirth()));
+			birthCertPath = birthCertPath.replace("$gender",cert.getGender().toString());
+			String finalPath = UIHost + birthCertPath;
+			cert.setEmbeddedUrl(getShortenedUrl(finalPath));
+        });
+		log.info(new Gson().toJson(pdfApplicationRequest));
+		//RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
 		restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
@@ -152,4 +171,16 @@ public class BirthRepository {
 		producer.push(config.getUpdateBirthTopic(), certRequest);
 	}
 	
+	public String getShortenedUrl(String url){
+		HashMap<String,String> body = new HashMap<>();
+		body.put("url",url);
+		StringBuilder builder = new StringBuilder(config.getUrlShortnerHost());
+		builder.append(config.getUrlShortnerEndpoint());
+		String res = restTemplate.postForObject(builder.toString(), body, String.class);
+		if(StringUtils.isEmpty(res)){
+			log.error("URL_SHORTENING_ERROR","Unable to shorten url: "+url); ;
+			return url;
+		}
+		else return res;
+	}
 }

@@ -1,8 +1,10 @@
 package org.bel.birthdeath.death.repository;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
@@ -30,12 +32,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Repository
 public class DeathRepository {
 
@@ -64,11 +69,8 @@ public class DeathRepository {
 	private BirthDeathConfiguration config;
 	
 	@Autowired
-    private ServiceRequestRepository serviceRequestRepository;
+    private RestTemplate restTemplate;
 	
-	@Autowired
-    private ObjectMapper mapper;
-    
 	public List<EgDeathDtl> getDeathDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = allqueryBuilder.getDeathDtls(criteria, preparedStmtList);
@@ -93,8 +95,22 @@ public class DeathRepository {
         }
         return response;*/
 		try {
-		System.out.println(new Gson().toJson(pdfApplicationRequest));
-		RestTemplate restTemplate = new RestTemplate();
+			SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");	
+			pdfApplicationRequest.getDeathCertificate().forEach(cert-> {
+				String UIHost = config.getUiAppHost();
+				String deathCertPath = config.getBirthCertLink();
+				deathCertPath = deathCertPath.replace("$id",cert.getId());
+				deathCertPath = deathCertPath.replace("$tenantId",cert.getTenantid());
+				deathCertPath = deathCertPath.replace("$regNo",cert.getRegistrationno());
+				deathCertPath = deathCertPath.replace("$dateofbirth",format.format(cert.getDateofdeath()));
+				deathCertPath = deathCertPath.replace("$gender",cert.getGender().toString());
+				String finalPath = UIHost + deathCertPath;
+				cert.setEmbeddedUrl(getShortenedUrl(finalPath));
+	        });
+		
+		log.info(new Gson().toJson(pdfApplicationRequest));
+		
+		//RestTemplate restTemplate = new RestTemplate();
 		MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter = new MappingJackson2HttpMessageConverter();
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(Arrays.asList(MediaType.APPLICATION_PDF, MediaType.APPLICATION_OCTET_STREAM));
 		restTemplate.getMessageConverters().add(mappingJackson2HttpMessageConverter);
@@ -158,4 +174,16 @@ public class DeathRepository {
 		producer.push(config.getUpdateDeathTopic(), certRequest);
 	}
 	
+	public String getShortenedUrl(String url){
+		HashMap<String,String> body = new HashMap<>();
+		body.put("url",url);
+		StringBuilder builder = new StringBuilder(config.getUrlShortnerHost());
+		builder.append(config.getUrlShortnerEndpoint());
+		String res = restTemplate.postForObject(builder.toString(), body, String.class);
+		if(StringUtils.isEmpty(res)){
+			log.error("URL_SHORTENING_ERROR","Unable to shorten url: "+url); ;
+			return url;
+		}
+		else return res;
+	}
 }

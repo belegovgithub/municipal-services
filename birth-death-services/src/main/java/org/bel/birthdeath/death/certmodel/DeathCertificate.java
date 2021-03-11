@@ -115,4 +115,6 @@ public class DeathCertificate {
   
   @JsonProperty("counter")
   private Integer counter ;
+  
+  private String embeddedUrl;
 }

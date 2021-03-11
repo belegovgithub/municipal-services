@@ -57,23 +57,29 @@ public class CommonRepository {
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
     		+ "createdtime, createdby, lastmodifiedtime, lastmodifiedby, counter, tenantid, gender, remarks, hospitalid) "
-    		+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    		+ "VALUES (:id, :registrationno, :hospitalname, :dateofreport, :dateofbirth, :firstname, :middlename, :lastname, "
+    		+ ":placeofbirth, :informantsname, :informantsaddress, :createdtime, :createdby, :lastmodifiedtime, "
+    		+ ":lastmodifiedby, :counter, :tenantid, :gender, :remarks, :hospitalid); ";
 	
 	private static final String birthFatherInfoSaveQry="INSERT INTO public.eg_birth_father_info( id, firstname, middlename, lastname, aadharno, "
 			+ "emailid, mobileno, education, proffession, nationality, religion, createdtime, createdby, lastmodifiedtime, lastmodifiedby, birthdtlid) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			+ "VALUES (:id, :firstname, :middlename, :lastname, :aadharno, :emailid, :mobileno, :education, :proffession, :nationality,"
+			+ " :religion, :createdtime, :createdby, :lastmodifiedtime, :lastmodifiedby, :birthdtlid);";
 	
 	private static final String birthMotherInfoSaveQry="INSERT INTO public.eg_birth_mother_info(id, firstname, middlename, lastname, aadharno, "
 			+ "emailid, mobileno, education, proffession, nationality, religion, createdtime, createdby, lastmodifiedtime, lastmodifiedby, birthdtlid) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			+ "VALUES (:id, :firstname, :middlename, :lastname, :aadharno, :emailid, :mobileno, :education, :proffession, :nationality,"
+			+ " :religion, :createdtime, :createdby, :lastmodifiedtime, :lastmodifiedby, :birthdtlid);";
 	
 	private static final String birthPermAddrSaveQry="INSERT INTO public.eg_birth_permaddr(id, buildingno, houseno, streetname, locality, tehsil, "
 			+ "district, city, state, pinno, country, createdby, createdtime, lastmodifiedby, lastmodifiedtime, birthdtlid) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country,"
+			+ " :createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :birthdtlid);";
 	
 	private static final String birthPresentAddrSaveQry="INSERT INTO public.eg_birth_presentaddr(id, buildingno, houseno, streetname, locality, tehsil, "
 			+ "district, city, state, pinno, country, createdby, createdtime, lastmodifiedby, lastmodifiedtime, birthdtlid) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country, "
+			+ ":createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :birthdtlid);";
 	
 	public List<EgHospitalDtl> getHospitalDtls(String tenantId) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -82,10 +88,10 @@ public class CommonRepository {
         return hospitalDtls;
 	}
 
-	public ArrayList<EgBirthDtl> saveBirthImport(String importJSon, RequestInfo requestInfo) {
+	public ArrayList<EgBirthDtl> saveBirthImport(BirthResponse response, RequestInfo requestInfo) {
 		ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
 		try {
-		BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
+		//BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
 		List<MapSqlParameterSource> birthDtlSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthFatherInfoSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthMotherInfoSource = new ArrayList<>();
@@ -172,7 +178,7 @@ public class CommonRepository {
 		sqlParameterSource.addValue("mobileno", birthMotherInfo.getMobileno());
 		sqlParameterSource.addValue("education", birthMotherInfo.getEducation());
 		sqlParameterSource.addValue("proffession", birthMotherInfo.getProffession());
-		sqlParameterSource.addValue("nationality)", birthMotherInfo.getNationality());
+		sqlParameterSource.addValue("nationality", birthMotherInfo.getNationality());
 		sqlParameterSource.addValue("religion", birthMotherInfo.getReligion());
 		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
 		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
@@ -195,7 +201,7 @@ public class CommonRepository {
 		sqlParameterSource.addValue("mobileno", birthFatherInfo.getMobileno());
 		sqlParameterSource.addValue("education", birthFatherInfo.getEducation());
 		sqlParameterSource.addValue("proffession", birthFatherInfo.getProffession());
-		sqlParameterSource.addValue("nationality)", birthFatherInfo.getNationality());
+		sqlParameterSource.addValue("nationality", birthFatherInfo.getNationality());
 		sqlParameterSource.addValue("religion", birthFatherInfo.getReligion());
 		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
 		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
@@ -227,7 +233,7 @@ public class CommonRepository {
 		sqlParameterSource.addValue("tenantid", birthDtl.getTenantid());
 		sqlParameterSource.addValue("gender", birthDtl.getGender());
 		sqlParameterSource.addValue("remarks", birthDtl.getRemarks());
-		sqlParameterSource.addValue("hospitalid", 1);
+		sqlParameterSource.addValue("hospitalid", birthDtl.getHospitalid());
 		birthDtl.setId(id);
 		return sqlParameterSource;
 

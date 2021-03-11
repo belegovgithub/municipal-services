@@ -76,4 +76,6 @@ public class EgDeathDtl{
 	private String religion;
 	
 	private String icdcode;	
+	
+	private String embeddedUrl;
 }

@@ -2,6 +2,8 @@ package org.bel.birthdeath.birth.model;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,10 +21,13 @@ public class EgBirthDtl{
 
 	private Long createdtime;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofbirth;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofreport;
 	
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofissue;
 
 	private String firstname;
@@ -54,6 +59,10 @@ public class EgBirthDtl{
 	private Integer counter;
 	
 	private String tenantid;
+	
+	private String embeddedUrl;
+	
+	private String hospitalid;
 	
 	private EgBirthFatherInfo birthFatherInfo;
 	

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
+import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.CommonRepository;
 import org.egov.common.contract.request.RequestInfo;
@@ -22,7 +23,7 @@ public class CommonService {
 		return hospitalDtls;
 	}
 
-	public List<EgBirthDtl> saveBirthImport(String importJSon, RequestInfo requestInfo) {
+	public List<EgBirthDtl> saveBirthImport(BirthResponse importJSon, RequestInfo requestInfo) {
 		ArrayList<EgBirthDtl> birthDtls = new ArrayList<EgBirthDtl>();
 		birthDtls = repository.saveBirthImport(importJSon, requestInfo);
 		return birthDtls;

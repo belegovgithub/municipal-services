@@ -78,5 +78,20 @@ public class BirthDeathConfiguration {
     
     @Value("${egovpdf.deathcert.postendpoint}")
     private String saveDeathCertEndpoint;
+    
+    @Value("${egov.bnd.birthcert.link}")
+    private String birthCertLink;
+    
+    @Value("${egov.bnd.deathcert.link}")
+    private String deathCertLink;
+
+    @Value("${egov.url.shortner.host}")
+    private String urlShortnerHost;
+    
+    @Value("${egov.url.shortner.endpoint}")
+    private String urlShortnerEndpoint;
+    
+    @Value("${egov.ui.app.host}")
+	private String uiAppHost;
 
 }

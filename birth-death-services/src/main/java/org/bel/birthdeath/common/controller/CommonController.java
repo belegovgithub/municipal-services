@@ -45,7 +45,7 @@ public class CommonController {
 	
 	@RequestMapping(value = { "/saveBirthImport"}, method = RequestMethod.POST)
     public ResponseEntity<BirthResponse> saveBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
-                                                      String importJSon) {
+    		@RequestBody BirthResponse importJSon) {
         List<EgBirthDtl> egBirthDtls = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
         BirthResponse response = BirthResponse.builder().birthCerts(egBirthDtls).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))

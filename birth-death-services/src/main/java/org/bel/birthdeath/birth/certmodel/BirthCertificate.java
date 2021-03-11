@@ -115,4 +115,6 @@ public class BirthCertificate {
   
   @JsonProperty("counter")
   private Integer counter ;
+  
+  private String embeddedUrl;
 }
