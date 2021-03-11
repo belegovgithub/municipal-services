@@ -95,4 +95,10 @@ public class DeathService {
 		deathCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
 		repository.update(certRequest);
 	}
+	
+	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {
+		List<EgDeathDtl> certdata=null;
+		certdata = repository.viewCertificateData(criteria);
+		return certdata;
+	}
 }

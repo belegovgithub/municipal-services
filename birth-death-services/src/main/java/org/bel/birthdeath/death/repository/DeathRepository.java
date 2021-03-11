@@ -10,7 +10,6 @@ import java.util.List;
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
-import org.bel.birthdeath.common.repository.ServiceRequestRepository;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.bel.birthdeath.death.certmodel.DeathCertAppln;
 import org.bel.birthdeath.death.certmodel.DeathCertRequest;
@@ -35,7 +34,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
@@ -186,5 +184,14 @@ public class DeathRepository {
 			return url;
 		}
 		else return res;
+	}
+	
+	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {
+		List<EgDeathDtl> certData = new ArrayList<EgDeathDtl>(); 
+		DeathCertificate certificate = getDeathCertReqByConsumerCode(criteria.getDeathcertificateno());
+		criteria.setId(certificate.getDeathDtlId());
+		certData= getDeathDtlsAll(criteria);
+		certData.get(0).setDateofissue(certificate.getDateofissue());
+		return certData;
 	}
 }

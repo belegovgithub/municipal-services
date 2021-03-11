@@ -12,6 +12,7 @@ import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.service.BirthService;
+import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
@@ -83,6 +84,15 @@ public class BirthController {
         List<BirthCertAppln> applications = birthService.searchApplications(requestInfoWrapper.getRequestInfo());
         BirthCertApplnResponse response = BirthCertApplnResponse.builder().applications(applications).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/_viewCertData"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthPdfApplicationRequest> viewCertificateData(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                        @ModelAttribute SearchCriteria criteria ) {
+        List<EgBirthDtl> certData = birthService.viewCertificateData(criteria);
+        BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().BirthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

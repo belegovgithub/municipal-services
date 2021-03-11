@@ -95,4 +95,10 @@ public class BirthService {
 		birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
 		repository.update(certRequest);
 	}
+
+	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {
+		List<EgBirthDtl> certdata=null;
+		certdata = repository.viewCertificateData(criteria);
+		return certdata;
+	}
 }

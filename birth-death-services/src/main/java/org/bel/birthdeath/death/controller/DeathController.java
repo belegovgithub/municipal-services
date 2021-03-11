@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.death.certmodel.DeathCertAppln;
@@ -83,6 +84,15 @@ public class DeathController {
         List<DeathCertAppln> applications = deathService.searchApplications(requestInfoWrapper.getRequestInfo());
         DeathCertApplnResponse response = DeathCertApplnResponse.builder().applications(applications).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/_viewCertData"}, method = RequestMethod.POST)
+    public ResponseEntity<DeathPdfApplicationRequest> viewCertificateData(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                        @ModelAttribute SearchCriteria criteria ) {
+        List<EgDeathDtl> certData = deathService.viewCertificateData(criteria);
+        DeathPdfApplicationRequest response = DeathPdfApplicationRequest.builder().DeathCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

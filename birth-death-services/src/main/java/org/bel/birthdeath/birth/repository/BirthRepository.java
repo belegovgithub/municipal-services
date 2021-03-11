@@ -21,7 +21,6 @@ import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
-import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -183,5 +182,14 @@ public class BirthRepository {
 			return url;
 		}
 		else return res;
+	}
+
+	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {
+		List<EgBirthDtl> certData = new ArrayList<EgBirthDtl>();
+		BirthCertificate certificate = getBirthCertReqByConsumerCode(criteria.getBirthcertificateno());
+		criteria.setId(certificate.getBirthDtlId());
+		certData = getBirthDtlsAll(criteria);
+		certData.get(0).setDateofissue(certificate.getDateofissue());
+		return certData;
 	}
 }

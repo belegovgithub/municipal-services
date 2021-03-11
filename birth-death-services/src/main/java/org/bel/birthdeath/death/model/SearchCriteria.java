@@ -59,4 +59,6 @@ public class SearchCriteria {
 	
 	@JsonProperty("spouseName")
 	private String spouseName;
+	
+	private String deathcertificateno;
 }
