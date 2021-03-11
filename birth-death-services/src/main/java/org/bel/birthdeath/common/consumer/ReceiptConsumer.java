@@ -94,6 +94,7 @@ public class ReceiptConsumer {
 					if(null!=pdfResp) {
 						birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 						birthCertificate.setEmbeddedUrl(applicationRequest.getBirthCertificate().get(0).getEmbeddedUrl());
+						birthCertificate.setDateofissue(applicationRequest.getBirthCertificate().get(0).getDateofissue());
 					}
 					birthCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
 					birthCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
@@ -118,6 +119,7 @@ public class ReceiptConsumer {
 					if(null!=pdfResp) {
 						deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 						deathCertificate.setEmbeddedUrl(applicationRequest.getDeathCertificate().get(0).getEmbeddedUrl());
+						deathCertificate.setDateofissue(applicationRequest.getDeathCertificate().get(0).getDateofissue());
 					}
 					deathCertificate.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
 					deathCertificate.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());

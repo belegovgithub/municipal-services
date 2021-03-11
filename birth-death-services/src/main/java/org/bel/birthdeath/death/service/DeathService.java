@@ -64,6 +64,7 @@ public class DeathService {
 			DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
 			EgovPdfResp pdfResp = repository.saveDeathCertPdf(applicationRequest);
 			deathCertificate.setEmbeddedUrl(applicationRequest.getDeathCertificate().get(0).getEmbeddedUrl());
+			deathCertificate.setDateofissue(applicationRequest.getDeathCertificate().get(0).getDateofissue());
 			deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 			repository.updateCounter(deathCertificate.getDeathDtlId());
 			deathCertificate.setApplicationStatus(StatusEnum.FREE_DOWNLOAD);

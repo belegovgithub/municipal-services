@@ -64,6 +64,7 @@ public class BirthService {
 			BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 			EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 			birthCertificate.setEmbeddedUrl(applicationRequest.getBirthCertificate().get(0).getEmbeddedUrl());
+			birthCertificate.setDateofissue(applicationRequest.getBirthCertificate().get(0).getDateofissue());
 			birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
 			repository.updateCounter(birthCertificate.getBirthDtlId());
 			birthCertificate.setApplicationStatus(StatusEnum.FREE_DOWNLOAD);

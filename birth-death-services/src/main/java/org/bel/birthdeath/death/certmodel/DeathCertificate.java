@@ -1,5 +1,6 @@
 package org.bel.birthdeath.death.certmodel;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.bel.birthdeath.common.model.Amount;
@@ -8,6 +9,7 @@ import org.bel.birthdeath.death.calculation.Calculation;
 import org.egov.common.contract.request.User;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -117,4 +119,7 @@ public class DeathCertificate {
   private Integer counter ;
   
   private String embeddedUrl;
+  
+  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
+  private Timestamp dateofissue;
 }
