@@ -49,19 +49,20 @@ public class DeathService {
 		deathCertificate.setDeathDtlId(criteria.getId());
 		deathCertificate.setTenantId(criteria.getTenantId());
 		DeathCertRequest deathCertRequest = DeathCertRequest.builder().deathCertificate(deathCertificate).requestInfo(requestInfo).build();
-		List<EgDeathDtl> birtDtls = repository.getDeathDtlsAll(criteria);
-		if(birtDtls.size()>1) 
+		List<EgDeathDtl> deathDtls = repository.getDeathDtlsAll(criteria);
+		if(deathDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
 		enrichmentServiceDeath.enrichCreateRequest(deathCertRequest);
 		enrichmentServiceDeath.setIdgenIds(deathCertRequest);
-		if(birtDtls.get(0).getCounter()>0){
+		if(deathDtls.get(0).getCounter()>0){
 			enrichmentServiceDeath.setDemandParams(deathCertRequest);
 			enrichmentServiceDeath.setGLCode(deathCertRequest);
 			calculationServiceDeath.addCalculation(deathCertRequest);
 			deathCertificate.setApplicationStatus(StatusEnum.ACTIVE);
 		}
 		else{
-			DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
+			deathDtls.get(0).setDeathcertificateno(deathCertRequest.getDeathCertificate().getDeathCertificateNo());
+			DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(deathDtls).build();
 			EgovPdfResp pdfResp = repository.saveDeathCertPdf(applicationRequest);
 			deathCertificate.setEmbeddedUrl(applicationRequest.getDeathCertificate().get(0).getEmbeddedUrl());
 			deathCertificate.setDateofissue(applicationRequest.getDeathCertificate().get(0).getDateofissue());
@@ -70,7 +71,7 @@ public class DeathService {
 			deathCertificate.setApplicationStatus(StatusEnum.FREE_DOWNLOAD);
 			
 		}
-		deathCertificate.setCounter(birtDtls.get(0).getCounter());
+		deathCertificate.setCounter(deathDtls.get(0).getCounter());
 		repository.save(deathCertRequest);
 		return deathCertificate;
 	}

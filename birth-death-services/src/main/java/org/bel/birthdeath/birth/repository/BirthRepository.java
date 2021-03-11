@@ -103,6 +103,7 @@ public class BirthRepository {
 			birthCertPath = birthCertPath.replace("$regNo",cert.getRegistrationno());
 			birthCertPath = birthCertPath.replace("$dateofbirth",format.format(cert.getDateofbirth()));
 			birthCertPath = birthCertPath.replace("$gender",cert.getGender().toString());
+			birthCertPath = birthCertPath.replace("$birthcertificateno",cert.getBirthcertificateno());
 			String finalPath = UIHost + birthCertPath;
 			cert.setEmbeddedUrl(getShortenedUrl(finalPath));
         });

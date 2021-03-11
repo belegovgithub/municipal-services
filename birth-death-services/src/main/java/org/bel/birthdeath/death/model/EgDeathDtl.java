@@ -78,4 +78,6 @@ public class EgDeathDtl{
 	private String icdcode;	
 	
 	private String embeddedUrl;
+	
+	private String deathcertificateno;
 }

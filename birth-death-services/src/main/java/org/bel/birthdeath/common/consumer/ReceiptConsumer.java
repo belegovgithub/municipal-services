@@ -89,6 +89,7 @@ public class ReceiptConsumer {
 					List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 					if(birtDtls.size()>1) 
 						throw new CustomException("Invalid_Input","Error in processing data");
+					birtDtls.get(0).setBirthcertificateno(paymentDetail.getBill().getConsumerCode());
 					BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 					if(null!=pdfResp) {
@@ -111,10 +112,11 @@ public class ReceiptConsumer {
 					org.bel.birthdeath.death.model.SearchCriteria criteria=new org.bel.birthdeath.death.model.SearchCriteria();
 					DeathCertificate deathCertificate = repositoryDeath.getDeathCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode());
 					criteria.setId(deathCertificate.getDeathDtlId());
-					List<EgDeathDtl> birtDtls = repositoryDeath.getDeathDtlsAll(criteria);
-					if(birtDtls.size()>1) 
+					List<EgDeathDtl> deathDtls = repositoryDeath.getDeathDtlsAll(criteria);
+					if(deathDtls.size()>1) 
 						throw new CustomException("Invalid_Input","Error in processing data");
-					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(birtDtls).build();
+					deathDtls.get(0).setDeathcertificateno(paymentDetail.getBill().getConsumerCode());
+					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(deathDtls).build();
 					EgovPdfResp pdfResp = repositoryDeath.saveDeathCertPdf(applicationRequest);
 					if(null!=pdfResp) {
 						deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));

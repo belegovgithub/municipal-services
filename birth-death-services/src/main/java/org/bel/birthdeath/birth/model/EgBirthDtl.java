@@ -71,4 +71,6 @@ public class EgBirthDtl{
 	private EgBirthPermaddr birthPermaddr;
 	
 	private EgBirthPresentaddr birthPresentaddr;
+	
+	private String birthcertificateno;
 }

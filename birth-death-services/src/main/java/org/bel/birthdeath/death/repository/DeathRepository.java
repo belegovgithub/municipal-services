@@ -104,6 +104,7 @@ public class DeathRepository {
 				deathCertPath = deathCertPath.replace("$regNo",cert.getRegistrationno());
 				deathCertPath = deathCertPath.replace("$dateofbirth",format.format(cert.getDateofdeath()));
 				deathCertPath = deathCertPath.replace("$gender",cert.getGender().toString());
+				deathCertPath = deathCertPath.replace("$deathcertificateno",cert.getDeathcertificateno());
 				String finalPath = UIHost + deathCertPath;
 				cert.setEmbeddedUrl(getShortenedUrl(finalPath));
 	        });
