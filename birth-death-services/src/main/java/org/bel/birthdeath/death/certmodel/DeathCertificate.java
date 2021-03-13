@@ -120,6 +120,5 @@ public class DeathCertificate {
   
   private String embeddedUrl;
   
-  @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
-  private Timestamp dateofissue;
+  private Long dateofissue;
 }

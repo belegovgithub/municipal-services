@@ -28,7 +28,7 @@ public class DeathCertRowMapper implements ResultSetExtractor<List<DeathCertific
 				if (certReq == null) {
 					certReq = DeathCertificate.builder().id(id).filestoreid(rs.getString("filestoreid"))
 							.deathDtlId(rs.getString("deathdtlid")).tenantId(rs.getString("tenantid")).deathCertificateNo(rs.getString("deathcertificateno"))
-							.embeddedUrl(rs.getString("embeddedurl")).dateofissue(rs.getTimestamp("dateofissue"))
+							.embeddedUrl(rs.getString("embeddedurl")).dateofissue(rs.getLong("dateofissue"))
 							.auditDetails(AuditDetails.builder().createdBy(rs.getString("createdBy")).createdTime(rs.getLong("createdtime")).build())
 							.build();
 					deathDtlMap.put(id, certReq);

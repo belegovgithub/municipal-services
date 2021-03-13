@@ -39,7 +39,7 @@ public class DeathDtlsAllRowMapper implements ResultSetExtractor<List<EgDeathDtl
 					EgDeathPermaddr	permaddr = EgDeathPermaddr.builder().fullAddress(rs.getString("permaddress")).build();
 					EgDeathPresentaddr presentaddr= EgDeathPresentaddr.builder().fullAddress(rs.getString("presentaddress")).build();
 					deathDtl = EgDeathDtl.builder().id(deathdtlid).registrationno(rs.getString("registrationno")).hospitalname(rs.getString("hospitalname")).dateofreport(rs.getTimestamp("dateofreport")).gender(rs.getInt("gender"))
-							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid")).dateofissue(rs.getTimestamp("dateofissue"))
+							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid")).dateofissue(System.currentTimeMillis())
 							.firstname(rs.getString("bdtlfn")).deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo).deathSpouseInfo(spouseInfo)
 							.deathPermaddr(permaddr).deathPresentaddr(presentaddr)
 							.build();
