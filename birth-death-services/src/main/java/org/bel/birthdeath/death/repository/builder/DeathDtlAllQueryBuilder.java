@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeathDtlAllQueryBuilder {
 
 	
-    private static String QUERY_Master_All = "SELECT bdtl.id deathdtlid, bdtl.tenantid tenantid, registrationno, dateofdeath, now() as dateofissue , counter, gender , "
+    private static String QUERY_Master_All = "SELECT bdtl.id deathdtlid, bdtl.tenantid tenantid, registrationno, dateofdeath, CURRENT_TIMESTAMP  as dateofissue , counter, gender , "
     		+ "CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ,"
     		+ "CASE WHEN hospitalid = '0' THEN hospitalname ELSE (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid) END AS hospitalname ,"
     		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,bsps.firstname bspsfn , placeofdeath ,dateofreport, remarks, "
