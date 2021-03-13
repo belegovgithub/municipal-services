@@ -109,9 +109,15 @@ public class DeathDtlAllQueryBuilder {
 			preparedStmtList.add(criteria.getGender());
 		}
 		if (criteria.getHospitalId() != null) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append(" bdtl.hospitalid=? ");
-			preparedStmtList.add(criteria.getHospitalId());
+			if(criteria.getHospitalId().equalsIgnoreCase("0")) {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" bdtl.hospitalid is null ");
+			}
+			else {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" bdtl.hospitalid=? ");
+				preparedStmtList.add(criteria.getHospitalId());
+			}
 		}
 		if (criteria.getMotherName() != null) {
 			addClauseIfRequired(preparedStmtList, builder);

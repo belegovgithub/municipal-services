@@ -1,5 +1,6 @@
 package org.bel.birthdeath.death.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
@@ -97,8 +98,6 @@ public class DeathService {
 	}
 	
 	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {
-		List<EgDeathDtl> certdata=null;
-		certdata = repository.viewCertificateData(criteria);
-		return certdata;
+		return repository.viewCertificateData(criteria);
 	}
 }

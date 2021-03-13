@@ -39,7 +39,7 @@ public class BirthService {
 	
 	public List<EgBirthDtl> search(SearchCriteria criteria) {
 		List<EgBirthDtl> birthDtls = null ;
-		if(validator.validateFields(criteria))
+		if(validator.validateFields(criteria)) 
 			birthDtls = repository.getBirthDtls(criteria);
 		return birthDtls;
 	}
@@ -97,8 +97,6 @@ public class BirthService {
 	}
 
 	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {
-		List<EgBirthDtl> certdata=null;
-		certdata = repository.viewCertificateData(criteria);
-		return certdata;
+		return repository.viewCertificateData(criteria);
 	}
 }

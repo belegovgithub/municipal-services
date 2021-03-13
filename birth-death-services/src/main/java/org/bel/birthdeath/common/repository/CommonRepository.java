@@ -2,7 +2,12 @@ package org.bel.birthdeath.common.repository;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
@@ -24,18 +29,12 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
 public class CommonRepository {
 	
-	@Autowired
-	private ObjectMapper mapper;
-
 	@Autowired
     private JdbcTemplate jdbcTemplate;
 	
@@ -89,7 +88,9 @@ public class CommonRepository {
 	}
 
 	public ArrayList<EgBirthDtl> saveBirthImport(BirthResponse response, RequestInfo requestInfo) {
-		ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
+		//ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
+		ArrayList<EgBirthDtl> rejectedbirthArrayList = new ArrayList<EgBirthDtl>();
+		Set<EgBirthDtl> duplicateList = new HashSet<EgBirthDtl>();
 		try {
 		//BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
 		List<MapSqlParameterSource> birthDtlSource = new ArrayList<>();
@@ -97,19 +98,33 @@ public class CommonRepository {
 		List<MapSqlParameterSource> birthMotherInfoSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthPermAddrSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthPresentAddrSource = new ArrayList<>();
+		Map<String,EgBirthDtl> uniqueList = new HashMap<String, EgBirthDtl>();
+		response.getBirthCerts().forEach(bdtl -> {
+			if (bdtl.getRegistrationno() != null) {
+				if (uniqueList.get(bdtl.getRegistrationno()) == null)
+					uniqueList.put(bdtl.getRegistrationno(), bdtl);
+				else {
+					duplicateList.add(bdtl);
+					duplicateList.add(uniqueList.get(bdtl.getRegistrationno()));
+				}
+			}
+		});
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
-		for(EgBirthDtl birthDtl : response.getBirthCerts()) {
-			if(birthValidator.validateUniqueRegNo(birthDtl)){
+		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
+			EgBirthDtl birthDtl = entry.getValue();
+			if(birthValidator.validateUniqueRegNo(birthDtl) && birthValidator.validateImportFields(birthDtl)){
 				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
 				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
 				birthMotherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
 				birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
 				birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
-				log.info("bdtlid "+birthDtl.getId());
-				birthArrayList.add(birthDtl);
+				//birthArrayList.add(birthDtl);
+			}
+			else {
+				rejectedbirthArrayList.add(birthDtl);
 			}
 		}
-		log.info(new Gson().toJson(birthDtlSource));
+		//log.info(new Gson().toJson(birthDtlSource));
 		namedParameterJdbcTemplate.batchUpdate(birthDtlSaveQry, birthDtlSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthFatherInfoSaveQry, birthFatherInfoSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthMotherInfoSaveQry, birthMotherInfoSource.toArray(new MapSqlParameterSource[0]));
@@ -119,7 +134,10 @@ public class CommonRepository {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		return birthArrayList;
+		log.info("duplicate "+duplicateList.size());
+		duplicateList.forEach(duplicate -> { duplicate.setRejectReason("Duplicate Reg No.");});
+		rejectedbirthArrayList.addAll(duplicateList);
+		return rejectedbirthArrayList;
 	}
 
 	private MapSqlParameterSource getParametersForPresentAddr(EgBirthDtl birthDtl, AuditDetails auditDetails) {

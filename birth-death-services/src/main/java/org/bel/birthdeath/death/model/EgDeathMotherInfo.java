@@ -19,8 +19,6 @@ public class EgDeathMotherInfo {
 
 	private Long createdtime;
 
-	private String education;
-
 	private String emailid;
 
 	private String firstname;
@@ -30,12 +28,6 @@ public class EgDeathMotherInfo {
 	private String middlename;
 
 	private String mobileno;
-
-	private String nationality;
-
-	private String proffession;
-
-	private String religion;
 
 	private String lastmodifiedby;
 

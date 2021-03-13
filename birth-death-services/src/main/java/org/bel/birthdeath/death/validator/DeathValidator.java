@@ -9,7 +9,7 @@ public class DeathValidator {
 
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
-				|| criteria.getDateOfDeath().isEmpty() || criteria.getDateOfDeath() == null)
+			|| criteria.getDateOfDeath() == null	|| criteria.getDateOfDeath().isEmpty() )
 			throw new CustomException("null_input", "Mandatory fileds can not be empty.");
 		/*if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
 				&& (criteria.getHospitalname() == null || criteria.getHospitalname().isEmpty() ||

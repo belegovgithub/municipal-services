@@ -65,7 +65,7 @@ public class EgDeathDtl{
 	
 	private EgDeathSpouseInfo deathSpouseInfo;
 	
-	private Integer age;
+	private String age;
 	
 	private String eidno;
 	

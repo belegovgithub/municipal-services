@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class BirthDtlAllQueryBuilder {
 
-	
     private static String QUERY_Master_All = "SELECT bdtl.id birthdtlid, bdtl.tenantid tenantid, registrationno, dateofbirth, now() as dateofissue , counter, gender , "
     		+ "CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ,"
     		+ "CASE WHEN hospitalid = '0' THEN hospitalname ELSE (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid) END AS hospitalname ,"
@@ -107,9 +106,15 @@ public class BirthDtlAllQueryBuilder {
 			preparedStmtList.add(criteria.getGender());
 		}
 		if (criteria.getHospitalId() != null) {
-			addClauseIfRequired(preparedStmtList, builder);
-			builder.append(" bdtl.hospitalid=? ");
-			preparedStmtList.add(criteria.getHospitalId());
+			if(criteria.getHospitalId().equalsIgnoreCase("0")) {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" bdtl.hospitalid is null ");
+			}
+			else {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" bdtl.hospitalid=? ");
+				preparedStmtList.add(criteria.getHospitalId());
+			}
 		}
 		if (criteria.getMotherName() != null) {
 			addClauseIfRequired(preparedStmtList, builder);
