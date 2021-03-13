@@ -2,6 +2,8 @@ package org.bel.birthdeath.death.model;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +21,10 @@ public class EgDeathDtl{
 
 	private Long createdtime;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofdeath;
 
+	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofreport;
 	
 	private Timestamp dateofissue;
