@@ -22,6 +22,7 @@ import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.builder.CommonQueryBuilder;
 import org.bel.birthdeath.common.repository.rowmapper.CommonRowMapper;
+import org.bel.birthdeath.common.services.CommonService;
 import org.bel.birthdeath.death.model.EgDeathDtl;
 import org.bel.birthdeath.death.model.EgDeathFatherInfo;
 import org.bel.birthdeath.death.model.EgDeathMotherInfo;
@@ -63,6 +64,9 @@ public class CommonRepository {
 	
 	@Autowired
 	DeathValidator deathValidator;
+	
+	@Autowired
+	CommonService commonService;
     
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -120,6 +124,9 @@ public class CommonRepository {
 			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country, "
 			+ ":createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :deathdtlid);";
 	
+	private static final String hospitalInsertSQL="INSERT INTO public.eg_birth_death_hospitals(id, hospitalname, tenantid) VALUES "
+			+ " (?, ?, ?) ;";
+	
 	public List<EgHospitalDtl> getHospitalDtls(String tenantId) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getHospitalDtls(tenantId, preparedStmtList);
@@ -139,16 +146,29 @@ public class CommonRepository {
 		List<MapSqlParameterSource> birthPermAddrSource = new ArrayList<>();
 		List<MapSqlParameterSource> birthPresentAddrSource = new ArrayList<>();
 		Map<String,EgBirthDtl> uniqueList = new HashMap<String, EgBirthDtl>();
+		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
 		response.getBirthCerts().forEach(bdtl -> {
 			if (bdtl.getRegistrationno() != null) {
 				if (uniqueList.get(bdtl.getRegistrationno()) == null)
+				{
 					uniqueList.put(bdtl.getRegistrationno(), bdtl);
+					if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
+					{
+						bdtl.setHospitalname(bdtl.getHospitalname().trim());
+						if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
+						{
+							uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+						}
+						uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+					}
+				}
 				else {
 					duplicateList.add(bdtl);
 					duplicateList.add(uniqueList.get(bdtl.getRegistrationno()));
 				}
 			}
 		});
+		modifyHospIdBirth(uniqueHospList , response.getBirthCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
@@ -180,6 +200,50 @@ public class CommonRepository {
 		return rejectedbirthArrayList;
 	}
 
+	private void modifyHospIdBirth(Map<String, List<EgBirthDtl>> uniqueHospList , String tenantid) {
+		Map<String,String> dbHospNameIdMap = new HashMap<String, String>();
+		List<EgHospitalDtl> hospitals = commonService.search(tenantid);
+		for (EgHospitalDtl egHospitalDtl : hospitals) {
+			dbHospNameIdMap.put(egHospitalDtl.getName(), egHospitalDtl.getId());
+		}
+		if(!uniqueHospList.keySet().isEmpty()) {
+			
+			for (String hospName : uniqueHospList.keySet()) {
+				if(!dbHospNameIdMap.containsKey(hospName))
+				{
+					String id = tenantid.split("\\.")[1] + "_" + (dbHospNameIdMap.keySet().size() + 1);
+					jdbcTemplate.update(hospitalInsertSQL, id,hospName,tenantid);
+					dbHospNameIdMap.put(hospName,id);
+				}
+				for (EgBirthDtl bdtl : uniqueHospList.get(hospName)) {
+					bdtl.setHospitalid(dbHospNameIdMap.get(hospName));
+				}
+			}
+		}
+	}
+	
+	private void modifyHospIdDeath(Map<String, List<EgDeathDtl>> uniqueHospList , String tenantid) {
+		Map<String,String> dbHospNameIdMap = new HashMap<String, String>();
+		List<EgHospitalDtl> hospitals = commonService.search(tenantid);
+		for (EgHospitalDtl egHospitalDtl : hospitals) {
+			dbHospNameIdMap.put(egHospitalDtl.getName(), egHospitalDtl.getId());
+		}
+		if(!uniqueHospList.keySet().isEmpty()) {
+			
+			for (String hospName : uniqueHospList.keySet()) {
+				if(!dbHospNameIdMap.containsKey(hospName))
+				{
+					String id = tenantid.split("\\.")[1] + "_" + (dbHospNameIdMap.keySet().size() + 1);
+					jdbcTemplate.update(hospitalInsertSQL, id,hospName,tenantid);
+					dbHospNameIdMap.put(hospName,id);
+				}
+				for (EgDeathDtl bdtl : uniqueHospList.get(hospName)) {
+					bdtl.setHospitalid(dbHospNameIdMap.get(hospName));
+				}
+			}
+		}
+	}
+	
 	private MapSqlParameterSource getParametersForPresentAddr(EgBirthDtl birthDtl, AuditDetails auditDetails) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgBirthPresentaddr presentaddr = birthDtl.getBirthPresentaddr();
@@ -311,16 +375,29 @@ public class CommonRepository {
 		List<MapSqlParameterSource> deathPermAddrSource = new ArrayList<>();
 		List<MapSqlParameterSource> deathPresentAddrSource = new ArrayList<>();
 		Map<String,EgDeathDtl> uniqueList = new HashMap<String, EgDeathDtl>();
-		response.getDeathCerts().forEach(bdtl -> {
-			if (bdtl.getRegistrationno() != null) {
-				if (uniqueList.get(bdtl.getRegistrationno()) == null)
-					uniqueList.put(bdtl.getRegistrationno(), bdtl);
+		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
+		response.getDeathCerts().forEach(deathtl -> {
+			if (deathtl.getRegistrationno() != null) {
+				if (uniqueList.get(deathtl.getRegistrationno()) == null)
+				{
+					uniqueList.put(deathtl.getRegistrationno(), deathtl);
+					if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty() )
+					{
+						deathtl.setHospitalname(deathtl.getHospitalname().trim());
+						if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
+						{
+							uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+						}
+						uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+					}
+				}
 				else {
-					duplicateList.add(bdtl);
-					duplicateList.add(uniqueList.get(bdtl.getRegistrationno()));
+					duplicateList.add(deathtl);
+					duplicateList.add(uniqueList.get(deathtl.getRegistrationno()));
 				}
 			}
 		});
+		modifyHospIdDeath(uniqueHospList , response.getDeathCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
