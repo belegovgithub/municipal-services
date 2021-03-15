@@ -174,8 +174,8 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
-			birthDtl.setDateofbirth(new Timestamp(birthDtl.getDateofbirthepoch()));
-			birthDtl.setDateofreport(new Timestamp(birthDtl.getDateofreportepoch()));
+			birthDtl.setDateofbirth(new Timestamp(birthDtl.getDateofbirthepoch()*1000));
+			birthDtl.setDateofreport(new Timestamp(birthDtl.getDateofreportepoch()*1000));
 			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
 			switch (birthDtl.getGenderStr()) {
 			case "male":
@@ -420,8 +420,8 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
-			deathDtl.setDateofdeath(new Timestamp(deathDtl.getDateofdeathepoch()));
-			deathDtl.setDateofreport(new Timestamp(deathDtl.getDateofreportepoch()));
+			deathDtl.setDateofdeath(new Timestamp(deathDtl.getDateofdeathepoch()*1000));
+			deathDtl.setDateofreport(new Timestamp(deathDtl.getDateofreportepoch()*1000));
 			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
 			switch (deathDtl.getGenderStr()) {
 			case "male":
