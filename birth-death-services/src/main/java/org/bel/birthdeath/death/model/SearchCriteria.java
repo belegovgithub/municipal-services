@@ -1,12 +1,5 @@
 package org.bel.birthdeath.death.model;
 
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
