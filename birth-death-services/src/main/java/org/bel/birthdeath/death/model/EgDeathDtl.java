@@ -27,6 +27,10 @@ public class EgDeathDtl{
 	@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Timestamp dateofreport;
 	
+	private long dateofdeathepoch;
+
+	private long dateofreportepoch;
+	
 	private Long dateofissue;
 
 	private String firstname;

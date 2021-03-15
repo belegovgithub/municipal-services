@@ -1,7 +1,9 @@
 package org.bel.birthdeath.common.repository;
 
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -172,6 +174,23 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
+			birthDtl.setDateofbirth(new Timestamp(birthDtl.getDateofbirthepoch()));
+			birthDtl.setDateofreport(new Timestamp(birthDtl.getDateofreportepoch()));
+			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
+			switch (birthDtl.getGenderStr()) {
+			case "male":
+				birthDtl.setGender(1);
+				break;
+			case "female":
+				birthDtl.setGender(2);
+				break;
+			case "transgender":
+				birthDtl.setGender(3);
+				break;
+			default:
+				birthDtl.setGender(1);
+				break;
+			}
 			if(birthValidator.validateUniqueRegNo(birthDtl) && birthValidator.validateImportFields(birthDtl)){
 				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
 				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
@@ -401,6 +420,23 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
+			deathDtl.setDateofdeath(new Timestamp(deathDtl.getDateofdeathepoch()));
+			deathDtl.setDateofreport(new Timestamp(deathDtl.getDateofreportepoch()));
+			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
+			switch (deathDtl.getGenderStr()) {
+			case "male":
+				deathDtl.setGender(1);
+				break;
+			case "female":
+				deathDtl.setGender(2);
+				break;
+			case "transgender":
+				deathDtl.setGender(3);
+				break;
+			default:
+				deathDtl.setGender(1);
+				break;
+			}
 			if(deathValidator.validateUniqueRegNo(deathDtl) && deathValidator.validateImportFields(deathDtl)){
 				deathDtlSource.add(getParametersForDeathDtl(deathDtl, auditDetails));
 				deathFatherInfoSource.add(getParametersForFatherInfo(deathDtl, auditDetails));
