@@ -17,14 +17,14 @@ public class DeathDtlAllQueryBuilder {
 	
     private static String QUERY_Master_All = "SELECT bdtl.id deathdtlid, bdtl.tenantid tenantid, registrationno, dateofdeath, counter, gender , "
     		+ "CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ,"
-    		+ "CASE WHEN hospitalid = '0' THEN hospitalname ELSE (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid) END AS hospitalname ,"
-    		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,bsps.firstname bspsfn , placeofdeath ,dateofreport, remarks, "
+    		+ " (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid)  AS hospitalname, placeofdeath, dateofreport, remarks, "
+    		+ "bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,bsps.firstname bspsfn , "
     		+ "bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn ,bsps.middlename bspsmn , "
     		+ "bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln ,bsps.lastname bspsln , "
-    		+ "concat(bpmad.houseno,' ',bpmad.buildingno,' ',bpmad.streetname,' ',bpmad.locality,' ',bpmad.tehsil,' ',"
-    		+ "bpmad.district,' ',bpmad.city,'',bpmad.state,' ',bpmad.pinno,' ',bpmad.country ) as permaddress ,"
-    		+ "concat(bpsad.houseno,' ',bpsad.buildingno,' ',bpsad.streetname,' ',bpsad.locality,' ',bpsad.tehsil,' ',"
-    		+ "bpsad.district,' ',bpsad.city,' ',bpsad.state,' ',bpsad.pinno,' ',bpsad.country ) as presentaddress "+
+    		+ "bpmad.houseno pmhouseno,bpmad.buildingno pmbuildingno,bpmad.streetname pmstreetname,bpmad.locality pmlocality,bpmad.tehsil pmtehsil,"
+    		+ "bpmad.district pmdistrict,bpmad.city pmcity ,bpmad.state pmstate,bpmad.pinno pmpinno,bpmad.country pmcountry,"
+    		+ "bpsad.houseno pshouseno,bpsad.buildingno psbuildingno,bpsad.streetname psstreetname,bpsad.locality pslocality,bpsad.tehsil pstehsil,"
+    		+ "bpsad.district psdistrict,bpsad.city pscity ,bpsad.state psstate,bpsad.pinno pspinno,bpsad.country pscountry "+
     		"FROM public.eg_death_dtls bdtl " + 
     		"left join eg_death_father_info bfat on bfat.deathdtlid = bdtl.id " + 
     		"left join eg_death_mother_info bmot on bmot.deathdtlid = bdtl.id " +
@@ -34,7 +34,7 @@ public class DeathDtlAllQueryBuilder {
     
     private static final String QUERY_Master = "SELECT bdtl.id deathdtlid, tenantid, registrationno, dateofdeath, counter, gender , "+
     		"CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ," + 
-    		"CASE WHEN hospitalid = '0' THEN hospitalname ELSE (select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid) END AS hospitalname ,"+
+    		"(select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid)  AS hospitalname ,"+
     		"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn ,bsps.firstname bspsfn , "+
     		"bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn ,bsps.middlename bspsmn , "+
     		"bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln ,bsps.lastname bspsln "+

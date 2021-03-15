@@ -17,10 +17,18 @@ import org.bel.birthdeath.birth.model.EgBirthPermaddr;
 import org.bel.birthdeath.birth.model.EgBirthPresentaddr;
 import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.BirthResponse;
+import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.builder.CommonQueryBuilder;
 import org.bel.birthdeath.common.repository.rowmapper.CommonRowMapper;
+import org.bel.birthdeath.death.model.EgDeathDtl;
+import org.bel.birthdeath.death.model.EgDeathFatherInfo;
+import org.bel.birthdeath.death.model.EgDeathMotherInfo;
+import org.bel.birthdeath.death.model.EgDeathPermaddr;
+import org.bel.birthdeath.death.model.EgDeathPresentaddr;
+import org.bel.birthdeath.death.model.EgDeathSpouseInfo;
+import org.bel.birthdeath.death.validator.DeathValidator;
 import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +60,9 @@ public class CommonRepository {
 	
 	@Autowired
 	BirthValidator birthValidator;
+	
+	@Autowired
+	DeathValidator deathValidator;
     
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -79,6 +90,35 @@ public class CommonRepository {
 			+ "district, city, state, pinno, country, createdby, createdtime, lastmodifiedby, lastmodifiedtime, birthdtlid) "
 			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country, "
 			+ ":createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :birthdtlid);";
+	
+	private static final String deathDtlSaveQry="INSERT INTO public.eg_death_dtls(id, registrationno, hospitalname, dateofreport, "
+    		+ "dateofdeath, firstname, middlename, lastname, placeofdeath, informantsname, informantsaddress, "
+    		+ "createdtime, createdby, lastmodifiedtime, lastmodifiedby, counter, tenantid, gender, remarks, hospitalid, age, eidno, aadharno, nationality, religion, icdcode) "
+    		+ "VALUES (:id, :registrationno, :hospitalname, :dateofreport, :dateofdeath, :firstname, :middlename, :lastname, "
+    		+ ":placeofdeath, :informantsname, :informantsaddress, :createdtime, :createdby, :lastmodifiedtime, "
+    		+ ":lastmodifiedby, :counter, :tenantid, :gender, :remarks, :hospitalid, :age, :eidno, :aadharno, :nationality, :religion, :icdcode); ";
+	
+	private static final String deathFatherInfoSaveQry="INSERT INTO public.eg_death_father_info( id, firstname, middlename, lastname, aadharno, "
+			+ "emailid, mobileno, createdtime, createdby, lastmodifiedtime, lastmodifiedby, deathdtlid) "
+			+ "VALUES (:id, :firstname, :middlename, :lastname, :aadharno, :emailid, :mobileno, :createdtime, :createdby, :lastmodifiedtime, :lastmodifiedby, :deathdtlid);";
+	
+	private static final String deathMotherInfoSaveQry="INSERT INTO public.eg_death_mother_info(id, firstname, middlename, lastname, aadharno, "
+			+ "emailid, mobileno, createdtime, createdby, lastmodifiedtime, lastmodifiedby, deathdtlid) "
+			+ "VALUES (:id, :firstname, :middlename, :lastname, :aadharno, :emailid, :mobileno, :createdtime, :createdby, :lastmodifiedtime, :lastmodifiedby, :deathdtlid);";
+	
+	private static final String deathSpouseInfoSaveQry="INSERT INTO public.eg_death_spouse_info(id, firstname, middlename, lastname, aadharno, "
+			+ "emailid, mobileno, createdtime, createdby, lastmodifiedtime, lastmodifiedby, deathdtlid) "
+			+ "VALUES (:id, :firstname, :middlename, :lastname, :aadharno, :emailid, :mobileno, :createdtime, :createdby, :lastmodifiedtime, :lastmodifiedby, :deathdtlid);";
+	
+	private static final String deathPermAddrSaveQry="INSERT INTO public.eg_death_permaddr(id, buildingno, houseno, streetname, locality, tehsil, "
+			+ "district, city, state, pinno, country, createdby, createdtime, lastmodifiedby, lastmodifiedtime, deathdtlid) "
+			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country,"
+			+ " :createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :deathdtlid);";
+	
+	private static final String deathPresentAddrSaveQry="INSERT INTO public.eg_death_presentaddr(id, buildingno, houseno, streetname, locality, tehsil, "
+			+ "district, city, state, pinno, country, createdby, createdtime, lastmodifiedby, lastmodifiedtime, deathdtlid) "
+			+ "VALUES (:id, :buildingno, :houseno, :streetname, :locality, :tehsil, :district, :city, :state, :pinno, :country, "
+			+ ":createdby, :createdtime, :lastmodifiedby, :lastmodifiedtime, :deathdtlid);";
 	
 	public List<EgHospitalDtl> getHospitalDtls(String tenantId) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -253,6 +293,196 @@ public class CommonRepository {
 		sqlParameterSource.addValue("remarks", birthDtl.getRemarks());
 		sqlParameterSource.addValue("hospitalid", birthDtl.getHospitalid());
 		birthDtl.setId(id);
+		return sqlParameterSource;
+
+	}
+	
+	
+	public ArrayList<EgDeathDtl> saveDeathImport(DeathResponse response, RequestInfo requestInfo) {
+		//ArrayList<EgDeathDtl> deathArrayList = new ArrayList<EgDeathDtl>();
+		ArrayList<EgDeathDtl> rejecteddeathArrayList = new ArrayList<EgDeathDtl>();
+		Set<EgDeathDtl> duplicateList = new HashSet<EgDeathDtl>();
+		try {
+		//DeathResponse response= mapper.convertValue(importJSon, DeathResponse.class);
+		List<MapSqlParameterSource> deathDtlSource = new ArrayList<>();
+		List<MapSqlParameterSource> deathFatherInfoSource = new ArrayList<>();
+		List<MapSqlParameterSource> deathMotherInfoSource = new ArrayList<>();
+		List<MapSqlParameterSource> deathSpouseInfoSource = new ArrayList<>();
+		List<MapSqlParameterSource> deathPermAddrSource = new ArrayList<>();
+		List<MapSqlParameterSource> deathPresentAddrSource = new ArrayList<>();
+		Map<String,EgDeathDtl> uniqueList = new HashMap<String, EgDeathDtl>();
+		response.getDeathCerts().forEach(bdtl -> {
+			if (bdtl.getRegistrationno() != null) {
+				if (uniqueList.get(bdtl.getRegistrationno()) == null)
+					uniqueList.put(bdtl.getRegistrationno(), bdtl);
+				else {
+					duplicateList.add(bdtl);
+					duplicateList.add(uniqueList.get(bdtl.getRegistrationno()));
+				}
+			}
+		});
+		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
+			EgDeathDtl deathDtl = entry.getValue();
+			if(deathValidator.validateUniqueRegNo(deathDtl) && deathValidator.validateImportFields(deathDtl)){
+				deathDtlSource.add(getParametersForDeathDtl(deathDtl, auditDetails));
+				deathFatherInfoSource.add(getParametersForFatherInfo(deathDtl, auditDetails));
+				deathMotherInfoSource.add(getParametersForMotherInfo(deathDtl, auditDetails));
+				deathSpouseInfoSource.add(getParametersForSpouseInfo(deathDtl, auditDetails));
+				deathPermAddrSource.add(getParametersForPermAddr(deathDtl, auditDetails));
+				deathPresentAddrSource.add(getParametersForPresentAddr(deathDtl, auditDetails));
+				//deathArrayList.add(deathDtl);
+			}
+			else {
+				rejecteddeathArrayList.add(deathDtl);
+			}
+		}
+		//log.info(new Gson().toJson(deathDtlSource));
+		namedParameterJdbcTemplate.batchUpdate(deathDtlSaveQry, deathDtlSource.toArray(new MapSqlParameterSource[0]));
+		namedParameterJdbcTemplate.batchUpdate(deathFatherInfoSaveQry, deathFatherInfoSource.toArray(new MapSqlParameterSource[0]));
+		namedParameterJdbcTemplate.batchUpdate(deathMotherInfoSaveQry, deathMotherInfoSource.toArray(new MapSqlParameterSource[0]));
+		namedParameterJdbcTemplate.batchUpdate(deathSpouseInfoSaveQry, deathSpouseInfoSource.toArray(new MapSqlParameterSource[0]));
+		namedParameterJdbcTemplate.batchUpdate(deathPermAddrSaveQry, deathPermAddrSource.toArray(new MapSqlParameterSource[0]));
+		namedParameterJdbcTemplate.batchUpdate(deathPresentAddrSaveQry, deathPresentAddrSource.toArray(new MapSqlParameterSource[0]));
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		log.info("duplicate "+duplicateList.size());
+		duplicateList.forEach(duplicate -> { duplicate.setRejectReason("Duplicate Reg No.");});
+		rejecteddeathArrayList.addAll(duplicateList);
+		return rejecteddeathArrayList;
+	}
+
+	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		EgDeathPresentaddr presentaddr = deathDtl.getDeathPresentaddr();
+		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
+		sqlParameterSource.addValue("buildingno", presentaddr.getBuildingno());
+		sqlParameterSource.addValue("houseno", presentaddr.getHouseno());
+		sqlParameterSource.addValue("streetname", presentaddr.getStreetname());
+		sqlParameterSource.addValue("locality", presentaddr.getLocality());
+		sqlParameterSource.addValue("tehsil", presentaddr.getTehsil());
+		sqlParameterSource.addValue("district", presentaddr.getDistrict());
+		sqlParameterSource.addValue("city", presentaddr.getCity());
+		sqlParameterSource.addValue("state", presentaddr.getState());
+		sqlParameterSource.addValue("pinno", presentaddr.getPinno());
+		sqlParameterSource.addValue("country", presentaddr.getCountry());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
+		return sqlParameterSource;
+	}
+
+	private MapSqlParameterSource getParametersForPermAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		EgDeathPermaddr permaddr = deathDtl.getDeathPermaddr();
+		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
+		sqlParameterSource.addValue("buildingno", permaddr.getBuildingno());
+		sqlParameterSource.addValue("houseno", permaddr.getHouseno());
+		sqlParameterSource.addValue("streetname", permaddr.getStreetname());
+		sqlParameterSource.addValue("locality", permaddr.getLocality());
+		sqlParameterSource.addValue("tehsil", permaddr.getTehsil());
+		sqlParameterSource.addValue("district", permaddr.getDistrict());
+		sqlParameterSource.addValue("city", permaddr.getCity());
+		sqlParameterSource.addValue("state", permaddr.getState());
+		sqlParameterSource.addValue("pinno", permaddr.getPinno());
+		sqlParameterSource.addValue("country", permaddr.getCountry());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
+		return sqlParameterSource;
+	}
+
+	private MapSqlParameterSource getParametersForMotherInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+		EgDeathMotherInfo deathMotherInfo = deathDtl.getDeathMotherInfo();
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
+		sqlParameterSource.addValue("firstname", deathMotherInfo.getFirstname());
+		sqlParameterSource.addValue("middlename", deathMotherInfo.getMiddlename());
+		sqlParameterSource.addValue("lastname", deathMotherInfo.getLastname());
+		sqlParameterSource.addValue("aadharno", deathMotherInfo.getAadharno());
+		sqlParameterSource.addValue("emailid", deathMotherInfo.getEmailid());
+		sqlParameterSource.addValue("mobileno", deathMotherInfo.getMobileno());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
+		return sqlParameterSource;
+	}
+	
+	private MapSqlParameterSource getParametersForSpouseInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+		EgDeathSpouseInfo deathSpouseInfo = deathDtl.getDeathSpouseInfo();
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
+		sqlParameterSource.addValue("firstname", deathSpouseInfo.getFirstname());
+		sqlParameterSource.addValue("middlename", deathSpouseInfo.getMiddlename());
+		sqlParameterSource.addValue("lastname", deathSpouseInfo.getLastname());
+		sqlParameterSource.addValue("aadharno", deathSpouseInfo.getAadharno());
+		sqlParameterSource.addValue("emailid", deathSpouseInfo.getEmailid());
+		sqlParameterSource.addValue("mobileno", deathSpouseInfo.getMobileno());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
+		return sqlParameterSource;
+	}
+
+	private MapSqlParameterSource getParametersForFatherInfo(EgDeathDtl deathDtl,
+			AuditDetails auditDetails) {
+		EgDeathFatherInfo deathFatherInfo = deathDtl.getDeathFatherInfo();
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
+		sqlParameterSource.addValue("firstname", deathFatherInfo.getFirstname());
+		sqlParameterSource.addValue("middlename", deathFatherInfo.getMiddlename());
+		sqlParameterSource.addValue("lastname", deathFatherInfo.getLastname());
+		sqlParameterSource.addValue("aadharno", deathFatherInfo.getAadharno());
+		sqlParameterSource.addValue("emailid", deathFatherInfo.getEmailid());
+		sqlParameterSource.addValue("mobileno", deathFatherInfo.getMobileno());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
+		return sqlParameterSource;
+	}
+
+	private MapSqlParameterSource getParametersForDeathDtl(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		String id= UUID.randomUUID().toString();
+		sqlParameterSource.addValue("id", id);
+		sqlParameterSource.addValue("registrationno", deathDtl.getRegistrationno());
+		sqlParameterSource.addValue("hospitalname", deathDtl.getHospitalname());
+		sqlParameterSource.addValue("dateofreport", deathDtl.getDateofreport());
+		sqlParameterSource.addValue("dateofdeath", deathDtl.getDateofdeath());
+		sqlParameterSource.addValue("firstname", deathDtl.getFirstname());
+		sqlParameterSource.addValue("middlename", deathDtl.getMiddlename());
+		sqlParameterSource.addValue("lastname", deathDtl.getLastname());
+		sqlParameterSource.addValue("placeofdeath", deathDtl.getPlaceofdeath());
+		sqlParameterSource.addValue("informantsname", deathDtl.getInformantsname());
+		sqlParameterSource.addValue("informantsaddress", deathDtl.getInformantsaddress());
+		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+		sqlParameterSource.addValue("lastmodifiedtime", null);
+		sqlParameterSource.addValue("lastmodifiedby", null);
+		sqlParameterSource.addValue("counter", deathDtl.getCounter());
+		sqlParameterSource.addValue("tenantid", deathDtl.getTenantid());
+		sqlParameterSource.addValue("gender", deathDtl.getGender());
+		sqlParameterSource.addValue("remarks", deathDtl.getRemarks());
+		sqlParameterSource.addValue("hospitalid", deathDtl.getHospitalid());
+		sqlParameterSource.addValue("age", deathDtl.getAge() );
+		sqlParameterSource.addValue("eidno", deathDtl.getEidno() );
+		sqlParameterSource.addValue("aadharno", deathDtl.getAadharno() );
+		sqlParameterSource.addValue("nationality", deathDtl.getNationality() );
+		sqlParameterSource.addValue("religion", deathDtl.getReligion() );
+		sqlParameterSource.addValue("icdcode", deathDtl.getIcdcode() );	
+		deathDtl.setId(id);
 		return sqlParameterSource;
 
 	}

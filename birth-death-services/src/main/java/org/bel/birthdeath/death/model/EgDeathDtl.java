@@ -59,6 +59,8 @@ public class EgDeathDtl{
 	
 	private String tenantid;
 	
+	private String hospitalid;
+	
 	private EgDeathFatherInfo deathFatherInfo;
 	
 	private EgDeathMotherInfo deathMotherInfo;
@@ -84,4 +86,8 @@ public class EgDeathDtl{
 	private String embeddedUrl;
 	
 	private String deathcertificateno;
+	
+	private String rejectReason;
+	
+	private String fullName;
 }

@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.common.contract.BirthResponse;
+import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.CommonRepository;
+import org.bel.birthdeath.death.model.EgDeathDtl;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,12 @@ public class CommonService {
 		ArrayList<EgBirthDtl> birthDtls = new ArrayList<EgBirthDtl>();
 		birthDtls = repository.saveBirthImport(importJSon, requestInfo);
 		return birthDtls;
+	}
+	
+	public List<EgDeathDtl> saveDeathImport(DeathResponse importJSon, RequestInfo requestInfo) {
+		ArrayList<EgDeathDtl> deathDtls = new ArrayList<EgDeathDtl>();
+		deathDtls = repository.saveDeathImport(importJSon, requestInfo);
+		return deathDtls;
 	}
 
 }

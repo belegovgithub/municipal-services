@@ -32,5 +32,6 @@ public class EgDeathFatherInfo {
 	private String lastmodifiedby;
 
 	private Long lastmodifiedtime;
-
+	
+	private String fullName;
 }

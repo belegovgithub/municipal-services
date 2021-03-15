@@ -40,5 +40,7 @@ public class EgBirthFatherInfo {
 	private String lastmodifiedby;
 
 	private Long lastmodifiedtime;
+	
+	private String fullName;
 
 }

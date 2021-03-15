@@ -75,4 +75,6 @@ public class EgBirthDtl{
 	private String birthcertificateno;
 	
 	private String rejectReason;
+	
+	private String fullName;
 }
