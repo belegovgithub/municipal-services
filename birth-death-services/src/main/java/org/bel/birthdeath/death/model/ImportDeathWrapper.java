@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.bel.birthdeath.utils.BirthDeathConstants;
+import org.egov.common.contract.response.ResponseInfo;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,9 +22,14 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 public class ImportDeathWrapper {
+	
+    @JsonProperty("ResponseInfo")
+    private ResponseInfo responseInfo = null;
 
+    @JsonProperty("statsMap")
 	private Map<String,Integer> statsMap;
 	
+    @JsonProperty("statsMapData")
 	private Map<String,List<EgDeathDtl>> statsMapData;
 	
 	public ImportDeathWrapper() {

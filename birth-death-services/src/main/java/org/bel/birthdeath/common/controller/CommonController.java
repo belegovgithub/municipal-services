@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.bel.birthdeath.birth.model.EgBirthDtl;
+import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.DeathResponse;
@@ -12,7 +12,7 @@ import org.bel.birthdeath.common.contract.HospitalResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.services.CommonService;
-import org.bel.birthdeath.death.model.EgDeathDtl;
+import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,22 +46,18 @@ public class CommonController {
 	
 	
 	@RequestMapping(value = { "/saveBirthImport"}, method = RequestMethod.POST)
-    public ResponseEntity<BirthResponse> saveBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+    public ResponseEntity<ImportBirthWrapper> saveBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
     		@RequestBody BirthResponse importJSon) {
-        List<EgBirthDtl> egBirthDtls = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
-        BirthResponse response = BirthResponse.builder().birthCerts(egBirthDtls).responseInfo(
-                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        ImportBirthWrapper importBirthWrapper = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
+        importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+        return new ResponseEntity<>(importBirthWrapper, HttpStatus.OK);
     }
 	
 	@RequestMapping(value = { "/saveDeathImport"}, method = RequestMethod.POST)
-    public ResponseEntity<DeathResponse> saveDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+    public ResponseEntity<ImportDeathWrapper> saveDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
     		@RequestBody DeathResponse importJSon) {
-        List<EgDeathDtl> egDeathDtls = commonService.saveDeathImport(importJSon,requestInfoWrapper.getRequestInfo());
-        DeathResponse response = DeathResponse.builder().deathCerts(egDeathDtls).responseInfo(
-                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+		ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,requestInfoWrapper.getRequestInfo());
+		importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+        return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
     }
 }
