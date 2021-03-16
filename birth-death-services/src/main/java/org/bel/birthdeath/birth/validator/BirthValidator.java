@@ -67,7 +67,7 @@ public class BirthValidator {
 				birthDtl.setDateofbirth(dobepochTimestamp);
 			}
 		}
-		if(null!=birthDtl.getDateofreportepoch() )
+		if(null!=birthDtl.getDateofreportepoch() && !birthDtl.getDateofreportepoch().isEmpty())
 		{
 			Long dorepoch = null;
 			try

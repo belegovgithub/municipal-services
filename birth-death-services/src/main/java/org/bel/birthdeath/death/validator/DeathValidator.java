@@ -68,7 +68,7 @@ public class DeathValidator {
 				deathDtl.setDateofdeath(dodepochTimestamp);
 			}
 		}
-		if(null!=deathDtl.getDateofreportepoch() )
+		if(null!=deathDtl.getDateofreportepoch() && !deathDtl.getDateofreportepoch().isEmpty() )
 		{
 			Long dorepoch = null;
 			try

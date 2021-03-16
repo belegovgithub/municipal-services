@@ -89,7 +89,7 @@ public class ImportDeathWrapper {
 	public void finaliseStats(int total, int success) {
 		int failed = 0;
 		for (String key : statsMap.keySet()) {
-			if(key.equals(BirthDeathConstants.DUPLICATE_REG) || key.equals(BirthDeathConstants.DUPLICATE_REG_EXCEL))
+			if(key.equals(BirthDeathConstants.DUPLICATE_REG_EXCEL))
 			{
 				failed = failed + statsMap.get(key)/2;
 			}
