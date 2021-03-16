@@ -3,7 +3,6 @@ package org.bel.birthdeath.common.repository;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.bel.birthdeath.birth.model.EgBirthFatherInfo;
 import org.bel.birthdeath.birth.model.EgBirthMotherInfo;
 import org.bel.birthdeath.birth.model.EgBirthPermaddr;
 import org.bel.birthdeath.birth.model.EgBirthPresentaddr;
+import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.DeathResponse;
@@ -31,7 +31,9 @@ import org.bel.birthdeath.death.model.EgDeathMotherInfo;
 import org.bel.birthdeath.death.model.EgDeathPermaddr;
 import org.bel.birthdeath.death.model.EgDeathPresentaddr;
 import org.bel.birthdeath.death.model.EgDeathSpouseInfo;
+import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.death.validator.DeathValidator;
+import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,10 +138,9 @@ public class CommonRepository {
         return hospitalDtls;
 	}
 
-	public ArrayList<EgBirthDtl> saveBirthImport(BirthResponse response, RequestInfo requestInfo) {
+	public ImportBirthWrapper saveBirthImport(BirthResponse response, RequestInfo requestInfo) {
+		ImportBirthWrapper importBirthWrapper = new ImportBirthWrapper();
 		//ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
-		ArrayList<EgBirthDtl> rejectedbirthArrayList = new ArrayList<EgBirthDtl>();
-		Set<EgBirthDtl> duplicateList = new HashSet<EgBirthDtl>();
 		try {
 		//BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
 		List<MapSqlParameterSource> birthDtlSource = new ArrayList<>();
@@ -165,8 +166,8 @@ public class CommonRepository {
 					}
 				}
 				else {
-					duplicateList.add(bdtl);
-					duplicateList.add(uniqueList.get(bdtl.getRegistrationno()));
+					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
+					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(bdtl.getRegistrationno()));
 				}
 			}
 		});
@@ -174,8 +175,8 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
-			birthDtl.setDateofbirth(new Timestamp(birthDtl.getDateofbirthepoch()*1000));
-			birthDtl.setDateofreport(new Timestamp(birthDtl.getDateofreportepoch()*1000));
+			birthDtl.setDateofbirth(null!=birthDtl.getDateofbirthepoch()?new Timestamp(birthDtl.getDateofbirthepoch()*1000):null);
+			birthDtl.setDateofreport(null!=birthDtl.getDateofreportepoch()?new Timestamp(birthDtl.getDateofreportepoch()*1000):null);
 			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
 			switch (birthDtl.getGenderStr()) {
 			case "male":
@@ -191,16 +192,13 @@ public class CommonRepository {
 				birthDtl.setGender(0);
 				break;
 			}
-			if(birthValidator.validateUniqueRegNo(birthDtl) && birthValidator.validateImportFields(birthDtl)){
+			if(birthValidator.validateUniqueRegNo(birthDtl,importBirthWrapper) && birthValidator.validateImportFields(birthDtl,importBirthWrapper)){
 				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
 				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
 				birthMotherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
 				birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
 				birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
 				//birthArrayList.add(birthDtl);
-			}
-			else {
-				rejectedbirthArrayList.add(birthDtl);
 			}
 		}
 		//log.info(new Gson().toJson(birthDtlSource));
@@ -209,14 +207,14 @@ public class CommonRepository {
 		namedParameterJdbcTemplate.batchUpdate(birthMotherInfoSaveQry, birthMotherInfoSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthPermAddrSaveQry, birthPermAddrSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(birthPresentAddrSaveQry, birthPresentAddrSource.toArray(new MapSqlParameterSource[0]));
+		log.info("completed " + birthDtlSource.size());
+		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),birthDtlSource.size());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		log.info("duplicate "+duplicateList.size());
-		duplicateList.forEach(duplicate -> { duplicate.setRejectReason("Duplicate Reg No.");});
-		rejectedbirthArrayList.addAll(duplicateList);
-		return rejectedbirthArrayList;
+		
+		return importBirthWrapper;
 	}
 
 	private void modifyHospIdBirth(Map<String, List<EgBirthDtl>> uniqueHospList , String tenantid) {
@@ -381,10 +379,8 @@ public class CommonRepository {
 	}
 	
 	
-	public ArrayList<EgDeathDtl> saveDeathImport(DeathResponse response, RequestInfo requestInfo) {
-		//ArrayList<EgDeathDtl> deathArrayList = new ArrayList<EgDeathDtl>();
-		ArrayList<EgDeathDtl> rejecteddeathArrayList = new ArrayList<EgDeathDtl>();
-		Set<EgDeathDtl> duplicateList = new HashSet<EgDeathDtl>();
+	public ImportDeathWrapper saveDeathImport(DeathResponse response, RequestInfo requestInfo) {
+		ImportDeathWrapper importDeathWrapper =  new ImportDeathWrapper();
 		try {
 		//DeathResponse response= mapper.convertValue(importJSon, DeathResponse.class);
 		List<MapSqlParameterSource> deathDtlSource = new ArrayList<>();
@@ -411,8 +407,8 @@ public class CommonRepository {
 					}
 				}
 				else {
-					duplicateList.add(deathtl);
-					duplicateList.add(uniqueList.get(deathtl.getRegistrationno()));
+					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
+					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(deathtl.getRegistrationno()));
 				}
 			}
 		});
@@ -420,8 +416,8 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
-			deathDtl.setDateofdeath(new Timestamp(deathDtl.getDateofdeathepoch()*1000));
-			deathDtl.setDateofreport(new Timestamp(deathDtl.getDateofreportepoch()*1000));
+			deathDtl.setDateofdeath(null!=deathDtl.getDateofdeathepoch()?new Timestamp(deathDtl.getDateofdeathepoch()*1000):null);
+			deathDtl.setDateofreport(null!=deathDtl.getDateofreportepoch()?new Timestamp(deathDtl.getDateofreportepoch()*1000):null);
 			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
 			switch (deathDtl.getGenderStr()) {
 			case "male":
@@ -437,7 +433,7 @@ public class CommonRepository {
 				deathDtl.setGender(0);
 				break;
 			}
-			if(deathValidator.validateUniqueRegNo(deathDtl) && deathValidator.validateImportFields(deathDtl)){
+			if(deathValidator.validateUniqueRegNo(deathDtl,importDeathWrapper) && deathValidator.validateImportFields(deathDtl,importDeathWrapper)){
 				deathDtlSource.add(getParametersForDeathDtl(deathDtl, auditDetails));
 				deathFatherInfoSource.add(getParametersForFatherInfo(deathDtl, auditDetails));
 				deathMotherInfoSource.add(getParametersForMotherInfo(deathDtl, auditDetails));
@@ -445,9 +441,6 @@ public class CommonRepository {
 				deathPermAddrSource.add(getParametersForPermAddr(deathDtl, auditDetails));
 				deathPresentAddrSource.add(getParametersForPresentAddr(deathDtl, auditDetails));
 				//deathArrayList.add(deathDtl);
-			}
-			else {
-				rejecteddeathArrayList.add(deathDtl);
 			}
 		}
 		//log.info(new Gson().toJson(deathDtlSource));
@@ -457,14 +450,13 @@ public class CommonRepository {
 		namedParameterJdbcTemplate.batchUpdate(deathSpouseInfoSaveQry, deathSpouseInfoSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(deathPermAddrSaveQry, deathPermAddrSource.toArray(new MapSqlParameterSource[0]));
 		namedParameterJdbcTemplate.batchUpdate(deathPresentAddrSaveQry, deathPresentAddrSource.toArray(new MapSqlParameterSource[0]));
+		log.info("completed " + deathDtlSource.size());
+		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),deathDtlSource.size());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		log.info("duplicate "+duplicateList.size());
-		duplicateList.forEach(duplicate -> { duplicate.setRejectReason("Duplicate Reg No.");});
-		rejecteddeathArrayList.addAll(duplicateList);
-		return rejecteddeathArrayList;
+		return importDeathWrapper;
 	}
 
 	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {

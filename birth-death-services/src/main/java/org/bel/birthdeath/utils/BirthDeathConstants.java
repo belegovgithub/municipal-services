@@ -39,7 +39,30 @@ public class BirthDeathConstants {
 	public static final String DEATH_CERT = "DEATH_CERT";
 	
 	public static final String DEATH_CERT_FEE = "DEATH_CERT_FEE";
+	
+	public static final String TENANT_EMPTY = "Tenantid cannot be empty";
+	public static final String MANDATORY_MISSING = "DOB/GENDER is empty";
+	public static final String DUPLICATE_REG = "Reg No already exists";
+	public static final String DUPLICATE_REG_EXCEL = "Reg No already exists in Excel";
+	public static final String REG_EMPTY = "Reg No cannot be empty";
+	public static final String DOB_EMPTY = "DoB cannot be empty";
+	public static final String GENDER_EMPTY = "Gender cannot be empty";
+	public static final String GENDER_INVALID = "Invalid Gender value";
+	public static final String FIRSTNAME_LARGE = "Firstname cannot exceed 200 chars";
+	public static final String MIDDLENAME_LARGE = "Middlename cannot exceed 200 chars";
+	public static final String LASTNAME_LARGE = "Lastname cannot exceed 200 chars";
+	public static final String F_FIRSTNAME_LARGE = "Father Firstname cannot exceed 200 chars";
+	public static final String F_MIDDLENAME_LARGE = "Father Middlename cannot exceed 200 chars";
+	public static final String F_LASTNAME_LARGE = "Father Lastname cannot exceed 200 chars";
+	public static final String M_FIRSTNAME_LARGE = "Mother Firstname cannot exceed 200 chars";
+	public static final String M_MIDDLENAME_LARGE = "Mother Middlename cannot exceed 200 chars";
+	public static final String M_LASTNAME_LARGE = "Mother Lastname cannot exceed 200 chars";
 
+	public static final String DOD_EMPTY = "DoD cannot be empty";
+	public static final String S_FIRSTNAME_LARGE = "Spouse Firstname cannot exceed 200 chars";
+	public static final String S_MIDDLENAME_LARGE = "Spouse Middlename cannot exceed 200 chars";
+	public static final String S_LASTNAME_LARGE = "Spouse Lastname cannot exceed 200 chars";
+	
     public BirthDeathConstants() {}
 
 }

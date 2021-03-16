@@ -1,8 +1,12 @@
 package org.bel.birthdeath.death.validator;
 
+import org.bel.birthdeath.birth.model.EgBirthDtl;
+import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.death.model.EgDeathDtl;
+import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.death.model.SearchCriteria;
 import org.bel.birthdeath.death.repository.DeathRepository;
+import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,85 +28,92 @@ public class DeathValidator {
 		return true;
 	}
 	
-	public boolean validateUniqueRegNo(EgDeathDtl deathDtl) {
+	public boolean validateUniqueRegNo(EgDeathDtl deathDtl,ImportDeathWrapper importDeathWrapper) {
 		SearchCriteria criteria = new SearchCriteria();
 		criteria.setRegistrationNo(deathDtl.getRegistrationno());
 		criteria.setTenantId(deathDtl.getTenantid());
 		if(repository.getDeathDtls(criteria).size()==0)
 			return true;
-		deathDtl.setRejectReason("Reg No already exists");
+		deathDtl.setRejectReason(BirthDeathConstants.DUPLICATE_REG);
+		importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG, deathDtl);
 		return false;
 	}
 	
-	public boolean validateImportFields(EgDeathDtl deathDtl) {
+	public boolean validateImportFields(EgDeathDtl deathDtl,ImportDeathWrapper importDeathWrapper) {
 		if(deathDtl.getTenantid()==null || deathDtl.getTenantid().isEmpty() ) {
-			deathDtl.setRejectReason("Tenantid cannot be empty");
+			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getRegistrationno()==null || deathDtl.getRegistrationno().isEmpty()) {
-			deathDtl.setRejectReason("Reg No cannot be empty");
+			setRejectionReason(BirthDeathConstants.REG_EMPTY,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDateofdeath()==null) {
-			deathDtl.setRejectReason("DoD cannot be empty");
+			setRejectionReason(BirthDeathConstants.DOD_EMPTY,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getGender()==null) {
-			deathDtl.setRejectReason("Gender cannot be empty");
+			setRejectionReason(BirthDeathConstants.GENDER_EMPTY,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getGender().intValue()!=1 && deathDtl.getGender().intValue()!=2 && deathDtl.getGender().intValue()!=3 ) {
-			deathDtl.setRejectReason("Gender value is not in range (1:3)");
+			setRejectionReason(BirthDeathConstants.GENDER_INVALID,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getFirstname()!=null && deathDtl.getFirstname().length()>200) {
-			deathDtl.setRejectReason("Firstname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getMiddlename()!=null && deathDtl.getMiddlename().length()>200) {
-			deathDtl.setRejectReason("Middlename cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.MIDDLENAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getLastname()!=null && deathDtl.getLastname().length()>200) {
-			deathDtl.setRejectReason("Lastname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathFatherInfo().getFirstname()!=null && deathDtl.getDeathFatherInfo().getFirstname().length()>200) {
-			deathDtl.setRejectReason("Father Firstname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.F_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathFatherInfo().getMiddlename()!=null && deathDtl.getDeathFatherInfo().getMiddlename().length()>200) {
-			deathDtl.setRejectReason("Father Middlename cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.F_MIDDLENAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathFatherInfo().getLastname()!=null && deathDtl.getDeathFatherInfo().getLastname().length()>200) {
-			deathDtl.setRejectReason("Father Lastname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.F_LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathMotherInfo().getFirstname()!=null && deathDtl.getDeathMotherInfo().getFirstname().length()>200) {
-			deathDtl.setRejectReason("Mother Firstname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.M_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathMotherInfo().getMiddlename()!=null && deathDtl.getDeathMotherInfo().getMiddlename().length()>200) {
-			deathDtl.setRejectReason("Mother Middlename cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.M_MIDDLENAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathMotherInfo().getLastname()!=null && deathDtl.getDeathMotherInfo().getLastname().length()>200) {
-			deathDtl.setRejectReason("Mother Lastname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.M_LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathSpouseInfo().getFirstname()!=null && deathDtl.getDeathSpouseInfo().getFirstname().length()>200) {
-			deathDtl.setRejectReason("Spouse Firstname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.S_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathSpouseInfo().getMiddlename()!=null && deathDtl.getDeathSpouseInfo().getMiddlename().length()>200) {
-			deathDtl.setRejectReason("Spouse Middlename cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.S_MIDDLENAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		if(deathDtl.getDeathSpouseInfo().getLastname()!=null && deathDtl.getDeathSpouseInfo().getLastname().length()>200) {
-			deathDtl.setRejectReason("Spouse Lastname cannot exceed 200 chars");
+			setRejectionReason(BirthDeathConstants.S_LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		return true;
+	}
+	
+	private void setRejectionReason(String reason,EgDeathDtl egDeathDtl,ImportDeathWrapper importDeathWrapper)
+	{
+		egDeathDtl.setRejectReason(reason);
+		importDeathWrapper.updateMaps(reason, egDeathDtl);
 	}
 }
