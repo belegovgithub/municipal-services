@@ -188,7 +188,7 @@ public class CommonRepository {
 				birthDtl.setGender(3);
 				break;
 			default:
-				birthDtl.setGender(1);
+				birthDtl.setGender(0);
 				break;
 			}
 			if(birthValidator.validateUniqueRegNo(birthDtl) && birthValidator.validateImportFields(birthDtl)){
@@ -434,7 +434,7 @@ public class CommonRepository {
 				deathDtl.setGender(3);
 				break;
 			default:
-				deathDtl.setGender(1);
+				deathDtl.setGender(0);
 				break;
 			}
 			if(deathValidator.validateUniqueRegNo(deathDtl) && deathValidator.validateImportFields(deathDtl)){
