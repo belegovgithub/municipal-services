@@ -29,9 +29,9 @@ public class EgBirthDtl{
 
 	private Timestamp dateofreport;
 	
-	private Long dateofbirthepoch;
+	private String dateofbirthepoch;
 
-	private Long dateofreportepoch;
+	private String dateofreportepoch;
 	
 	//@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Long dateofissue;

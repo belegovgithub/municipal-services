@@ -51,6 +51,10 @@ public class ImportDeathWrapper {
 		statsMap.put(BirthDeathConstants.M_MIDDLENAME_LARGE,0);
 		statsMap.put(BirthDeathConstants.M_LASTNAME_LARGE,0);
 		statsMap.put(BirthDeathConstants.DUPLICATE_REG_EXCEL,0);
+		statsMap.put(BirthDeathConstants.INVALID_DOD,0);
+		statsMap.put(BirthDeathConstants.INVALID_DOD_RANGE,0);
+		statsMap.put(BirthDeathConstants.INVALID_DOR,0);
+		statsMap.put(BirthDeathConstants.INVALID_DOR_RANGE,0);
 
 		statsMapData =  new HashMap<String, List<EgDeathDtl>>();
 		statsMapData.put(BirthDeathConstants.TENANT_EMPTY,new ArrayList<EgDeathDtl>());
@@ -70,6 +74,10 @@ public class ImportDeathWrapper {
 		statsMapData.put(BirthDeathConstants.M_MIDDLENAME_LARGE,new ArrayList<EgDeathDtl>());
 		statsMapData.put(BirthDeathConstants.M_LASTNAME_LARGE,new ArrayList<EgDeathDtl>());
 		statsMapData.put(BirthDeathConstants.DUPLICATE_REG_EXCEL,new ArrayList<EgDeathDtl>());
+		statsMapData.put(BirthDeathConstants.INVALID_DOD,new ArrayList<EgDeathDtl>());
+		statsMapData.put(BirthDeathConstants.INVALID_DOD_RANGE,new ArrayList<EgDeathDtl>());
+		statsMapData.put(BirthDeathConstants.INVALID_DOR,new ArrayList<EgDeathDtl>());
+		statsMapData.put(BirthDeathConstants.INVALID_DOR_RANGE,new ArrayList<EgDeathDtl>());
 	}
 	
 	public void updateMaps(String error,EgDeathDtl record)
@@ -81,7 +89,14 @@ public class ImportDeathWrapper {
 	public void finaliseStats(int total, int success) {
 		int failed = 0;
 		for (String key : statsMap.keySet()) {
-			failed = failed + statsMap.get(key);
+			if(key.equals(BirthDeathConstants.DUPLICATE_REG) || key.equals(BirthDeathConstants.DUPLICATE_REG_EXCEL))
+			{
+				failed = failed + statsMap.get(key)/2;
+			}
+			else
+			{
+				failed = failed + statsMap.get(key);
+			}
 		}
 		statsMap.put("Total Records",total);
 		statsMap.put("Sucessful Records",success);

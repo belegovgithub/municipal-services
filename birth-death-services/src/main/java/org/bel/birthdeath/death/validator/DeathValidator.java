@@ -1,7 +1,7 @@
 package org.bel.birthdeath.death.validator;
 
-import org.bel.birthdeath.birth.model.EgBirthDtl;
-import org.bel.birthdeath.birth.model.ImportBirthWrapper;
+import java.sql.Timestamp;
+
 import org.bel.birthdeath.death.model.EgDeathDtl;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.death.model.SearchCriteria;
@@ -16,6 +16,10 @@ public class DeathValidator {
 
 	@Autowired
 	DeathRepository repository;
+	
+	Timestamp beforeDate =  new Timestamp(1640975400000l);
+	
+	Timestamp afterDate = new Timestamp(-2209008070000l);
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -40,6 +44,54 @@ public class DeathValidator {
 	}
 	
 	public boolean validateImportFields(EgDeathDtl deathDtl,ImportDeathWrapper importDeathWrapper) {
+		if(null!=deathDtl.getDateofdeathepoch() )
+		{
+			Long dobepoch = null;
+			try
+			{
+				dobepoch = Long.parseLong(deathDtl.getDateofdeathepoch());
+			}
+			catch (NumberFormatException e) {
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD, deathDtl);
+				return false;
+			}
+			if(dobepoch!=null)
+			{
+				Timestamp dodepochTimestamp = new Timestamp(dobepoch*1000);
+				if(!(dodepochTimestamp.before(beforeDate) && dodepochTimestamp.after(afterDate)))
+				{
+					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD_RANGE);
+					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD_RANGE, deathDtl);
+					return false;
+				}
+				deathDtl.setDateofdeath(dodepochTimestamp);
+			}
+		}
+		if(null!=deathDtl.getDateofreportepoch() )
+		{
+			Long dorepoch = null;
+			try
+			{
+				dorepoch = Long.parseLong(deathDtl.getDateofreportepoch());
+			}
+			catch (NumberFormatException e) {
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, deathDtl);
+				return false;
+			}
+			if(dorepoch!=null)
+			{
+				Timestamp dorepochTimestamp = new Timestamp(dorepoch*1000);
+				if(!(dorepochTimestamp.before(beforeDate) && dorepochTimestamp.after(afterDate)))
+				{
+					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, deathDtl);
+					return false;
+				}
+				deathDtl.setDateofreport(dorepochTimestamp);
+			}
+		}
 		if(deathDtl.getTenantid()==null || deathDtl.getTenantid().isEmpty() ) {
 			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,deathDtl,importDeathWrapper);
 			return false;

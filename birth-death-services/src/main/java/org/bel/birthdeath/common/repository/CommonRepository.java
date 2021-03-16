@@ -168,6 +168,7 @@ public class CommonRepository {
 				else {
 					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
 					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(bdtl.getRegistrationno()));
+					uniqueList.remove(bdtl.getRegistrationno());
 				}
 			}
 		});
@@ -175,8 +176,6 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
-			birthDtl.setDateofbirth(null!=birthDtl.getDateofbirthepoch()?new Timestamp(birthDtl.getDateofbirthepoch()*1000):null);
-			birthDtl.setDateofreport(null!=birthDtl.getDateofreportepoch()?new Timestamp(birthDtl.getDateofreportepoch()*1000):null);
 			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
 			switch (birthDtl.getGenderStr()) {
 			case "male":
@@ -409,6 +408,7 @@ public class CommonRepository {
 				else {
 					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
 					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(deathtl.getRegistrationno()));
+					uniqueList.remove(deathtl.getRegistrationno());
 				}
 			}
 		});
@@ -416,8 +416,6 @@ public class CommonRepository {
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
-			deathDtl.setDateofdeath(null!=deathDtl.getDateofdeathepoch()?new Timestamp(deathDtl.getDateofdeathepoch()*1000):null);
-			deathDtl.setDateofreport(null!=deathDtl.getDateofreportepoch()?new Timestamp(deathDtl.getDateofreportepoch()*1000):null);
 			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
 			switch (deathDtl.getGenderStr()) {
 			case "male":

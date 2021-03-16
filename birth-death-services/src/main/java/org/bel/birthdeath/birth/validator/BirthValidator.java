@@ -1,5 +1,7 @@
 package org.bel.birthdeath.birth.validator;
 
+import java.sql.Timestamp;
+
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.birth.model.SearchCriteria;
@@ -14,6 +16,9 @@ public class BirthValidator {
 	
 	@Autowired
 	BirthRepository repository;
+	
+	Timestamp beforeDate =  new Timestamp(1640975400000l);
+	Timestamp afterDate = new Timestamp(-2209008070000l);
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -38,6 +43,54 @@ public class BirthValidator {
 	}
 	
 	public boolean validateImportFields(EgBirthDtl birthDtl,ImportBirthWrapper importBirthWrapper) {
+		if(null!=birthDtl.getDateofbirthepoch() )
+		{
+			Long dobepoch = null;
+			try
+			{
+				dobepoch = Long.parseLong(birthDtl.getDateofbirthepoch());
+			}
+			catch (NumberFormatException e) {
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB, birthDtl);
+				return false;
+			}
+			if(dobepoch!=null)
+			{
+				Timestamp dobepochTimestamp = new Timestamp(dobepoch*1000);
+				if(!(dobepochTimestamp.before(beforeDate) && dobepochTimestamp.after(afterDate)))
+				{
+					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB_RANGE);
+					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB_RANGE, birthDtl);
+					return false;
+				}
+				birthDtl.setDateofbirth(dobepochTimestamp);
+			}
+		}
+		if(null!=birthDtl.getDateofreportepoch() )
+		{
+			Long dorepoch = null;
+			try
+			{
+				dorepoch = Long.parseLong(birthDtl.getDateofreportepoch());
+			}
+			catch (NumberFormatException e) {
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, birthDtl);
+				return false;
+			}
+			if(dorepoch!=null)
+			{
+				Timestamp dorepochTimestamp = new Timestamp(dorepoch*1000);
+				if(!(dorepochTimestamp.before(beforeDate) && dorepochTimestamp.after(afterDate)))
+				{
+					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, birthDtl);
+					return false;
+				}
+				birthDtl.setDateofreport(dorepochTimestamp);
+			}
+		}
 		if(birthDtl.getTenantid()==null || birthDtl.getTenantid().isEmpty() ) {
 			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,birthDtl,importBirthWrapper);
 			return false;

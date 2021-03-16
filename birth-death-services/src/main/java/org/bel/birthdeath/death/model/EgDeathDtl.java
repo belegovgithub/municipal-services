@@ -29,9 +29,9 @@ public class EgDeathDtl{
 
 	private Timestamp dateofreport;
 	
-	private Long dateofdeathepoch;
+	private String dateofdeathepoch;
 
-	private Long dateofreportepoch;
+	private String dateofreportepoch;
 	
 	private Long dateofissue;
 

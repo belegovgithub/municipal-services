@@ -57,8 +57,14 @@ public class BirthDeathConstants {
 	public static final String M_FIRSTNAME_LARGE = "Mother Firstname cannot exceed 200 chars";
 	public static final String M_MIDDLENAME_LARGE = "Mother Middlename cannot exceed 200 chars";
 	public static final String M_LASTNAME_LARGE = "Mother Lastname cannot exceed 200 chars";
+	public static final String INVALID_DOB = "DOB not valid";
+	public static final String INVALID_DOB_RANGE = "DOB not in range";
+	public static final String INVALID_DOR = "DOR not valid";
+	public static final String INVALID_DOR_RANGE = "DOR not in range";
 
 	public static final String DOD_EMPTY = "DoD cannot be empty";
+	public static final String INVALID_DOD = "DOD not valid";
+	public static final String INVALID_DOD_RANGE = "DOD not in range";
 	public static final String S_FIRSTNAME_LARGE = "Spouse Firstname cannot exceed 200 chars";
 	public static final String S_MIDDLENAME_LARGE = "Spouse Middlename cannot exceed 200 chars";
 	public static final String S_LASTNAME_LARGE = "Spouse Lastname cannot exceed 200 chars";
