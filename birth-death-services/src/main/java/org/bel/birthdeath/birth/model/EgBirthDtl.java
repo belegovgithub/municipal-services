@@ -2,8 +2,6 @@ package org.bel.birthdeath.birth.model;
 
 import java.sql.Timestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,6 +31,7 @@ public class EgBirthDtl{
 
 	private String dateofreportepoch;
 	
+	private String excelrowindex;
 	//@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Long dateofissue;
 

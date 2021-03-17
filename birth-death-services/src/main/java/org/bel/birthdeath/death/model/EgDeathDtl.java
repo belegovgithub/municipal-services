@@ -2,8 +2,6 @@ package org.bel.birthdeath.death.model;
 
 import java.sql.Timestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +29,8 @@ public class EgDeathDtl{
 	
 	private String dateofdeathepoch;
 
+	private String excelrowindex;
+	
 	private String dateofreportepoch;
 	
 	private Long dateofissue;

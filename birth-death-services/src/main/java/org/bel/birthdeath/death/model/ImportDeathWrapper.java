@@ -1,6 +1,7 @@
 package org.bel.birthdeath.death.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,6 @@ import org.egov.common.contract.response.ResponseInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,70 +20,57 @@ import lombok.ToString;
 @Setter
 @ToString
 @AllArgsConstructor
-@Builder
 public class ImportDeathWrapper {
 	
     @JsonProperty("ResponseInfo")
     private ResponseInfo responseInfo = null;
 
     @JsonProperty("statsMap")
-	private Map<String,Integer> statsMap;
+	private Map<String,Integer> statsMap = new HashMap<String, Integer>();;
 	
     @JsonProperty("statsMapData")
-	private Map<String,List<EgDeathDtl>> statsMapData;
+	private Map<String,List<EgDeathDtl>> statsMapData =  new HashMap<String, List<EgDeathDtl>>();
+    
+    @JsonProperty("errorRowMap")
+   	private Map<String,List<String>> errorRowMap =  new HashMap<String, List<String>>();
 	
+    List<String> keyList = Arrays.asList(new String[] { 
+    		BirthDeathConstants.TENANT_EMPTY,
+    		BirthDeathConstants.MANDATORY_MISSING,
+    		BirthDeathConstants.DUPLICATE_REG,
+    		BirthDeathConstants.REG_EMPTY,
+    		BirthDeathConstants.DOD_EMPTY,
+    		BirthDeathConstants.GENDER_EMPTY,
+    		BirthDeathConstants.GENDER_INVALID,
+    		BirthDeathConstants.FIRSTNAME_LARGE,
+    		BirthDeathConstants.MIDDLENAME_LARGE,
+    		BirthDeathConstants.LASTNAME_LARGE,
+    		BirthDeathConstants.F_FIRSTNAME_LARGE,
+    		BirthDeathConstants.F_MIDDLENAME_LARGE,
+    		BirthDeathConstants.F_LASTNAME_LARGE,
+    		BirthDeathConstants.M_FIRSTNAME_LARGE,
+    		BirthDeathConstants.M_MIDDLENAME_LARGE,
+    		BirthDeathConstants.M_LASTNAME_LARGE,
+    		BirthDeathConstants.DUPLICATE_REG_EXCEL,
+    		BirthDeathConstants.INVALID_DOD,
+    		BirthDeathConstants.INVALID_DOD_RANGE,
+    		BirthDeathConstants.INVALID_DOR,
+    		BirthDeathConstants.INVALID_DOR_RANGE
+			});
+    
 	public ImportDeathWrapper() {
-		statsMap =  new HashMap<String, Integer>();
-		statsMap.put(BirthDeathConstants.TENANT_EMPTY,0);
-		statsMap.put(BirthDeathConstants.MANDATORY_MISSING,0);
-		statsMap.put(BirthDeathConstants.DUPLICATE_REG,0);
-		statsMap.put(BirthDeathConstants.REG_EMPTY,0);
-		statsMap.put(BirthDeathConstants.DOD_EMPTY,0);
-		statsMap.put(BirthDeathConstants.GENDER_EMPTY,0);
-		statsMap.put(BirthDeathConstants.GENDER_INVALID,0);
-		statsMap.put(BirthDeathConstants.FIRSTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.MIDDLENAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.LASTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.F_FIRSTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.F_MIDDLENAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.F_LASTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.M_FIRSTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.M_MIDDLENAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.M_LASTNAME_LARGE,0);
-		statsMap.put(BirthDeathConstants.DUPLICATE_REG_EXCEL,0);
-		statsMap.put(BirthDeathConstants.INVALID_DOD,0);
-		statsMap.put(BirthDeathConstants.INVALID_DOD_RANGE,0);
-		statsMap.put(BirthDeathConstants.INVALID_DOR,0);
-		statsMap.put(BirthDeathConstants.INVALID_DOR_RANGE,0);
-
-		statsMapData =  new HashMap<String, List<EgDeathDtl>>();
-		statsMapData.put(BirthDeathConstants.TENANT_EMPTY,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.MANDATORY_MISSING,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.DUPLICATE_REG,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.REG_EMPTY,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.DOD_EMPTY,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.GENDER_EMPTY,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.GENDER_INVALID,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.FIRSTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.MIDDLENAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.LASTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.F_FIRSTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.F_MIDDLENAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.F_LASTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.M_FIRSTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.M_MIDDLENAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.M_LASTNAME_LARGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.DUPLICATE_REG_EXCEL,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.INVALID_DOD,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.INVALID_DOD_RANGE,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.INVALID_DOR,new ArrayList<EgDeathDtl>());
-		statsMapData.put(BirthDeathConstants.INVALID_DOR_RANGE,new ArrayList<EgDeathDtl>());
+		for (String key : keyList) {
+			statsMap.put(key,0);
+			statsMapData.put(key,new ArrayList<EgDeathDtl>());
+			errorRowMap.put(key,new ArrayList<String>());
+		}
 	}
 	
 	public void updateMaps(String error,EgDeathDtl record)
 	{
 		statsMap.put(error,statsMap.get(error)+1);
 		statsMapData.get(error).add(record);
+		errorRowMap.get(error).add(record.getExcelrowindex());
 	}
 
 	public void finaliseStats(int total, int success) {
@@ -96,6 +83,14 @@ public class ImportDeathWrapper {
 			else
 			{
 				failed = failed + statsMap.get(key);
+			}
+		}
+		for (String key : keyList) {
+			if(statsMap.get(key)==0)
+			{
+				statsMap.remove(key);
+				statsMapData.remove(key);
+				errorRowMap.remove(key);
 			}
 		}
 		statsMap.put("Total Records",total);
