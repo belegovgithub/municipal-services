@@ -17,9 +17,8 @@ public class DeathValidator {
 	@Autowired
 	DeathRepository repository;
 	
-	Timestamp beforeDate =  new Timestamp(1640975400000l);
-	
-	Timestamp afterDate = new Timestamp(-2209008070000l);
+	Timestamp beforeDate =  new Timestamp(System.currentTimeMillis());
+	Timestamp afterDate = new Timestamp(-5364683608000l);
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
