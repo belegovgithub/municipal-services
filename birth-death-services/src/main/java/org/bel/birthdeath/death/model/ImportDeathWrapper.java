@@ -9,6 +9,7 @@ import java.util.Map;
 import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.egov.common.contract.response.ResponseInfo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -26,14 +27,15 @@ public class ImportDeathWrapper {
     private ResponseInfo responseInfo = null;
 
     @JsonProperty("statsMap")
-	private Map<String,Integer> statsMap = new HashMap<String, Integer>();;
+	private Map<String,Integer> statsMap;
 	
     @JsonProperty("statsMapData")
-	private Map<String,List<EgDeathDtl>> statsMapData =  new HashMap<String, List<EgDeathDtl>>();
+	private Map<String,List<EgDeathDtl>> statsMapData;
     
     @JsonProperty("errorRowMap")
-   	private Map<String,List<String>> errorRowMap =  new HashMap<String, List<String>>();
+   	private Map<String,List<String>> errorRowMap;
 	
+    @JsonIgnore
     List<String> keyList = Arrays.asList(new String[] { 
     		BirthDeathConstants.TENANT_EMPTY,
     		BirthDeathConstants.MANDATORY_MISSING,
@@ -59,6 +61,9 @@ public class ImportDeathWrapper {
 			});
     
 	public ImportDeathWrapper() {
+		statsMap = new HashMap<String, Integer>();
+		statsMapData =  new HashMap<String, List<EgDeathDtl>>();
+		errorRowMap =  new HashMap<String, List<String>>();
 		for (String key : keyList) {
 			statsMap.put(key,0);
 			statsMapData.put(key,new ArrayList<EgDeathDtl>());
