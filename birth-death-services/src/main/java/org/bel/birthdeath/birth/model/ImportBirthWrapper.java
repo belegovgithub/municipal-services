@@ -81,14 +81,7 @@ public class ImportBirthWrapper {
 	public void finaliseStats(int total, int success) {
 		int failed = 0;
 		for (String key : statsMap.keySet()) {
-			if(key.equals(BirthDeathConstants.DUPLICATE_REG_EXCEL))
-			{
-				failed = failed + statsMap.get(key)/2;
-			}
-			else
-			{
-				failed = failed + statsMap.get(key);
-			}
+			failed = failed + statsMap.get(key);
 		}
 		for (String key : keyList) {
 			if(statsMap.get(key)==0)

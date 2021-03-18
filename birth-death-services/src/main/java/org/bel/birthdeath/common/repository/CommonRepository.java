@@ -150,6 +150,7 @@ public class CommonRepository {
 		List<MapSqlParameterSource> birthPresentAddrSource = new ArrayList<>();
 		Map<String,EgBirthDtl> uniqueList = new HashMap<String, EgBirthDtl>();
 		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
+		Set<String> duplicates = new HashSet<String>();
 		response.getBirthCerts().forEach(bdtl -> {
 			if (bdtl.getRegistrationno() != null) {
 				if (uniqueList.get(bdtl.getRegistrationno()) == null)
@@ -167,11 +168,14 @@ public class CommonRepository {
 				}
 				else {
 					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
-					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(bdtl.getRegistrationno()));
-					uniqueList.remove(bdtl.getRegistrationno());
+					duplicates.add(bdtl.getRegistrationno());
 				}
 			}
 		});
+		for (String regno : duplicates) {
+			importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
+			uniqueList.remove(regno);
+		}
 		modifyHospIdBirth(uniqueHospList , response.getBirthCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
@@ -390,6 +394,7 @@ public class CommonRepository {
 		List<MapSqlParameterSource> deathPresentAddrSource = new ArrayList<>();
 		Map<String,EgDeathDtl> uniqueList = new HashMap<String, EgDeathDtl>();
 		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
+		Set<String> duplicates = new HashSet<String>();
 		response.getDeathCerts().forEach(deathtl -> {
 			if (deathtl.getRegistrationno() != null) {
 				if (uniqueList.get(deathtl.getRegistrationno()) == null)
@@ -407,11 +412,14 @@ public class CommonRepository {
 				}
 				else {
 					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
-					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(deathtl.getRegistrationno()));
-					uniqueList.remove(deathtl.getRegistrationno());
+					duplicates.add(deathtl.getRegistrationno());
 				}
 			}
 		});
+		for (String regno : duplicates) {
+			importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
+			uniqueList.remove(regno);
+		}
 		modifyHospIdDeath(uniqueHospList , response.getDeathCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
