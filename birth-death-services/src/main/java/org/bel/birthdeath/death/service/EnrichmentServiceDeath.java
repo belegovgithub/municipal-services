@@ -114,7 +114,7 @@ public class EnrichmentServiceDeath {
 		ArrayList<Amount> amounts = new ArrayList<Amount>();
 		Amount amount=new Amount();
 		amount.setTaxHeadCode(DEATH_CERT_FEE);
-		amount.setAmount(new BigDecimal(10));
+		amount.setAmount(new BigDecimal(50));
 		amounts.add(amount);
 		deathCert.setAmount(amounts);
 		deathCert.setCitizen(deathCertRequest.getRequestInfo().getUserInfo());

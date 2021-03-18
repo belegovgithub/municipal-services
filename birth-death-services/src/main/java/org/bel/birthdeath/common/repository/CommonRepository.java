@@ -214,10 +214,12 @@ public class CommonRepository {
 		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),birthDtlSource.size());
 		}
 		catch (Exception e) {
+			importBirthWrapper.setServiceError("Service Error in importing");
 			e.printStackTrace();
 		}
-		
-		return importBirthWrapper;
+		finally {
+			return importBirthWrapper;
+		}
 	}
 
 	private void modifyHospIdBirth(Map<String, List<EgBirthDtl>> uniqueHospList , String tenantid) {
@@ -460,9 +462,12 @@ public class CommonRepository {
 		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),deathDtlSource.size());
 		}
 		catch (Exception e) {
+			importDeathWrapper.setServiceError("Service Error in importing");
 			e.printStackTrace();
 		}
-		return importDeathWrapper;
+		finally {
+			return importDeathWrapper;
+		}
 	}
 
 	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {

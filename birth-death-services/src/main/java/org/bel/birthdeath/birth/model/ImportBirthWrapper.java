@@ -35,6 +35,9 @@ public class ImportBirthWrapper {
     @JsonProperty("statsMapData")
 	private Map<String,List<EgBirthDtl>> statsMapData;
     
+    @JsonProperty("serviceError")
+   	private String serviceError;
+    
     @JsonIgnore
 	List<String> keyList = Arrays.asList(new String[] { 
 			BirthDeathConstants.TENANT_EMPTY,
