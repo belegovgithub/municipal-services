@@ -129,9 +129,9 @@ CREATE TABLE public.eg_death_presentaddr
 CREATE TABLE public.eg_death_spouse_info
 (
     id character varying(64)  NOT NULL,
-    firstname character varying(30) ,
-    middlename character varying(30) ,
-    lastname character varying(30) ,
+    firstname character varying(200) ,
+    middlename character varying(200) ,
+    lastname character varying(200) ,
     aadharno character varying(150) ,
     emailid character varying(150) ,
     mobileno character varying(150) ,
