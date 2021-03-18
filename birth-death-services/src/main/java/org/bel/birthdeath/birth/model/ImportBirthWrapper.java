@@ -29,11 +29,11 @@ public class ImportBirthWrapper {
     @JsonProperty("statsMap")
 	private Map<String,Integer> statsMap;
 	
-    @JsonProperty("statsMapData")
-	private Map<String,List<EgBirthDtl>> statsMapData;
-    
     @JsonProperty("errorRowMap")
    	private Map<String,List<String>> errorRowMap;
+    
+    @JsonProperty("statsMapData")
+	private Map<String,List<EgBirthDtl>> statsMapData;
     
     @JsonIgnore
 	List<String> keyList = Arrays.asList(new String[] { 
