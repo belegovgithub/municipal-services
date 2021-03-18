@@ -6,6 +6,13 @@ CREATE TABLE public.eg_birth_death_hospitals
     CONSTRAINT eg_birth_death_hospitals_pkey PRIMARY KEY (id)
 );
 
+CREATE SEQUENCE public.seq_eg_bnd_br_apl
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
 CREATE TABLE public.eg_birth_dtls
 (
     id character varying(64)  NOT NULL,
