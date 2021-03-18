@@ -96,11 +96,11 @@ public class DeathRepository {
 			SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");	
 			pdfApplicationRequest.getDeathCertificate().forEach(cert-> {
 				String UIHost = config.getUiAppHost();
-				String deathCertPath = config.getBirthCertLink();
+				String deathCertPath = config.getDeathCertLink();
 				deathCertPath = deathCertPath.replace("$id",cert.getId());
 				deathCertPath = deathCertPath.replace("$tenantId",cert.getTenantid());
 				deathCertPath = deathCertPath.replace("$regNo",cert.getRegistrationno());
-				deathCertPath = deathCertPath.replace("$dateofbirth",format.format(cert.getDateofdeath()));
+				deathCertPath = deathCertPath.replace("$dateofdeath",format.format(cert.getDateofdeath()));
 				deathCertPath = deathCertPath.replace("$gender",cert.getGender().toString());
 				deathCertPath = deathCertPath.replace("$deathcertificateno",cert.getDeathcertificateno());
 				String finalPath = UIHost + deathCertPath;

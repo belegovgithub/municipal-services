@@ -217,9 +217,7 @@ public class CommonRepository {
 			importBirthWrapper.setServiceError("Service Error in importing");
 			e.printStackTrace();
 		}
-		finally {
-			return importBirthWrapper;
-		}
+		return importBirthWrapper;
 	}
 
 	private void modifyHospIdBirth(Map<String, List<EgBirthDtl>> uniqueHospList , String tenantid) {
@@ -465,9 +463,7 @@ public class CommonRepository {
 			importDeathWrapper.setServiceError("Service Error in importing");
 			e.printStackTrace();
 		}
-		finally {
-			return importDeathWrapper;
-		}
+		return importDeathWrapper;
 	}
 
 	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {
