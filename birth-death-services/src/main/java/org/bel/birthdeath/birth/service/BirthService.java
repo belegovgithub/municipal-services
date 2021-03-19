@@ -77,7 +77,7 @@ public class BirthService {
 	}
 
 	public BirthCertificate getBirthCertReqByConsumerCode(SearchCriteria criteria, RequestInfo requestInfo) {
-		return repository.getBirthCertReqByConsumerCode(criteria.getConsumerCode());
+		return repository.getBirthCertReqByConsumerCode(criteria.getConsumerCode(),requestInfo);
 	}
 	
 	public List<BirthCertAppln> searchApplications(RequestInfo requestInfo) {
@@ -87,13 +87,16 @@ public class BirthService {
 	}
 
 	public void updateDownloadStatus(BirthCertRequest certRequest) {
-		AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
-		BirthCertificate birthCert = certRequest.getBirthCertificate();
-		birthCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
-		birthCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
-		//birthCert.setAuditDetails(auditDetails);
-		birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
-		repository.update(certRequest);
+		if(null!=certRequest.getRequestInfo() && null!=certRequest.getRequestInfo().getUserInfo() && null!=certRequest.getRequestInfo().getUserInfo().getUuid())
+		{
+			AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
+			BirthCertificate birthCert = certRequest.getBirthCertificate();
+			birthCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+			birthCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+			//birthCert.setAuditDetails(auditDetails);
+			birthCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
+			repository.update(certRequest);
+		}
 	}
 
 	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {

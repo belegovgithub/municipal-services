@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.bel.birthdeath.birth.model.SearchCriteria;
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,12 +55,17 @@ public class BirthDtlAllQueryBuilder {
     }
 
 
-	public String getBirthCertReq(String consumerCode, List<Object> preparedStmtList) {
+	public String getBirthCertReq(String consumerCode, RequestInfo requestInfo, List<Object> preparedStmtList) {
 		StringBuilder builder = new StringBuilder("select req.*,(select tenantid from eg_birth_dtls dtl where req.birthdtlid=dtl.id) from eg_birth_cert_request req");
 		if (consumerCode != null && !consumerCode.isEmpty()) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" birthcertificateno=? ");
 			preparedStmtList.add(consumerCode);
+		}
+		if(null!=requestInfo && null!= requestInfo.getUserInfo() && requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN")) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" createdby=? ");
+			preparedStmtList.add(requestInfo.getUserInfo().getUuid());
 		}
 		return builder.toString();
 	}

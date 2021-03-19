@@ -21,6 +21,7 @@ import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.Producer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -133,11 +134,20 @@ public class BirthRepository {
         return birthDtls;
 	}
 
-	public BirthCertificate getBirthCertReqByConsumerCode(String consumerCode) {
+	public BirthCertificate getBirthCertReqByConsumerCode(String consumerCode, RequestInfo requestInfo) {
+	try {
 		List<Object> preparedStmtList = new ArrayList<>();
-		String query = allqueryBuilder.getBirthCertReq(consumerCode,preparedStmtList);
+		String query = allqueryBuilder.getBirthCertReq(consumerCode,requestInfo,preparedStmtList);
 		List<BirthCertificate> birthCerts =  jdbcTemplate.query(query, preparedStmtList.toArray(), birthCertRowMapper);
-		return birthCerts.get(0);
+		if(null!=birthCerts && !birthCerts.isEmpty()) {
+			return birthCerts.get(0);
+		}
+	}
+	catch(Exception e) {
+		e.printStackTrace();
+		throw new CustomException("invalid_data","Invalid Data");
+	}
+	return null;
 	}
 
 	public void updateCounter(String birthDtlId) {
@@ -186,7 +196,7 @@ public class BirthRepository {
 
 	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {
 		List<EgBirthDtl> certData = new ArrayList<EgBirthDtl>();
-		BirthCertificate certificate = getBirthCertReqByConsumerCode(criteria.getBirthcertificateno());
+		BirthCertificate certificate = getBirthCertReqByConsumerCode(criteria.getBirthcertificateno(),null);
 		criteria.setId(certificate.getBirthDtlId());
 		certData = getBirthDtlsAll(criteria);
 		certData.get(0).setDateofissue(certificate.getDateofissue());

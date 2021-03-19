@@ -78,7 +78,7 @@ public class DeathService {
 	}
 
 	public DeathCertificate getDeathCertReqByConsumerCode(SearchCriteria criteria, RequestInfo requestInfo) {
-		return repository.getDeathCertReqByConsumerCode(criteria.getConsumerCode());
+		return repository.getDeathCertReqByConsumerCode(criteria.getConsumerCode(),requestInfo);
 	}
 	
 	public List<DeathCertAppln> searchApplications(RequestInfo requestInfo) {
@@ -88,13 +88,17 @@ public class DeathService {
 	}
 
 	public void updateDownloadStatus(DeathCertRequest certRequest) {
-		AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
-		DeathCertificate deathCert = certRequest.getDeathCertificate();
-		deathCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
-		deathCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
-		//deathCert.setAuditDetails(auditDetails);
-		deathCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
-		repository.update(certRequest);
+		if(null!=certRequest.getRequestInfo() && null!=certRequest.getRequestInfo().getUserInfo() && null!=certRequest.getRequestInfo().getUserInfo().getUuid())
+		{
+			AuditDetails auditDetails = commUtils.getAuditDetails(certRequest.getRequestInfo().getUserInfo().getUuid(), false);
+			DeathCertificate deathCert = certRequest.getDeathCertificate();
+			deathCert.getAuditDetails().setLastModifiedBy(auditDetails.getLastModifiedBy());
+			deathCert.getAuditDetails().setLastModifiedTime(auditDetails.getLastModifiedTime());
+			//deathCert.setAuditDetails(auditDetails);
+			deathCert.setApplicationStatus(StatusEnum.PAID_DOWNLOAD);
+			repository.update(certRequest);
+		}
+
 	}
 	
 	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {

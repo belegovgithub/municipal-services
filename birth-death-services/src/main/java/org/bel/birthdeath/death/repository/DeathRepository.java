@@ -21,6 +21,7 @@ import org.bel.birthdeath.death.repository.rowmapper.DeathCertApplnRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathCertRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsAllRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsRowMapper;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -136,11 +137,19 @@ public class DeathRepository {
         return deathDtls;
 	}
 
-	public DeathCertificate getDeathCertReqByConsumerCode(String consumerCode) {
+	public DeathCertificate getDeathCertReqByConsumerCode(String consumerCode, RequestInfo requestInfo) {
+		try {
 		List<Object> preparedStmtList = new ArrayList<>();
-		String query = allqueryBuilder.getDeathCertReq(consumerCode,preparedStmtList);
+		String query = allqueryBuilder.getDeathCertReq(consumerCode,requestInfo,preparedStmtList);
 		List<DeathCertificate> deathCerts =  jdbcTemplate.query(query, preparedStmtList.toArray(), deathCertRowMapper);
-		return deathCerts.get(0);
+		if(null!=deathCerts && !deathCerts.isEmpty())
+			return deathCerts.get(0);
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("invalid_data","Invalid Data");
+		}
+		return null;
 	}
 
 	public void updateCounter(String deathDtlId) {
@@ -188,7 +197,7 @@ public class DeathRepository {
 	
 	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {
 		List<EgDeathDtl> certData = new ArrayList<EgDeathDtl>(); 
-		DeathCertificate certificate = getDeathCertReqByConsumerCode(criteria.getDeathcertificateno());
+		DeathCertificate certificate = getDeathCertReqByConsumerCode(criteria.getDeathcertificateno(),null);
 		criteria.setId(certificate.getDeathDtlId());
 		certData= getDeathDtlsAll(criteria);
 		certData.get(0).setDateofissue(certificate.getDateofissue());

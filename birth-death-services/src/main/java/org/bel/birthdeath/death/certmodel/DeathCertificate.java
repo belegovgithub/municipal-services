@@ -83,7 +83,7 @@ public class DeathCertificate {
 	  
 	  CANCELLED("CANCELLED"),
 	  
-	  FREE_DOWNLOAD ("FREE_DOWNLOAD "),
+	  FREE_DOWNLOAD ("FREE_DOWNLOAD"),
 
 	  PAID_DOWNLOAD("PAID_DOWNLOAD"),
 

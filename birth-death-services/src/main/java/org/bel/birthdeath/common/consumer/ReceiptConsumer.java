@@ -73,7 +73,7 @@ public class ReceiptConsumer {
     public void process(HashMap<String, Object> record) {
 
 		try {
-			log.info("Process for object"+ record);
+			//log.info("Process for object"+ record);
 			PaymentRequest paymentRequest = mapper.convertValue(record, PaymentRequest.class);
 			RequestInfo requestInfo = paymentRequest.getRequestInfo();
 			if( paymentRequest.getPayment().getTotalAmountPaid().compareTo(paymentRequest.getPayment().getTotalDue())!=0) 
@@ -84,7 +84,7 @@ public class ReceiptConsumer {
 					String uuid = requestInfo.getUserInfo().getUuid();
 				    AuditDetails auditDetails = commUtils.getAuditDetails(uuid, false);
 					SearchCriteria criteria=new SearchCriteria();
-					BirthCertificate birthCertificate = repository.getBirthCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode());
+					BirthCertificate birthCertificate = repository.getBirthCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode(),requestInfo);
 					criteria.setId(birthCertificate.getBirthDtlId());
 					List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
 					if(birtDtls.size()>1) 
@@ -110,7 +110,7 @@ public class ReceiptConsumer {
 					String uuid = requestInfo.getUserInfo().getUuid();
 				    AuditDetails auditDetails = commUtils.getAuditDetails(uuid, false);
 					org.bel.birthdeath.death.model.SearchCriteria criteria=new org.bel.birthdeath.death.model.SearchCriteria();
-					DeathCertificate deathCertificate = repositoryDeath.getDeathCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode());
+					DeathCertificate deathCertificate = repositoryDeath.getDeathCertReqByConsumerCode(paymentDetail.getBill().getConsumerCode(),requestInfo);
 					criteria.setId(deathCertificate.getDeathDtlId());
 					List<EgDeathDtl> deathDtls = repositoryDeath.getDeathDtlsAll(criteria);
 					if(deathDtls.size()>1) 

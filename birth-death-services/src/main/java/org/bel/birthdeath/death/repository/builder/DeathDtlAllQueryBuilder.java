@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.bel.birthdeath.death.model.SearchCriteria;
+import org.egov.common.contract.request.RequestInfo;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -57,12 +58,17 @@ public class DeathDtlAllQueryBuilder {
     }
 
 
-	public String getDeathCertReq(String consumerCode, List<Object> preparedStmtList) {
+	public String getDeathCertReq(String consumerCode, RequestInfo requestInfo, List<Object> preparedStmtList) {
 		StringBuilder builder = new StringBuilder("select req.*,(select tenantid from eg_death_dtls dtl where req.deathdtlid=dtl.id) from eg_death_cert_request req");
 		if (consumerCode != null && !consumerCode.isEmpty()) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" deathcertificateno=? ");
 			preparedStmtList.add(consumerCode);
+		}
+		if(null!=requestInfo && null!= requestInfo.getUserInfo() && requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN")) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" createdby=? ");
+			preparedStmtList.add(requestInfo.getUserInfo().getUuid());
 		}
 		return builder.toString();
 	}
