@@ -1,7 +1,6 @@
 package org.bel.birthdeath.common.repository;
 
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,6 +19,7 @@ import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.birth.validator.BirthValidator;
 import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.DeathResponse;
+import org.bel.birthdeath.common.contract.EncryptionDecryptionUtil;
 import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
 import org.bel.birthdeath.common.repository.builder.CommonQueryBuilder;
@@ -41,6 +41,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import com.google.gson.Gson;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,6 +73,9 @@ public class CommonRepository {
 	
 	@Autowired
 	CommonService commonService;
+	
+	@Autowired
+	EncryptionDecryptionUtil encryptionDecryptionUtil;
     
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -197,7 +202,7 @@ public class CommonRepository {
 			}
 			if(birthValidator.validateUniqueRegNo(birthDtl,importBirthWrapper) && birthValidator.validateImportFields(birthDtl,importBirthWrapper)){
 				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
-				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails));
+				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails, requestInfo));
 				birthMotherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
 				birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
 				birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
@@ -331,7 +336,7 @@ public class CommonRepository {
 	}
 
 	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl,
-			AuditDetails auditDetails) {
+			AuditDetails auditDetails ,RequestInfo requestInfo) {
 		EgBirthFatherInfo birthFatherInfo = birthDtl.getBirthFatherInfo();
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -350,6 +355,12 @@ public class CommonRepository {
 		sqlParameterSource.addValue("lastmodifiedtime", null);
 		sqlParameterSource.addValue("lastmodifiedby", null);
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
+		log.info(" test start");
+		EgBirthFatherInfo enc = encryptionDecryptionUtil.encryptObject(birthFatherInfo, "User", EgBirthFatherInfo.class);
+		log.info("enc : "+new Gson().toJson(enc));
+		
+		EgBirthFatherInfo dec = encryptionDecryptionUtil.decryptObject(enc, "User", EgBirthFatherInfo.class, requestInfo);
+		log.info("dec : "+new Gson().toJson(dec));
 		return sqlParameterSource;
 	}
 
