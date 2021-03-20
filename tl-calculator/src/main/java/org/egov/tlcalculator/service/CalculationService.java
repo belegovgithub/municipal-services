@@ -314,8 +314,7 @@ public class CalculationService {
   private FeeAndBillingSlabIds getTradeUnitFeeAndBillingSlabIds(TradeLicense license, CalculationType calculationType){
 
       List<BigDecimal> tradeUnitFees = new LinkedList<>();
-      List<BigDecimal> tradeAppFees = new LinkedList<>();
-      BigDecimal tradeAppTotalFee = null ;
+      BigDecimal tradeAppTotalFee = new BigDecimal(0) ;
       List<TradeUnit> tradeUnits = license.getTradeLicenseDetail().getTradeUnits();
       List<String> billingSlabIds = new LinkedList<>();
       int i = 0;
@@ -357,8 +356,10 @@ public class CalculationService {
                  tradeUnitFees.add(billingSlabs.get(0).getRate().multiply(uomVal));
                  //tradeUnitTotalFee = tradeUnitTotalFee.add(billingSlabs.get(0).getRate().multiply(uomVal));
              }
-	             tradeAppFees.add(billingSlabs.get(0).getApplicationFee());
-	             tradeAppTotalFee = billingSlabs.get(0).getApplicationFee();
+	         if(tradeAppTotalFee.compareTo(billingSlabs.get(0).getApplicationFee()) < 0) {
+             		tradeAppTotalFee=billingSlabs.get(0).getApplicationFee();
+             }
+	             
            i++;
          }
       }
