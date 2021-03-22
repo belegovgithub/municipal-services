@@ -30,8 +30,5 @@ public class DeathResponse   {
         @Valid
         private List<EgDeathDtl> deathCerts = null;
         
-        @JsonProperty("RequestInfo")
-        private RequestInfo requestInfo = null;
-
 }
 

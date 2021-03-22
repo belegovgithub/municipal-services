@@ -30,8 +30,6 @@ public class BirthResponse   {
         @JsonProperty("birthCerts")
         @Valid
         private List<EgBirthDtl> birthCerts = null;
-
-        @JsonProperty("RequestInfo")
-        private RequestInfo requestInfo = null;
+        
 }
 
