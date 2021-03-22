@@ -18,7 +18,7 @@ import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.model.AuditDetails;
-import org.bel.birthdeath.common.producer.Producer;
+import org.bel.birthdeath.common.producer.BndProducer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.bel.birthdeath.death.certmodel.DeathCertRequest;
 import org.bel.birthdeath.death.certmodel.DeathCertificate;
@@ -28,6 +28,7 @@ import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -44,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReceiptConsumer {
 
 	@Autowired
+	@Qualifier("objectMapperBnd")
 	private ObjectMapper mapper;
 	
 	@Autowired
@@ -53,7 +55,7 @@ public class ReceiptConsumer {
 	private BirthDeathConfiguration config ;
 	
 	@Autowired
-	private Producer producer;
+	private BndProducer bndProducer;
 	
 	@Autowired
 	private BirthRepository repository;
@@ -103,7 +105,7 @@ public class ReceiptConsumer {
 					birthCertificate.setApplicationStatus(StatusEnum.PAID);
 					birthCertificate.setBirthCertificateNo(paymentDetail.getBill().getConsumerCode());
 					BirthCertRequest request = BirthCertRequest.builder().requestInfo(requestInfo).birthCertificate(birthCertificate).build();
-					producer.push(config.getUpdateBirthTopic(), request);
+					bndProducer.push(config.getUpdateBirthTopic(), request);
 					repository.updateCounter(birthCertificate.getBirthDtlId());
 				}
 				if(paymentDetail.getBusinessService().equalsIgnoreCase(DEATH_CERT)) {
@@ -129,7 +131,7 @@ public class ReceiptConsumer {
 					deathCertificate.setApplicationStatus(org.bel.birthdeath.death.certmodel.DeathCertificate.StatusEnum.PAID);
 					deathCertificate.setDeathCertificateNo(paymentDetail.getBill().getConsumerCode());
 					DeathCertRequest request = DeathCertRequest.builder().requestInfo(requestInfo).deathCertificate(deathCertificate).build();
-					producer.push(config.getUpdateDeathTopic(), request);
+					bndProducer.push(config.getUpdateDeathTopic(), request);
 					repositoryDeath.updateCounter(deathCertificate.getDeathDtlId());
 				}
 			}

@@ -2,6 +2,7 @@ package org.bel.birthdeath.common.contract;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.egov.encryption.EncryptionService;
 import org.egov.encryption.audit.AuditService;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -33,6 +35,7 @@ public class EncryptionDecryptionUtil {
     private AuditService auditService;
 
     @Autowired
+    @Qualifier("objectMapperBnd")
     private ObjectMapper objectMapper;
 
     @Value(("${egov.state.level.tenant.id}"))
@@ -79,7 +82,6 @@ public class EncryptionDecryptionUtil {
                 objectToDecrypt = Collections.singletonList(objectToDecrypt);
             }
             final User encrichedUserInfo = getEncrichedandCopiedUserInfo(requestInfo.getUserInfo());
-            key = getKeyToDecrypt(objectToDecrypt, encrichedUserInfo);
             P decryptedObject = (P) encryptionService.decryptJson(objectToDecrypt, key, encrichedUserInfo, classType);
             if (decryptedObject == null) {
                 throw new CustomException("DECRYPTION_NULL_ERROR", "Null object found on performing decryption");
@@ -98,58 +100,14 @@ public class EncryptionDecryptionUtil {
         }
     }
 
-    public boolean isUserDecryptingForSelf(Object objectToDecrypt, User userInfo) {
-        User userToDecrypt = null;
-        if (objectToDecrypt instanceof List) {
-            if (((List) objectToDecrypt).isEmpty())
-                return false;
-            if (((List) objectToDecrypt).size() > 1)
-                return false;
-            userToDecrypt = (User) ((List) objectToDecrypt).get(0);
-        } else {
-            throw new CustomException("DECRYPTION_NOTLIST_ERROR", objectToDecrypt + " is not of type List of User");
-        }
-
-        if ((userToDecrypt.getUuid() != null) && userToDecrypt.getUuid().equalsIgnoreCase(userInfo.getUuid()))
-            return true;
-        else
-            return false;
-    }
-
-    private boolean isDecryptionForIndividualUser(Object objectToDecrypt) {
-        if (((List) objectToDecrypt).size() == 1)
-            return true;
-        else
-            return false;
-    }
-
-    public String getKeyToDecrypt(Object objectToDecrypt, User userInfo) {
-        if (!abacEnabled)
-            return "ALL_ACCESS";
-        else if (isUserDecryptingForSelf(objectToDecrypt, userInfo))
-            return "UserListSelf";
-        else if (isDecryptionForIndividualUser(objectToDecrypt))
-            return "UserListOtherIndividual";
-        else
-            return "UserListOtherBulk";
-    }
 
     public void auditTheDecryptRequest(Object objectToDecrypt, String key, User userInfo) {
-        String purpose;
-        if (!abacEnabled)
-            purpose = "AbacDisabled";
-        else if (isUserDecryptingForSelf(objectToDecrypt, userInfo))
-            purpose = "Self";
-        else if (isDecryptionForIndividualUser(objectToDecrypt))
-            purpose = "SingleSearchResult";
-        else
-            purpose = "BulkSearchResult";
+        String purpose= "BndDetail";
 
         ObjectNode abacParams = objectMapper.createObjectNode();
         abacParams.set("key", TextNode.valueOf(key));
 
-        List<String> decryptedUserUuid = (List<String>) ((List) objectToDecrypt).stream()
-                .map(user -> ((User) user).getUuid()).collect(Collectors.toList());
+        List<String> decryptedUserUuid = Arrays.asList(userInfo.getUuid());
 
         ObjectNode auditData = objectMapper.createObjectNode();
         auditData.set("entityType", TextNode.valueOf(User.class.getName()));
@@ -176,4 +134,4 @@ public class EncryptionDecryptionUtil {
                 .roles(newRoleList).tenantId(userInfo.getTenantId()).uuid(userInfo.getUuid()).build();
         return newuserInfo;
     }
-}
+ }

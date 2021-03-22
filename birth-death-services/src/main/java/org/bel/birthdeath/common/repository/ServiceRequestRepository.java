@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +22,7 @@ public class ServiceRequestRepository {
 	private RestTemplate restTemplate;
 	
 	@Autowired
+	@Qualifier("objectMapperBnd")
 	private ObjectMapper mapper;
 	
 	public Object fetchResult(StringBuilder uri, Object request) {

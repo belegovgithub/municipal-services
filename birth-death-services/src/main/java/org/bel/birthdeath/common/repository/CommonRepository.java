@@ -42,8 +42,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.google.gson.Gson;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -314,7 +312,7 @@ public class CommonRepository {
 	}
 
 	private MapSqlParameterSource getParametersForMotherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails) {
-		EgBirthMotherInfo birthMotherInfo = birthDtl.getBirthMotherInfo();
+		EgBirthMotherInfo birthMotherInfo = encryptionDecryptionUtil.encryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
 		sqlParameterSource.addValue("firstname", birthMotherInfo.getFirstname());
@@ -337,7 +335,7 @@ public class CommonRepository {
 
 	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl,
 			AuditDetails auditDetails ,RequestInfo requestInfo) {
-		EgBirthFatherInfo birthFatherInfo = birthDtl.getBirthFatherInfo();
+		EgBirthFatherInfo birthFatherInfo = encryptionDecryptionUtil.encryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
 		sqlParameterSource.addValue("firstname", birthFatherInfo.getFirstname());
@@ -355,12 +353,7 @@ public class CommonRepository {
 		sqlParameterSource.addValue("lastmodifiedtime", null);
 		sqlParameterSource.addValue("lastmodifiedby", null);
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
-		log.info(" test start");
-		EgBirthFatherInfo enc = encryptionDecryptionUtil.encryptObject(birthFatherInfo, "User", EgBirthFatherInfo.class);
-		log.info("enc : "+new Gson().toJson(enc));
 		
-		EgBirthFatherInfo dec = encryptionDecryptionUtil.decryptObject(enc, "User", EgBirthFatherInfo.class, requestInfo);
-		log.info("dec : "+new Gson().toJson(dec));
 		return sqlParameterSource;
 	}
 
@@ -522,7 +515,7 @@ public class CommonRepository {
 	}
 
 	private MapSqlParameterSource getParametersForMotherInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
-		EgDeathMotherInfo deathMotherInfo = deathDtl.getDeathMotherInfo();
+		EgDeathMotherInfo deathMotherInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathMotherInfo(), "BndDetail", EgDeathMotherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
 		sqlParameterSource.addValue("firstname", deathMotherInfo.getFirstname());
@@ -540,7 +533,7 @@ public class CommonRepository {
 	}
 	
 	private MapSqlParameterSource getParametersForSpouseInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
-		EgDeathSpouseInfo deathSpouseInfo = deathDtl.getDeathSpouseInfo();
+		EgDeathSpouseInfo deathSpouseInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathSpouseInfo(), "BndDetail", EgDeathSpouseInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
 		sqlParameterSource.addValue("firstname", deathSpouseInfo.getFirstname());
@@ -559,7 +552,7 @@ public class CommonRepository {
 
 	private MapSqlParameterSource getParametersForFatherInfo(EgDeathDtl deathDtl,
 			AuditDetails auditDetails) {
-		EgDeathFatherInfo deathFatherInfo = deathDtl.getDeathFatherInfo();
+		EgDeathFatherInfo deathFatherInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathFatherInfo(), "BndDetail", EgDeathFatherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
 		sqlParameterSource.addValue("firstname", deathFatherInfo.getFirstname());
@@ -578,6 +571,7 @@ public class CommonRepository {
 
 	private MapSqlParameterSource getParametersForDeathDtl(EgDeathDtl deathDtl, AuditDetails auditDetails) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+		EgDeathDtl deathDtlEnc = encryptionDecryptionUtil.encryptObject(deathDtl, "BndDetail", EgDeathDtl.class);
 		String id= UUID.randomUUID().toString();
 		sqlParameterSource.addValue("id", id);
 		sqlParameterSource.addValue("registrationno", deathDtl.getRegistrationno());
@@ -601,10 +595,10 @@ public class CommonRepository {
 		sqlParameterSource.addValue("hospitalid", deathDtl.getHospitalid());
 		sqlParameterSource.addValue("age", deathDtl.getAge() );
 		sqlParameterSource.addValue("eidno", deathDtl.getEidno() );
-		sqlParameterSource.addValue("aadharno", deathDtl.getAadharno() );
+		sqlParameterSource.addValue("aadharno", deathDtlEnc.getAadharno() );
 		sqlParameterSource.addValue("nationality", deathDtl.getNationality() );
 		sqlParameterSource.addValue("religion", deathDtl.getReligion() );
-		sqlParameterSource.addValue("icdcode", deathDtl.getIcdcode() );	
+		sqlParameterSource.addValue("icdcode", deathDtlEnc.getIcdcode() );	
 		deathDtl.setId(id);
 		return sqlParameterSource;
 

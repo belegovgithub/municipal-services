@@ -19,7 +19,7 @@ import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
-import org.bel.birthdeath.common.producer.Producer;
+import org.bel.birthdeath.common.producer.BndProducer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
@@ -62,7 +62,7 @@ public class BirthRepository {
 	private BirthCertApplnRowMapper certApplnRowMapper;
 	
 	@Autowired
-	private Producer producer;
+	private BndProducer bndProducer;
 	
 	@Autowired
 	private BirthDeathConfiguration config;
@@ -78,7 +78,7 @@ public class BirthRepository {
 	}
 
 	public void save(BirthCertRequest birthCertRequest) {
-		producer.push(config.getSaveBirthTopic(), birthCertRequest);
+		bndProducer.push(config.getSaveBirthTopic(), birthCertRequest);
 	}
 
 	public EgovPdfResp saveBirthCertPdf(BirthPdfApplicationRequest pdfApplicationRequest) {
@@ -178,7 +178,7 @@ public class BirthRepository {
 	}
 
 	public void update(BirthCertRequest certRequest) {
-		producer.push(config.getUpdateBirthTopic(), certRequest);
+		bndProducer.push(config.getUpdateBirthTopic(), certRequest);
 	}
 	
 	public String getShortenedUrl(String url){

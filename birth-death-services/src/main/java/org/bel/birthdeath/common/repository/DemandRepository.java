@@ -9,6 +9,7 @@ import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +26,7 @@ public class DemandRepository {
     private BirthDeathConfiguration config;
 
     @Autowired
+    @Qualifier("objectMapperBnd")
     private ObjectMapper mapper;
 
 
