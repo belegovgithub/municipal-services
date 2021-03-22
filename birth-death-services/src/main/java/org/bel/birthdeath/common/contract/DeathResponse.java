@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.bel.birthdeath.death.model.EgDeathDtl;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,6 +29,9 @@ public class DeathResponse   {
         @JsonProperty("deathCerts")
         @Valid
         private List<EgDeathDtl> deathCerts = null;
+        
+        @JsonProperty("RequestInfo")
+        private RequestInfo requestInfo = null;
 
 }
 

@@ -46,18 +46,18 @@ public class CommonController {
 	
 	
 	@RequestMapping(value = { "/saveBirthImport"}, method = RequestMethod.POST)
-    public ResponseEntity<ImportBirthWrapper> saveBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+    public ResponseEntity<ImportBirthWrapper> saveBirthImport(
     		@RequestBody BirthResponse importJSon) {
-        ImportBirthWrapper importBirthWrapper = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
-        importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+        ImportBirthWrapper importBirthWrapper = commonService.saveBirthImport(importJSon,importJSon.getRequestInfo());
+        importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(importJSon.getRequestInfo(), true));
         return new ResponseEntity<>(importBirthWrapper, HttpStatus.OK);
     }
 	
 	@RequestMapping(value = { "/saveDeathImport"}, method = RequestMethod.POST)
-    public ResponseEntity<ImportDeathWrapper> saveDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+    public ResponseEntity<ImportDeathWrapper> saveDeathImport(
     		@RequestBody DeathResponse importJSon) {
-		ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,requestInfoWrapper.getRequestInfo());
-		importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+		ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,importJSon.getRequestInfo());
+		importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(importJSon.getRequestInfo(), true));
         return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
     }
 }

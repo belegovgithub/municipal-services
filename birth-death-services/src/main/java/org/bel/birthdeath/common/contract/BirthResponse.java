@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,5 +31,7 @@ public class BirthResponse   {
         @Valid
         private List<EgBirthDtl> birthCerts = null;
 
+        @JsonProperty("RequestInfo")
+        private RequestInfo requestInfo = null;
 }
 
