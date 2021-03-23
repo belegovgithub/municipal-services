@@ -135,6 +135,18 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.F_LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
+		if(deathDtl.getDeathFatherInfo().getEmailid()!=null && deathDtl.getDeathFatherInfo().getEmailid().length()>50) {
+			setRejectionReason(BirthDeathConstants.F_EMAIL_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathFatherInfo().getMobileno()!=null && deathDtl.getDeathFatherInfo().getMobileno().length()>20) {
+			setRejectionReason(BirthDeathConstants.F_MOBILE_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathFatherInfo().getAadharno()!=null && deathDtl.getDeathFatherInfo().getAadharno().length()>50) {
+			setRejectionReason(BirthDeathConstants.F_AADHAR_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
 		if(deathDtl.getDeathMotherInfo().getFirstname()!=null && deathDtl.getDeathMotherInfo().getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.M_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
@@ -147,6 +159,19 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.M_LASTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
+		if(deathDtl.getDeathMotherInfo().getEmailid()!=null && deathDtl.getDeathMotherInfo().getEmailid().length()>50) {
+			setRejectionReason(BirthDeathConstants.M_EMAIL_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+
+		if(deathDtl.getDeathMotherInfo().getMobileno()!=null && deathDtl.getDeathMotherInfo().getMobileno().length()>20) {
+			setRejectionReason(BirthDeathConstants.M_MOBILE_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathMotherInfo().getAadharno()!=null && deathDtl.getDeathMotherInfo().getAadharno().length()>50) {
+			setRejectionReason(BirthDeathConstants.M_AADHAR_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
 		if(deathDtl.getDeathSpouseInfo().getFirstname()!=null && deathDtl.getDeathSpouseInfo().getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.S_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
@@ -157,6 +182,18 @@ public class DeathValidator {
 		}
 		if(deathDtl.getDeathSpouseInfo().getLastname()!=null && deathDtl.getDeathSpouseInfo().getLastname().length()>200) {
 			setRejectionReason(BirthDeathConstants.S_LASTNAME_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathSpouseInfo().getEmailid()!=null && deathDtl.getDeathSpouseInfo().getEmailid().length()>50) {
+			setRejectionReason(BirthDeathConstants.S_EMAIL_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathSpouseInfo().getMobileno()!=null && deathDtl.getDeathSpouseInfo().getMobileno().length()>20) {
+			setRejectionReason(BirthDeathConstants.S_MOBILE_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathSpouseInfo().getAadharno()!=null && deathDtl.getDeathSpouseInfo().getAadharno().length()>50) {
+			setRejectionReason(BirthDeathConstants.S_AADHAR_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
 		return true;

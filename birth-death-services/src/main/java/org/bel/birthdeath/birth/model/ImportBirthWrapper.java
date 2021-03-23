@@ -60,7 +60,13 @@ public class ImportBirthWrapper {
 			BirthDeathConstants.INVALID_DOB,
 			BirthDeathConstants.INVALID_DOB_RANGE,
 			BirthDeathConstants.INVALID_DOR,
-			BirthDeathConstants.INVALID_DOR_RANGE
+			BirthDeathConstants.INVALID_DOR_RANGE,
+			BirthDeathConstants.F_EMAIL_LARGE,
+			BirthDeathConstants.M_EMAIL_LARGE,
+			BirthDeathConstants.F_MOBILE_LARGE,
+			BirthDeathConstants.M_MOBILE_LARGE,
+			BirthDeathConstants.F_AADHAR_LARGE,
+			BirthDeathConstants.M_AADHAR_LARGE
 			});
     
 	public ImportBirthWrapper() {

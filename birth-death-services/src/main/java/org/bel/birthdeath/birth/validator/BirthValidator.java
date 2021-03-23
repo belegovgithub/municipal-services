@@ -134,6 +134,18 @@ public class BirthValidator {
 			setRejectionReason(BirthDeathConstants.F_LASTNAME_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
+		if(birthDtl.getBirthFatherInfo().getEmailid()!=null && birthDtl.getBirthFatherInfo().getEmailid().length()>50) {
+			setRejectionReason(BirthDeathConstants.F_EMAIL_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthFatherInfo().getMobileno()!=null && birthDtl.getBirthFatherInfo().getMobileno().length()>20) {
+			setRejectionReason(BirthDeathConstants.F_MOBILE_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthFatherInfo().getAadharno()!=null && birthDtl.getBirthFatherInfo().getAadharno().length()>50) {
+			setRejectionReason(BirthDeathConstants.F_AADHAR_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
 		if(birthDtl.getBirthMotherInfo().getFirstname()!=null && birthDtl.getBirthMotherInfo().getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.M_FIRSTNAME_LARGE,birthDtl,importBirthWrapper);
 			return false;
@@ -144,6 +156,19 @@ public class BirthValidator {
 		}
 		if(birthDtl.getBirthMotherInfo().getLastname()!=null && birthDtl.getBirthMotherInfo().getLastname().length()>200) {
 			setRejectionReason(BirthDeathConstants.M_LASTNAME_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getEmailid()!=null && birthDtl.getBirthMotherInfo().getEmailid().length()>50) {
+			setRejectionReason(BirthDeathConstants.M_EMAIL_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+
+		if(birthDtl.getBirthMotherInfo().getMobileno()!=null && birthDtl.getBirthMotherInfo().getMobileno().length()>20) {
+			setRejectionReason(BirthDeathConstants.M_MOBILE_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getAadharno()!=null && birthDtl.getBirthMotherInfo().getAadharno().length()>50) {
+			setRejectionReason(BirthDeathConstants.M_AADHAR_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
 		return true;

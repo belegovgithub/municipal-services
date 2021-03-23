@@ -57,6 +57,17 @@ public class BirthDeathConstants {
 	public static final String M_FIRSTNAME_LARGE = "Mother Firstname cannot exceed 200 chars";
 	public static final String M_MIDDLENAME_LARGE = "Mother Middlename cannot exceed 200 chars";
 	public static final String M_LASTNAME_LARGE = "Mother Lastname cannot exceed 200 chars";
+	public static final String F_EMAIL_LARGE = "Father Email cannot exceed 50 chars";
+	public static final String M_EMAIL_LARGE = "Mother Email cannot exceed 50 chars";
+	public static final String F_MOBILE_LARGE = "Father Mobile cannot exceed 20 chars";
+	public static final String M_MOBILE_LARGE = "Mother Mobile cannot exceed 20 chars";
+	public static final String F_AADHAR_LARGE = "Father Aadhar cannot exceed 50 chars";
+	public static final String M_AADHAR_LARGE = "Mother Aadhar cannot exceed 50 chars";
+	public static final String S_EMAIL_LARGE = "Spouse Email cannot exceed 50 chars";
+	public static final String S_AADHAR_LARGE = "Spouse Aadhar cannot exceed 50 chars";
+	public static final String S_MOBILE_LARGE = "Spouse Mobile cannot exceed 20 chars";
+	
+	
 	public static final String INVALID_DOB = "DOB not valid";
 	public static final String INVALID_DOB_RANGE = "DOB not in range";
 	public static final String INVALID_DOR = "DOR not valid";
