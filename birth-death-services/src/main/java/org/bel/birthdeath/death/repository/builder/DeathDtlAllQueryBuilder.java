@@ -25,7 +25,8 @@ public class DeathDtlAllQueryBuilder {
     		+ "bpmad.houseno pmhouseno,bpmad.buildingno pmbuildingno,bpmad.streetname pmstreetname,bpmad.locality pmlocality,bpmad.tehsil pmtehsil,"
     		+ "bpmad.district pmdistrict,bpmad.city pmcity ,bpmad.state pmstate,bpmad.pinno pmpinno,bpmad.country pmcountry,"
     		+ "bpsad.houseno pshouseno,bpsad.buildingno psbuildingno,bpsad.streetname psstreetname,bpsad.locality pslocality,bpsad.tehsil pstehsil,"
-    		+ "bpsad.district psdistrict,bpsad.city pscity ,bpsad.state psstate,bpsad.pinno pspinno,bpsad.country pscountry "+
+    		+ "bpsad.district psdistrict,bpsad.city pscity ,bpsad.state psstate,bpsad.pinno pspinno,bpsad.country pscountry,"
+    		+ "bdtl.aadharno bdtlaadharno ,bfat.aadharno bfataadharno ,bmot.aadharno bmotaadharno , bsps.aadharno bspsaadharno "+
     		"FROM public.eg_death_dtls bdtl " + 
     		"left join eg_death_father_info bfat on bfat.deathdtlid = bdtl.id " + 
     		"left join eg_death_mother_info bmot on bmot.deathdtlid = bdtl.id " +

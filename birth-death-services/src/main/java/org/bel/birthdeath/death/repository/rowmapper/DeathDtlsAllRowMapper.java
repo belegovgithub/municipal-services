@@ -36,15 +36,15 @@ public class DeathDtlsAllRowMapper implements ResultSetExtractor<List<EgDeathDtl
 
 				if (deathDtl == null) {
 					EgDeathMotherInfo motherInfo = EgDeathMotherInfo.builder().firstname(rs.getString("bmotfn")).middlename(rs.getString("bmotmn")).lastname(rs.getString("bmotln"))
-							.build();
+							.aadharno(rs.getString("bmotaadharno")).build();
 					motherInfo.setFullName(utils.addfullName(motherInfo.getFirstname(),motherInfo.getMiddlename(),motherInfo.getLastname()));
 					
 					EgDeathFatherInfo fatherInfo = EgDeathFatherInfo.builder().firstname(rs.getString("bfatfn")).middlename(rs.getString("bfatmn")).lastname(rs.getString("bfatln"))
-							.build();
+							.aadharno(rs.getString("bfataadharno")).build();
 					fatherInfo.setFullName(utils.addfullName(fatherInfo.getFirstname(),fatherInfo.getMiddlename(),fatherInfo.getLastname()));
 					
 					EgDeathSpouseInfo spouseInfo = EgDeathSpouseInfo.builder().firstname(rs.getString("bspsfn")).middlename(rs.getString("bspsmn")).lastname(rs.getString("bspsln"))
-							.build();
+							.aadharno(rs.getString("bspsaadharno")).build();
 					spouseInfo.setFullName(utils.addfullName(spouseInfo.getFirstname(),spouseInfo.getMiddlename(),spouseInfo.getLastname()));
 					
 					EgDeathPermaddr	permaddr = EgDeathPermaddr.builder().houseno(rs.getString("pmhouseno")).buildingno(rs.getString("pmbuildingno"))
@@ -63,7 +63,7 @@ public class DeathDtlsAllRowMapper implements ResultSetExtractor<List<EgDeathDtl
 							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid")).dateofissue(System.currentTimeMillis())
 							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln")).deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo).deathSpouseInfo(spouseInfo)
 							.deathPermaddr(permaddr).deathPresentaddr(presentaddr).placeofdeath(rs.getString("placeofdeath")).remarks(rs.getString("remarks")).age(rs.getString("age"))
-							.build();
+							.aadharno(rs.getString("bdtlaadharno")).build();
 					deathDtl.setFullName(utils.addfullName(deathDtl.getFirstname(), deathDtl.getMiddlename(), deathDtl.getLastname()));
 					deathDtlMap.put(deathdtlid, deathDtl);
 				}

@@ -62,7 +62,7 @@ public class BirthService {
 		}
 		else{
 			birtDtls.get(0).setBirthcertificateno(birthCertRequest.getBirthCertificate().getBirthCertificateNo());
-			BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
+			BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).birthCertificate(birtDtls).build();
 			EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 			birthCertificate.setEmbeddedUrl(applicationRequest.getBirthCertificate().get(0).getEmbeddedUrl());
 			birthCertificate.setDateofissue(applicationRequest.getBirthCertificate().get(0).getDateofissue());
@@ -101,5 +101,9 @@ public class BirthService {
 
 	public List<EgBirthDtl> viewCertificateData(SearchCriteria criteria) {
 		return repository.viewCertificateData(criteria);
+	}
+	
+	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria) {
+		return repository.viewfullCertMasterData(criteria);
 	}
 }

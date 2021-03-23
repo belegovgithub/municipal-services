@@ -17,6 +17,7 @@ import org.bel.birthdeath.birth.repository.rowmapper.BirthCertApplnRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthCertRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsAllRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
+import org.bel.birthdeath.birth.repository.rowmapper.BirthMasterDtlRowMapper;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.producer.BndProducer;
@@ -54,6 +55,9 @@ public class BirthRepository {
 	
 	@Autowired
 	private BirthDtlsAllRowMapper allRowMapper;
+	
+	@Autowired
+	private BirthMasterDtlRowMapper birthMasterDtlRowMapper;
 	
 	@Autowired
 	private BirthCertRowMapper birthCertRowMapper;
@@ -201,5 +205,12 @@ public class BirthRepository {
 		certData = getBirthDtlsAll(criteria);
 		certData.get(0).setDateofissue(certificate.getDateofissue());
 		return certData;
+	}
+	
+	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria) {
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = allqueryBuilder.getBirthCertMasterDtl(criteria, preparedStmtList);
+        List<EgBirthDtl> birthCertMasterDtl =  jdbcTemplate.query(query, preparedStmtList.toArray(), birthMasterDtlRowMapper);
+        return birthCertMasterDtl;
 	}
 }

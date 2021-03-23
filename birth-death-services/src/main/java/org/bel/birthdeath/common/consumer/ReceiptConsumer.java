@@ -92,7 +92,7 @@ public class ReceiptConsumer {
 					if(birtDtls.size()>1) 
 						throw new CustomException("Invalid_Input","Error in processing data");
 					birtDtls.get(0).setBirthcertificateno(paymentDetail.getBill().getConsumerCode());
-					BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).BirthCertificate(birtDtls).build();
+					BirthPdfApplicationRequest applicationRequest = BirthPdfApplicationRequest.builder().requestInfo(requestInfo).birthCertificate(birtDtls).build();
 					EgovPdfResp pdfResp = repository.saveBirthCertPdf(applicationRequest);
 					if(null!=pdfResp) {
 						birthCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));

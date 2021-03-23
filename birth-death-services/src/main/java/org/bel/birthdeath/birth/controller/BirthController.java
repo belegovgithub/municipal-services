@@ -92,7 +92,16 @@ public class BirthController {
     public ResponseEntity<BirthPdfApplicationRequest> viewCertificateData(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
         List<EgBirthDtl> certData = birthService.viewCertificateData(criteria);
-        BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().BirthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
+        BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().birthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/_viewfullCertData"}, method = RequestMethod.POST)
+    public ResponseEntity<BirthPdfApplicationRequest> viewfullCertMasterData(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                        @ModelAttribute SearchCriteria criteria ) {
+        List<EgBirthDtl> certData = birthService.viewfullCertMasterData(criteria);
+        BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().birthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

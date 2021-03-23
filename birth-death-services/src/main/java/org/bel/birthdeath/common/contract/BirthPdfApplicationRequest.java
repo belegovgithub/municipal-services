@@ -26,5 +26,5 @@ public class BirthPdfApplicationRequest {
     private RequestInfo requestInfo = null;
 
 	@JsonProperty("BirthCertificate")
-	private List<EgBirthDtl> BirthCertificate;
+	private List<EgBirthDtl> birthCertificate;
 }
