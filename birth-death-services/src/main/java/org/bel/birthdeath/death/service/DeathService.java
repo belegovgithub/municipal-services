@@ -1,6 +1,5 @@
 package org.bel.birthdeath.death.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
@@ -63,7 +62,7 @@ public class DeathService {
 		}
 		else{
 			deathDtls.get(0).setDeathcertificateno(deathCertRequest.getDeathCertificate().getDeathCertificateNo());
-			DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(deathDtls).build();
+			DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).deathCertificate(deathDtls).build();
 			EgovPdfResp pdfResp = repository.saveDeathCertPdf(applicationRequest);
 			deathCertificate.setEmbeddedUrl(applicationRequest.getDeathCertificate().get(0).getEmbeddedUrl());
 			deathCertificate.setDateofissue(applicationRequest.getDeathCertificate().get(0).getDateofissue());
@@ -103,5 +102,9 @@ public class DeathService {
 	
 	public List<EgDeathDtl> viewCertificateData(SearchCriteria criteria) {
 		return repository.viewCertificateData(criteria);
+	}
+	
+	public List<EgDeathDtl> viewfullCertMasterData(SearchCriteria criteria) {
+		return repository.viewfullCertMasterData(criteria);
 	}
 }

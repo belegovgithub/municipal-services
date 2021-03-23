@@ -21,6 +21,7 @@ import org.bel.birthdeath.death.repository.rowmapper.DeathCertApplnRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathCertRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsAllRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsRowMapper;
+import org.bel.birthdeath.death.repository.rowmapper.DeathMasterDtlRowMapper;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class DeathRepository {
 	
 	@Autowired
 	private DeathDtlsAllRowMapper allRowMapper;
+	
+	@Autowired
+	private DeathMasterDtlRowMapper deathMasterDtlRowMapper;
 	
 	@Autowired
 	private DeathCertRowMapper deathCertRowMapper;
@@ -202,5 +206,12 @@ public class DeathRepository {
 		certData= getDeathDtlsAll(criteria);
 		certData.get(0).setDateofissue(certificate.getDateofissue());
 		return certData;
+	}
+	
+	public List<EgDeathDtl> viewfullCertMasterData(SearchCriteria criteria) {
+		List<Object> preparedStmtList = new ArrayList<>();
+        String query = allqueryBuilder.getDeathCertMasterDtl(criteria, preparedStmtList);
+        List<EgDeathDtl> deathCertMasterDtl =  jdbcTemplate.query(query, preparedStmtList.toArray(), deathMasterDtlRowMapper);
+        return deathCertMasterDtl;
 	}
 }

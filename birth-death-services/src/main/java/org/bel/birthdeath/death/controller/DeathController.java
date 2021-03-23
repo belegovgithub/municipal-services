@@ -92,7 +92,16 @@ public class DeathController {
     public ResponseEntity<DeathPdfApplicationRequest> viewCertificateData(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
         List<EgDeathDtl> certData = deathService.viewCertificateData(criteria);
-        DeathPdfApplicationRequest response = DeathPdfApplicationRequest.builder().DeathCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
+        DeathPdfApplicationRequest response = DeathPdfApplicationRequest.builder().deathCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/_viewfullCertData"}, method = RequestMethod.POST)
+    public ResponseEntity<DeathPdfApplicationRequest> viewfullCertMasterData(@RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                        @ModelAttribute SearchCriteria criteria ) {
+        List<EgDeathDtl> certData = deathService.viewfullCertMasterData(criteria);
+        DeathPdfApplicationRequest response = DeathPdfApplicationRequest.builder().deathCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

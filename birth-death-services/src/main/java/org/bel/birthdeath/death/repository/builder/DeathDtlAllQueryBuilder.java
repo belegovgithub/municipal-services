@@ -15,6 +15,27 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class DeathDtlAllQueryBuilder {
 
+	private static String QUERY_Master_Full_Dtl = "SELECT bdtl.id deathdtlid,bfat.id bfatid,bmot.id bmotid,bpmad.id bpmadid,bpsad.id bpsadid, bsps.id bspsid," + 
+			"bdtl.tenantid tenantid, registrationno, dateofdeath, counter, gender ,  " + 
+			"CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr , " + 
+			"(select bh.hospitalname from eg_birth_death_hospitals bh where bh.id=hospitalid)  AS hospitalname, placeofdeath, dateofreport, remarks, " + 
+			"hospitalid , informantsname , informantsaddress , age,  eidno , icdcode , bdtl.nationality bdtlnationality, bdtl.religion bdtlreligion ," + 
+			"bfat.firstname bfatfn ,bmot.firstname bmotfn , bdtl.firstname bdtlfn , bsps.firstname bspsfn ," + 
+			"bfat.middlename bfatmn ,bmot.middlename bmotmn , bdtl.middlename bdtlmn , bsps.middlename bspsmn ," + 
+			"bfat.lastname bfatln ,bmot.lastname bmotln , bdtl.lastname bdtlln , bsps.lastname bspsln ," + 
+			"bfat.aadharno bfataadharno ,bmot.aadharno bmotaadharno ,bsps.aadharno bspsaadharno , bdtl.aadharno bdtlaadharno," + 
+			"bfat.emailid bfatemailid ,bmot.emailid bmotemailid ,bsps.emailid bspsemailid , " + 
+			"bfat.mobileno bfatmobileno ,bmot.mobileno bmotmobileno ,bsps.mobileno bspsmobileno , " + 
+			"bpmad.houseno pmhouseno,bpmad.buildingno pmbuildingno,bpmad.streetname pmstreetname,bpmad.locality pmlocality,bpmad.tehsil pmtehsil, " + 
+			"bpmad.district pmdistrict,bpmad.city pmcity ,bpmad.state pmstate,bpmad.pinno pmpinno,bpmad.country pmcountry, " + 
+			"bpsad.houseno pshouseno,bpsad.buildingno psbuildingno,bpsad.streetname psstreetname,bpsad.locality pslocality,bpsad.tehsil pstehsil, " + 
+			"bpsad.district psdistrict,bpsad.city pscity ,bpsad.state psstate,bpsad.pinno pspinno,bpsad.country pscountry  " + 
+			"FROM public.eg_death_dtls bdtl  " + 
+			"left join eg_death_father_info bfat on bfat.deathdtlid = bdtl.id    " + 
+			"left join eg_death_mother_info bmot on bmot.deathdtlid = bdtl.id  " + 
+			"left join eg_death_spouse_info bsps on bsps.deathdtlid = bdtl.id  " + 
+			"left join eg_death_permaddr bpmad on bpmad.deathdtlid = bdtl.id    " + 
+			"left join eg_death_presentaddr bpsad on bpsad.deathdtlid = bdtl.id";
 	
     private static String QUERY_Master_All = "SELECT bdtl.id deathdtlid, bdtl.tenantid tenantid, registrationno, dateofdeath, counter, gender , age , "
     		+ "CASE WHEN gender = '1' THEN 'Male' WHEN gender = '2' THEN 'Female' WHEN gender = '3' THEN 'Transgender'  END AS genderstr ,"
@@ -170,6 +191,22 @@ public class DeathDtlAllQueryBuilder {
 			preparedStmtList.add("%"+criteria.getName()+"%");
 			preparedStmtList.add("%"+criteria.getName()+"%");
 			preparedStmtList.add("%"+criteria.getName()+"%");
+		}
+		return builder.toString();
+	}
+	
+	public String getDeathCertMasterDtl(SearchCriteria criteria, List<Object> preparedStmtList) {
+		StringBuilder builder = new StringBuilder(QUERY_Master_Full_Dtl);
+
+		if (criteria.getTenantId() != null) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" bdtl.tenantid=? ");
+			preparedStmtList.add(criteria.getTenantId());
+		}
+		if (criteria.getId() != null) {
+			addClauseIfRequired(preparedStmtList, builder);
+			builder.append(" bdtl.id=? ");
+			preparedStmtList.add(criteria.getId());
 		}
 		return builder.toString();
 	}

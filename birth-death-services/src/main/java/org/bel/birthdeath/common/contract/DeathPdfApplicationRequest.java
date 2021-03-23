@@ -26,5 +26,5 @@ public class DeathPdfApplicationRequest {
     private RequestInfo requestInfo = null;
 
 	@JsonProperty("DeathCertificate")
-	private List<EgDeathDtl> DeathCertificate;
+	private List<EgDeathDtl> deathCertificate;
 }

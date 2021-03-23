@@ -118,7 +118,7 @@ public class ReceiptConsumer {
 					if(deathDtls.size()>1) 
 						throw new CustomException("Invalid_Input","Error in processing data");
 					deathDtls.get(0).setDeathcertificateno(paymentDetail.getBill().getConsumerCode());
-					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).DeathCertificate(deathDtls).build();
+					DeathPdfApplicationRequest applicationRequest = DeathPdfApplicationRequest.builder().requestInfo(requestInfo).deathCertificate(deathDtls).build();
 					EgovPdfResp pdfResp = repositoryDeath.saveDeathCertPdf(applicationRequest);
 					if(null!=pdfResp) {
 						deathCertificate.setFilestoreid(pdfResp.getFilestoreIds().get(0));
