@@ -103,7 +103,7 @@ public class BirthController {
 	@RequestMapping(value = { "/_viewfullCertData"}, method = RequestMethod.POST)
     public ResponseEntity<BirthPdfApplicationRequest> viewfullCertMasterData(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
-        List<EgBirthDtl> certData = birthService.viewfullCertMasterData(criteria);
+        List<EgBirthDtl> certData = birthService.viewfullCertMasterData(criteria,requestInfoWrapper.getRequestInfo());
         BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().birthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);

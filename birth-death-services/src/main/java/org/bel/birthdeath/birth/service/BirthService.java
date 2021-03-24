@@ -49,7 +49,7 @@ public class BirthService {
 		birthCertificate.setBirthDtlId(criteria.getId());
 		birthCertificate.setTenantId(criteria.getTenantId());
 		BirthCertRequest birthCertRequest = BirthCertRequest.builder().birthCertificate(birthCertificate).requestInfo(requestInfo).build();
-		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria);
+		List<EgBirthDtl> birtDtls = repository.getBirthDtlsAll(criteria,requestInfo);
 		if(birtDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
 		enrichmentService.enrichCreateRequest(birthCertRequest);
@@ -103,7 +103,7 @@ public class BirthService {
 		return repository.viewCertificateData(criteria);
 	}
 	
-	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria) {
-		return repository.viewfullCertMasterData(criteria);
+	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria,RequestInfo requestInfo) {
+		return repository.viewfullCertMasterData(criteria,requestInfo);
 	}
 }

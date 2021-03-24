@@ -49,7 +49,7 @@ public class DeathService {
 		deathCertificate.setDeathDtlId(criteria.getId());
 		deathCertificate.setTenantId(criteria.getTenantId());
 		DeathCertRequest deathCertRequest = DeathCertRequest.builder().deathCertificate(deathCertificate).requestInfo(requestInfo).build();
-		List<EgDeathDtl> deathDtls = repository.getDeathDtlsAll(criteria);
+		List<EgDeathDtl> deathDtls = repository.getDeathDtlsAll(criteria,requestInfo);
 		if(deathDtls.size()>1) 
 			throw new CustomException("Invalid_Input","Error in processing data");
 		enrichmentServiceDeath.enrichCreateRequest(deathCertRequest);
@@ -104,7 +104,7 @@ public class DeathService {
 		return repository.viewCertificateData(criteria);
 	}
 	
-	public List<EgDeathDtl> viewfullCertMasterData(SearchCriteria criteria) {
-		return repository.viewfullCertMasterData(criteria);
+	public List<EgDeathDtl> viewfullCertMasterData(SearchCriteria criteria,RequestInfo requestInfo) {
+		return repository.viewfullCertMasterData(criteria,requestInfo);
 	}
 }

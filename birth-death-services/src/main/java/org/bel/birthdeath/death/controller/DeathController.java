@@ -100,7 +100,7 @@ public class DeathController {
 	@RequestMapping(value = { "/_viewfullCertData"}, method = RequestMethod.POST)
     public ResponseEntity<DeathPdfApplicationRequest> viewfullCertMasterData(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
-        List<EgDeathDtl> certData = deathService.viewfullCertMasterData(criteria);
+        List<EgDeathDtl> certData = deathService.viewfullCertMasterData(criteria,requestInfoWrapper.getRequestInfo());
         DeathPdfApplicationRequest response = DeathPdfApplicationRequest.builder().deathCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);

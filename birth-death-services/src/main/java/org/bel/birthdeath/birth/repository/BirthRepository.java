@@ -11,6 +11,8 @@ import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
 import org.bel.birthdeath.birth.certmodel.BirthCertRequest;
 import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
+import org.bel.birthdeath.birth.model.EgBirthFatherInfo;
+import org.bel.birthdeath.birth.model.EgBirthMotherInfo;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.builder.BirthDtlAllQueryBuilder;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthCertApplnRowMapper;
@@ -20,6 +22,7 @@ import org.bel.birthdeath.birth.repository.rowmapper.BirthDtlsRowMapper;
 import org.bel.birthdeath.birth.repository.rowmapper.BirthMasterDtlRowMapper;
 import org.bel.birthdeath.common.contract.BirthPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
+import org.bel.birthdeath.common.contract.EncryptionDecryptionUtil;
 import org.bel.birthdeath.common.producer.BndProducer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.egov.common.contract.request.RequestInfo;
@@ -73,6 +76,9 @@ public class BirthRepository {
 	
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@Autowired
+	private EncryptionDecryptionUtil encryptionDecryptionUtil;
 	
 	public List<EgBirthDtl> getBirthDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -131,10 +137,14 @@ public class BirthRepository {
 		return null;
 	}
 
-	public List<EgBirthDtl> getBirthDtlsAll(SearchCriteria criteria) {
+	public List<EgBirthDtl> getBirthDtlsAll(SearchCriteria criteria ,RequestInfo requestInfo) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = allqueryBuilder.getBirtDtlsAll(criteria, preparedStmtList);
         List<EgBirthDtl> birthDtls =  jdbcTemplate.query(query, preparedStmtList.toArray(), allRowMapper);
+        birthDtls.forEach(birthDtl -> {
+        	birthDtl.setBirthFatherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class, requestInfo));
+        	birthDtl.setBirthMotherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class, requestInfo));
+        });
         return birthDtls;
 	}
 
@@ -202,15 +212,19 @@ public class BirthRepository {
 		List<EgBirthDtl> certData = new ArrayList<EgBirthDtl>();
 		BirthCertificate certificate = getBirthCertReqByConsumerCode(criteria.getBirthcertificateno(),null);
 		criteria.setId(certificate.getBirthDtlId());
-		certData = getBirthDtlsAll(criteria);
+		certData = getBirthDtlsAll(criteria,null);
 		certData.get(0).setDateofissue(certificate.getDateofissue());
 		return certData;
 	}
 	
-	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria) {
+	public List<EgBirthDtl> viewfullCertMasterData(SearchCriteria criteria,RequestInfo requestInfo) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = allqueryBuilder.getBirthCertMasterDtl(criteria, preparedStmtList);
         List<EgBirthDtl> birthCertMasterDtl =  jdbcTemplate.query(query, preparedStmtList.toArray(), birthMasterDtlRowMapper);
+        birthCertMasterDtl.forEach(birthDtl -> {
+        	birthDtl.setBirthFatherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class, requestInfo));
+        	birthDtl.setBirthMotherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class, requestInfo));
+        });
         return birthCertMasterDtl;
 	}
 }
