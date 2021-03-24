@@ -58,6 +58,7 @@ public class BirthDtlsAllRowMapper implements ResultSetExtractor<List<EgBirthDtl
 							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid")).dateofissue(System.currentTimeMillis())
 							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln")).birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
 							.birthPermaddr(permaddr).birthPresentaddr(presentaddr).placeofbirth(rs.getString("placeofbirth")).remarks(rs.getString("remarks"))
+							.dateofbirthepoch(String.valueOf(rs.getTimestamp("dateofbirth").getTime())).dateofreportepoch(String.valueOf(rs.getTimestamp("dateofreport").getTime()))
 							.build();
 					birthDtl.setFullName(utils.addfullName(birthDtl.getFirstname(), birthDtl.getMiddlename(), birthDtl.getLastname()));
 					birthDtlMap.put(birthdtlid, birthDtl);

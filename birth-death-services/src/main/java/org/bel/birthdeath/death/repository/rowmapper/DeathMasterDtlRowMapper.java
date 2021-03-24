@@ -72,6 +72,7 @@ public class DeathMasterDtlRowMapper implements ResultSetExtractor<List<EgDeathD
 							.dateofdeathepoch(rs.getTimestamp("dateofdeath").toString()).dateofreportepoch(rs.getTimestamp("dateofreport").toString())
 							.eidno(rs.getString("eidno")).aadharno(rs.getString("bdtlaadharno"))
 							.nationality(rs.getString("bdtlnationality")).religion(rs.getString("bdtlreligion")).icdcode(rs.getString("icdcode")).age(rs.getString("age"))
+							.dateofdeathepoch(String.valueOf(rs.getTimestamp("dateofdeath").getTime())).dateofreportepoch(String.valueOf(rs.getTimestamp("dateofreport").getTime()))
 							.build();
 					deathDtl.setFullName(utils.addfullName(deathDtl.getFirstname(), deathDtl.getMiddlename(), deathDtl.getLastname()));
 					deathDtlMap.put(deathdtlid, deathDtl);

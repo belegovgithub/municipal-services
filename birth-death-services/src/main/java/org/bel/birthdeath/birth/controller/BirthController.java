@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
+
 
 @RestController
 @RequestMapping("/birth")
@@ -91,6 +93,7 @@ public class BirthController {
 	@RequestMapping(value = { "/_viewCertData"}, method = RequestMethod.POST)
     public ResponseEntity<BirthPdfApplicationRequest> viewCertificateData(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                         @ModelAttribute SearchCriteria criteria ) {
+		System.out.println("requestInfoWrapper.getRequestInfo() "+new Gson().toJson(requestInfoWrapper.getRequestInfo()));
         List<EgBirthDtl> certData = birthService.viewCertificateData(criteria);
         BirthPdfApplicationRequest response = BirthPdfApplicationRequest.builder().birthCertificate(certData).requestInfo(requestInfoWrapper.getRequestInfo())
                 .build();

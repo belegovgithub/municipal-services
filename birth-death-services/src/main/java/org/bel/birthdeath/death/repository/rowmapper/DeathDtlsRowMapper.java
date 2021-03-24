@@ -49,6 +49,7 @@ public class DeathDtlsRowMapper implements ResultSetExtractor<List<EgDeathDtl>> 
 							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid"))
 							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln"))
 							.deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo).deathSpouseInfo(spouseInfo)
+							.dateofdeathepoch(String.valueOf(rs.getTimestamp("dateofdeath").getTime()))
 							.build();
 					deathDtl.setFullName(utils.addfullName(deathDtl.getFirstname(), deathDtl.getMiddlename(), deathDtl.getLastname()));
 					deathDtlMap.put(deathdtlid, deathDtl);
