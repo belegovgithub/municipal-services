@@ -62,7 +62,7 @@ public class BirthDeathApplication {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        mapper.setDateFormat(new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH));
+        //mapper.setDateFormat(new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH));
         mapper.setTimeZone(TimeZone.getTimeZone(timeZone));
         converter.setObjectMapper(mapper);
         return converter;
