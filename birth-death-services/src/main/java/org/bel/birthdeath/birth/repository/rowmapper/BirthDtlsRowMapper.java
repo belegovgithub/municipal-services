@@ -44,7 +44,6 @@ public class BirthDtlsRowMapper implements ResultSetExtractor<List<EgBirthDtl>> 
 							.dateofbirth(rs.getTimestamp("dateofbirth")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid"))
 							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln"))
 							.birthMotherInfo(motherInfo).birthFatherInfo(fatherInfo)
-							.dateofbirthepoch(String.valueOf(rs.getTimestamp("dateofbirth").getTime()))
 							.build();
 					birthDtl.setFullName(utils.addfullName(birthDtl.getFirstname(), birthDtl.getMiddlename(), birthDtl.getLastname()));
 					birthDtlMap.put(birthdtlid, birthDtl);
