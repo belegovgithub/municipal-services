@@ -27,7 +27,7 @@ public class DeathCertApplnRowMapper implements ResultSetExtractor<List<DeathCer
 				if (certReq == null) {
 					certReq = DeathCertAppln.builder().applicationNumber(rs.getString("deathCertificateNo")).applicationDate(rs.getString("createdtime"))
 							.status(rs.getString("status")).regNo(rs.getString("registrationno")).tenantId(rs.getString("tenantid")).name(rs.getString("name"))
-							.applicationCategory("Death").applicationType("Download Certificate")
+							.applicationCategory("Death").applicationType("CERT_DOWNLOAD")
 							.build();
 					deathDtlMap.put(applNo, certReq);
 				}

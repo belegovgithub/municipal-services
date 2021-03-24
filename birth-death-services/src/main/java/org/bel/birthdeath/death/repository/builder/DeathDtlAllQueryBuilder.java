@@ -69,7 +69,7 @@ public class DeathDtlAllQueryBuilder {
     private static String applsQuery ="select breq.deathCertificateNo, breq.createdtime, breq.status, bdtl.registrationno, bdtl.tenantid, "
     		+ "concat(COALESCE(bdtl.firstname,'') , ' ', COALESCE(bdtl.middlename,'') ,' ', COALESCE(bdtl.lastname,'')) as name "
     		+ "from eg_death_cert_request breq left join eg_death_dtls bdtl on bdtl.id=breq.deathDtlId where  "
-    		+ "breq.createdby=?";
+    		+ "breq.createdby=? order by breq.createdtime DESC ";
     
     private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
         if (values.isEmpty())

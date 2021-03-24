@@ -26,6 +26,7 @@ import org.bel.birthdeath.death.repository.rowmapper.DeathCertRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsAllRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathDtlsRowMapper;
 import org.bel.birthdeath.death.repository.rowmapper.DeathMasterDtlRowMapper;
+import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,9 @@ public class DeathRepository {
 	
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
+	
+	@Autowired
+	private CommonUtils commonUtils;
 	
 	public List<EgDeathDtl> getDeathDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -152,6 +156,7 @@ public class DeathRepository {
         	EgDeathDtl dec = encryptionDecryptionUtil.decryptObject(deathDtl, "BndDetail", EgDeathDtl.class, requestInfo);
         	deathDtl.setAadharno(dec.getAadharno());
         	deathDtl.setIcdcode(dec.getIcdcode());
+        	commonUtils.maskAndShowLast4Chars(deathDtl);
         });
         return deathDtls;
 	}
@@ -228,13 +233,13 @@ public class DeathRepository {
         String query = allqueryBuilder.getDeathCertMasterDtl(criteria, preparedStmtList);
         List<EgDeathDtl> deathCertMasterDtl =  jdbcTemplate.query(query, preparedStmtList.toArray(), deathMasterDtlRowMapper);
         deathCertMasterDtl.forEach(deathDtl -> {
-        	deathDtl = encryptionDecryptionUtil.decryptObject(deathDtl, "BndDetail", EgDeathDtl.class, requestInfo);
         	deathDtl.setDeathFatherInfo(encryptionDecryptionUtil.decryptObject(deathDtl.getDeathFatherInfo(), "BndDetail", EgDeathFatherInfo.class, requestInfo));
         	deathDtl.setDeathMotherInfo(encryptionDecryptionUtil.decryptObject(deathDtl.getDeathMotherInfo(), "BndDetail", EgDeathMotherInfo.class, requestInfo));
         	deathDtl.setDeathSpouseInfo(encryptionDecryptionUtil.decryptObject(deathDtl.getDeathSpouseInfo(), "BndDetail", EgDeathSpouseInfo.class, requestInfo));
         	EgDeathDtl dec = encryptionDecryptionUtil.decryptObject(deathDtl, "BndDetail", EgDeathDtl.class, requestInfo);
         	deathDtl.setAadharno(dec.getAadharno());
         	deathDtl.setIcdcode(dec.getIcdcode());
+        	commonUtils.maskAndShowLast4Chars(deathDtl);
         });
         return deathCertMasterDtl;
 	}

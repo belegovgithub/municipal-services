@@ -66,7 +66,7 @@ public class DeathMasterDtlRowMapper implements ResultSetExtractor<List<EgDeathD
 					
 					deathDtl = EgDeathDtl.builder().id(deathdtlid).registrationno(rs.getString("registrationno")).hospitalname(rs.getString("hospitalname")).dateofreport(rs.getTimestamp("dateofreport")).gender(rs.getInt("gender"))
 							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid"))
-							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln")).deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo)
+							.firstname(rs.getString("bdtlfn")).middlename(rs.getString("bdtlmn")).lastname(rs.getString("bdtlln")).deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo).deathSpouseInfo(spouseInfo)
 							.deathPermaddr(permaddr).deathPresentaddr(presentaddr).placeofdeath(rs.getString("placeofdeath")).remarks(rs.getString("remarks"))
 							.hospitalid(rs.getString("hospitalid")).informantsname(rs.getString("informantsname")).informantsaddress(rs.getString("informantsaddress"))
 							.eidno(rs.getString("eidno")).aadharno(rs.getString("bdtlaadharno"))

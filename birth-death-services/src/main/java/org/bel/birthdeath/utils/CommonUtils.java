@@ -1,7 +1,9 @@
 package org.bel.birthdeath.utils;
 
 
+import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.common.model.AuditDetails;
+import org.bel.birthdeath.death.model.EgDeathDtl;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
@@ -62,5 +64,47 @@ public class CommonUtils {
 		if(null!=country)
 			fullAddress.append(" "+country);
 		return fullAddress.toString();
+	}
+	
+	public void maskAndShowLast4Chars(EgBirthDtl birthDtl) {
+		if(null!=birthDtl.getBirthFatherInfo().getAadharno())
+			birthDtl.getBirthFatherInfo().setAadharno(birthDtl.getBirthFatherInfo().getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=birthDtl.getBirthMotherInfo().getAadharno())
+			birthDtl.getBirthMotherInfo().setAadharno(birthDtl.getBirthMotherInfo().getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		
+		if(null!=birthDtl.getBirthFatherInfo().getMobileno())
+			birthDtl.getBirthFatherInfo().setMobileno(birthDtl.getBirthFatherInfo().getMobileno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=birthDtl.getBirthMotherInfo().getMobileno())
+			birthDtl.getBirthMotherInfo().setMobileno(birthDtl.getBirthMotherInfo().getMobileno().replaceAll("\\w(?=\\w{4})", "*"));
+		
+		if(null!=birthDtl.getBirthFatherInfo().getEmailid())
+			birthDtl.getBirthFatherInfo().setEmailid(birthDtl.getBirthFatherInfo().getEmailid().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=birthDtl.getBirthMotherInfo().getEmailid())
+			birthDtl.getBirthMotherInfo().setEmailid(birthDtl.getBirthMotherInfo().getEmailid().replaceAll("\\w(?=\\w{4})", "*"));
+	}
+	
+	public void maskAndShowLast4Chars(EgDeathDtl deathDtl) {
+		if(null!=deathDtl.getAadharno())
+			deathDtl.setAadharno(deathDtl.getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathFatherInfo().getAadharno())
+			deathDtl.getDeathFatherInfo().setAadharno(deathDtl.getDeathFatherInfo().getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathMotherInfo().getAadharno())
+			deathDtl.getDeathMotherInfo().setAadharno(deathDtl.getDeathMotherInfo().getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathSpouseInfo().getAadharno())
+			deathDtl.getDeathSpouseInfo().setAadharno(deathDtl.getDeathSpouseInfo().getAadharno().replaceAll("\\w(?=\\w{4})", "*"));
+		
+		if(null!=deathDtl.getDeathFatherInfo().getMobileno())
+			deathDtl.getDeathFatherInfo().setMobileno(deathDtl.getDeathFatherInfo().getMobileno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathMotherInfo().getMobileno())
+			deathDtl.getDeathMotherInfo().setMobileno(deathDtl.getDeathMotherInfo().getMobileno().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathSpouseInfo().getMobileno())
+			deathDtl.getDeathSpouseInfo().setMobileno(deathDtl.getDeathSpouseInfo().getMobileno().replaceAll("\\w(?=\\w{4})", "*"));
+		
+		if(null!=deathDtl.getDeathFatherInfo().getEmailid())
+			deathDtl.getDeathFatherInfo().setEmailid(deathDtl.getDeathFatherInfo().getEmailid().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathMotherInfo().getEmailid())
+			deathDtl.getDeathMotherInfo().setEmailid(deathDtl.getDeathMotherInfo().getEmailid().replaceAll("\\w(?=\\w{4})", "*"));
+		if(null!=deathDtl.getDeathSpouseInfo().getEmailid())
+			deathDtl.getDeathSpouseInfo().setEmailid(deathDtl.getDeathSpouseInfo().getEmailid().replaceAll("\\w(?=\\w{4})", "*"));
 	}
 }

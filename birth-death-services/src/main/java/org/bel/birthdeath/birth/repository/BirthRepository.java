@@ -25,6 +25,7 @@ import org.bel.birthdeath.common.contract.EgovPdfResp;
 import org.bel.birthdeath.common.contract.EncryptionDecryptionUtil;
 import org.bel.birthdeath.common.producer.BndProducer;
 import org.bel.birthdeath.config.BirthDeathConfiguration;
+import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,9 @@ public class BirthRepository {
 	
 	@Autowired
 	private EncryptionDecryptionUtil encryptionDecryptionUtil;
+	
+	@Autowired
+	private CommonUtils commonUtils;
 	
 	public List<EgBirthDtl> getBirthDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -144,6 +148,7 @@ public class BirthRepository {
         birthDtls.forEach(birthDtl -> {
         	birthDtl.setBirthFatherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class, requestInfo));
         	birthDtl.setBirthMotherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class, requestInfo));
+        	commonUtils.maskAndShowLast4Chars(birthDtl);
         });
         return birthDtls;
 	}
@@ -224,6 +229,7 @@ public class BirthRepository {
         birthCertMasterDtl.forEach(birthDtl -> {
         	birthDtl.setBirthFatherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class, requestInfo));
         	birthDtl.setBirthMotherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class, requestInfo));
+        	commonUtils.maskAndShowLast4Chars(birthDtl);
         });
         return birthCertMasterDtl;
 	}
