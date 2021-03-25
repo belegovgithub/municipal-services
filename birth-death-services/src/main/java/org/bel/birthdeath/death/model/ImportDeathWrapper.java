@@ -70,7 +70,8 @@ public class ImportDeathWrapper {
 			BirthDeathConstants.S_MOBILE_LARGE,
 			BirthDeathConstants.F_AADHAR_LARGE,
 			BirthDeathConstants.M_AADHAR_LARGE,
-			BirthDeathConstants.S_AADHAR_LARGE
+			BirthDeathConstants.S_AADHAR_LARGE,
+			BirthDeathConstants.DATA_ERROR
 			});
     
 	public ImportDeathWrapper() {

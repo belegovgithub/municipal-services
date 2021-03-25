@@ -75,6 +75,11 @@ public class CommonRepository {
 	@Autowired
 	EncryptionDecryptionUtil encryptionDecryptionUtil;
     
+	
+	private static final String birthDtlDeleteQry="Delete from eg_birth_dtls where tenantid = :tenantid and registrationno = :registrationno; ";
+	
+	private static final String deathDtlDeleteQry="Delete from eg_death_dtls where tenantid = :tenantid and registrationno = :registrationno; ";
+	
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
     		+ "createdtime, createdby, lastmodifiedtime, lastmodifiedby, counter, tenantid, gender, remarks, hospitalid) "
@@ -146,11 +151,6 @@ public class CommonRepository {
 		//ArrayList<EgBirthDtl> birthArrayList = new ArrayList<EgBirthDtl>();
 		try {
 		//BirthResponse response= mapper.convertValue(importJSon, BirthResponse.class);
-		List<MapSqlParameterSource> birthDtlSource = new ArrayList<>();
-		List<MapSqlParameterSource> birthFatherInfoSource = new ArrayList<>();
-		List<MapSqlParameterSource> birthMotherInfoSource = new ArrayList<>();
-		List<MapSqlParameterSource> birthPermAddrSource = new ArrayList<>();
-		List<MapSqlParameterSource> birthPresentAddrSource = new ArrayList<>();
 		Map<String,EgBirthDtl> uniqueList = new HashMap<String, EgBirthDtl>();
 		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
 		Set<String> duplicates = new HashSet<String>();
@@ -181,6 +181,7 @@ public class CommonRepository {
 		}
 		modifyHospIdBirth(uniqueHospList , response.getBirthCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+		int finalCount=0;
 		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
 			EgBirthDtl birthDtl = entry.getValue();
 			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
@@ -199,22 +200,28 @@ public class CommonRepository {
 				break;
 			}
 			if(birthValidator.validateUniqueRegNo(birthDtl,importBirthWrapper) && birthValidator.validateImportFields(birthDtl,importBirthWrapper)){
-				birthDtlSource.add(getParametersForBirthDtl(birthDtl, auditDetails));
-				birthFatherInfoSource.add(getParametersForFatherInfo(birthDtl, auditDetails, requestInfo));
-				birthMotherInfoSource.add(getParametersForMotherInfo(birthDtl, auditDetails));
-				birthPermAddrSource.add(getParametersForPermAddr(birthDtl, auditDetails));
-				birthPresentAddrSource.add(getParametersForPresentAddr(birthDtl, auditDetails));
-				//birthArrayList.add(birthDtl);
+				try {
+					namedParameterJdbcTemplate.update(birthDtlSaveQry, getParametersForBirthDtl(birthDtl, auditDetails));
+					namedParameterJdbcTemplate.update(birthFatherInfoSaveQry, getParametersForFatherInfo(birthDtl, auditDetails));
+					namedParameterJdbcTemplate.update(birthMotherInfoSaveQry, getParametersForMotherInfo(birthDtl, auditDetails));
+					namedParameterJdbcTemplate.update(birthPermAddrSaveQry, getParametersForPermAddr(birthDtl, auditDetails));
+					namedParameterJdbcTemplate.update(birthPresentAddrSaveQry, getParametersForPresentAddr(birthDtl, auditDetails));
+					finalCount++;
+				}
+				catch (Exception e) {
+					birthDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
+					importBirthWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, birthDtl);
+					Map<String, String> params = new HashMap<>();
+					params.put("tenantid", birthDtl.getTenantid());
+					params.put("registrationno", birthDtl.getRegistrationno());
+					namedParameterJdbcTemplate.update(birthDtlDeleteQry, params);
+					e.printStackTrace();
+				}
 			}
 		}
-		//log.info(new Gson().toJson(birthDtlSource));
-		namedParameterJdbcTemplate.batchUpdate(birthDtlSaveQry, birthDtlSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(birthFatherInfoSaveQry, birthFatherInfoSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(birthMotherInfoSaveQry, birthMotherInfoSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(birthPermAddrSaveQry, birthPermAddrSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(birthPresentAddrSaveQry, birthPresentAddrSource.toArray(new MapSqlParameterSource[0]));
-		log.info("completed " + birthDtlSource.size());
-		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),birthDtlSource.size());
+		
+		log.info("completed " + finalCount);
+		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),finalCount);
 		}
 		catch (Exception e) {
 			importBirthWrapper.setServiceError("Service Error in importing");
@@ -333,8 +340,7 @@ public class CommonRepository {
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl,
-			AuditDetails auditDetails ,RequestInfo requestInfo) {
+	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails) {
 		EgBirthFatherInfo birthFatherInfo = encryptionDecryptionUtil.encryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -390,12 +396,6 @@ public class CommonRepository {
 		ImportDeathWrapper importDeathWrapper =  new ImportDeathWrapper();
 		try {
 		//DeathResponse response= mapper.convertValue(importJSon, DeathResponse.class);
-		List<MapSqlParameterSource> deathDtlSource = new ArrayList<>();
-		List<MapSqlParameterSource> deathFatherInfoSource = new ArrayList<>();
-		List<MapSqlParameterSource> deathMotherInfoSource = new ArrayList<>();
-		List<MapSqlParameterSource> deathSpouseInfoSource = new ArrayList<>();
-		List<MapSqlParameterSource> deathPermAddrSource = new ArrayList<>();
-		List<MapSqlParameterSource> deathPresentAddrSource = new ArrayList<>();
 		Map<String,EgDeathDtl> uniqueList = new HashMap<String, EgDeathDtl>();
 		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
 		Set<String> duplicates = new HashSet<String>();
@@ -426,6 +426,7 @@ public class CommonRepository {
 		}
 		modifyHospIdDeath(uniqueHospList , response.getDeathCerts().get(0).getTenantid());
 		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+		int finalCount=0;
 		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
 			EgDeathDtl deathDtl = entry.getValue();
 			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
@@ -444,24 +445,30 @@ public class CommonRepository {
 				break;
 			}
 			if(deathValidator.validateUniqueRegNo(deathDtl,importDeathWrapper) && deathValidator.validateImportFields(deathDtl,importDeathWrapper)){
-				deathDtlSource.add(getParametersForDeathDtl(deathDtl, auditDetails));
-				deathFatherInfoSource.add(getParametersForFatherInfo(deathDtl, auditDetails));
-				deathMotherInfoSource.add(getParametersForMotherInfo(deathDtl, auditDetails));
-				deathSpouseInfoSource.add(getParametersForSpouseInfo(deathDtl, auditDetails));
-				deathPermAddrSource.add(getParametersForPermAddr(deathDtl, auditDetails));
-				deathPresentAddrSource.add(getParametersForPresentAddr(deathDtl, auditDetails));
-				//deathArrayList.add(deathDtl);
+				try {
+					namedParameterJdbcTemplate.update(deathDtlSaveQry, getParametersForDeathDtl(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathFatherInfoSaveQry, getParametersForFatherInfo(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathMotherInfoSaveQry, getParametersForMotherInfo(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathSpouseInfoSaveQry, getParametersForMotherInfo(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathPermAddrSaveQry, getParametersForPermAddr(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathPresentAddrSaveQry, getParametersForPresentAddr(deathDtl, auditDetails));
+					finalCount++;
+				}
+				catch (Exception e) {
+					deathDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
+					importDeathWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, deathDtl);
+					Map<String, String> params = new HashMap<>();
+					params.put("tenantid", deathDtl.getTenantid());
+					params.put("registrationno", deathDtl.getRegistrationno());
+					namedParameterJdbcTemplate.update(deathDtlDeleteQry, params);
+					e.printStackTrace();
+				}
 			}
 		}
 		//log.info(new Gson().toJson(deathDtlSource));
-		namedParameterJdbcTemplate.batchUpdate(deathDtlSaveQry, deathDtlSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(deathFatherInfoSaveQry, deathFatherInfoSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(deathMotherInfoSaveQry, deathMotherInfoSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(deathSpouseInfoSaveQry, deathSpouseInfoSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(deathPermAddrSaveQry, deathPermAddrSource.toArray(new MapSqlParameterSource[0]));
-		namedParameterJdbcTemplate.batchUpdate(deathPresentAddrSaveQry, deathPresentAddrSource.toArray(new MapSqlParameterSource[0]));
-		log.info("completed " + deathDtlSource.size());
-		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),deathDtlSource.size());
+		
+		log.info("completed " + finalCount);
+		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),finalCount);
 		}
 		catch (Exception e) {
 			importDeathWrapper.setServiceError("Service Error in importing");

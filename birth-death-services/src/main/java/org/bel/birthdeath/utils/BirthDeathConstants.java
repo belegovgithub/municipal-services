@@ -80,6 +80,7 @@ public class BirthDeathConstants {
 	public static final String S_MIDDLENAME_LARGE = "Spouse Middlename cannot exceed 200 chars";
 	public static final String S_LASTNAME_LARGE = "Spouse Lastname cannot exceed 200 chars";
 	
+	public static final String DATA_ERROR = "Data Error";
     public BirthDeathConstants() {}
 
 }

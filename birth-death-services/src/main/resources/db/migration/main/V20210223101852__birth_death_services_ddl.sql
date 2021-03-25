@@ -39,8 +39,8 @@ CREATE TABLE public.eg_birth_dtls
     CONSTRAINT eg_birth_dtls_ukey1 UNIQUE (registrationno, tenantid),
     CONSTRAINT eg_birth_dtls_fkey1 FOREIGN KEY (hospitalid)
         REFERENCES public.eg_birth_death_hospitals (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_father_info
@@ -50,7 +50,7 @@ CREATE TABLE public.eg_birth_father_info
     middlename character varying(200) ,
     lastname character varying(200) ,
     aadharno character varying(150) ,
-    emailid character varying(150) ,
+    emailid character varying(300) ,
     mobileno character varying(150) ,
     education character varying(100) ,
     proffession character varying(100) ,
@@ -64,8 +64,8 @@ CREATE TABLE public.eg_birth_father_info
     CONSTRAINT eg_birth_father_info_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_father_info_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_mother_info
@@ -75,7 +75,7 @@ CREATE TABLE public.eg_birth_mother_info
     middlename character varying(200) ,
     lastname character varying(200) ,
     aadharno character varying(150) ,
-    emailid character varying(150) ,
+    emailid character varying(300) ,
     mobileno character varying(150) ,
     education character varying(100) ,
     proffession character varying(100) ,
@@ -89,8 +89,8 @@ CREATE TABLE public.eg_birth_mother_info
     CONSTRAINT eg_birth_mother_info_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_mother_info_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_permaddr
@@ -114,8 +114,8 @@ CREATE TABLE public.eg_birth_permaddr
     CONSTRAINT eg_birth_permaddr_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_permaddr_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_presentaddr
@@ -139,8 +139,8 @@ CREATE TABLE public.eg_birth_presentaddr
     CONSTRAINT eg_birth_presentaddr_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_presentaddr_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_cert_request
@@ -160,8 +160,8 @@ CREATE TABLE public.eg_birth_cert_request
     CONSTRAINT eg_birth_cert_request_pkey PRIMARY KEY (id),
     CONSTRAINT eg_birth_cert_request_fkey1 FOREIGN KEY (birthdtlid)
         REFERENCES public.eg_birth_dtls (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 CREATE TABLE public.eg_birth_cert_request_audit
