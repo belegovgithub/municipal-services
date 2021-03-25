@@ -139,7 +139,7 @@ public class PaymentUpdateService {
 					wfIntegrator.callWorkFlow(updateRequest);
 					
 					//To update demand on payment of application fee. Need to check final payment
-					if(!updateRequest.getLicenses().get(0).getStatus().equalsIgnoreCase(STATUS_APPROVED))
+					if(updateRequest.getLicenses().get(0).getStatus().equalsIgnoreCase(STATUS_APPLIED))
 						calculationService.addCalculation(updateRequest);
 
 					updateRequest.getLicenses()
