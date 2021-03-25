@@ -1,6 +1,9 @@
 package org.bel.birthdeath.birth.validator;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.ImportBirthWrapper;
@@ -18,6 +21,8 @@ public class BirthValidator {
 	BirthRepository repository;
 	Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+86400000l);
 	Timestamp afterDate = new Timestamp(-5364683608000l);
+	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MM-yyyy");
+	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -42,54 +47,42 @@ public class BirthValidator {
 	}
 	
 	public boolean validateImportFields(EgBirthDtl birthDtl,ImportBirthWrapper importBirthWrapper) {
-		if(null!=birthDtl.getDateofbirthepoch() )
+		Long dobdateFormatEpoch = dateFormatHandler(birthDtl.getDateofbirthepoch());
+		if(null == dobdateFormatEpoch)
 		{
-			Long dobepoch = null;
-			try
-			{
-				dobepoch = Long.parseLong(birthDtl.getDateofbirthepoch());
-			}
-			catch (NumberFormatException e) {
-				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB);
-				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB, birthDtl);
+			birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB);
+			importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB, birthDtl);
+			return false;
+		}
+		else
+		{
+			Timestamp dobdateRangeEpoch = dateTimeStampHandler(dobdateFormatEpoch);
+			if(null==dobdateRangeEpoch) {
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB_RANGE);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB_RANGE, birthDtl);
 				return false;
 			}
-			if(dobepoch!=null)
-			{
-				Timestamp dobepochTimestamp = new Timestamp(dobepoch*1000);
-				if(!(dobepochTimestamp.before(beforeDate) && dobepochTimestamp.after(afterDate)))
-				{
-					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB_RANGE);
-					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB_RANGE, birthDtl);
-					return false;
-				}
-				birthDtl.setDateofbirth(dobepochTimestamp);
-			}
+			birthDtl.setDateofbirth(dobdateRangeEpoch);
 		}
-		if(null!=birthDtl.getDateofreportepoch() && !birthDtl.getDateofreportepoch().isEmpty())
+		
+		Long dordateFormatEpoch = dateFormatHandler(birthDtl.getDateofbirthepoch());
+		if(null == dordateFormatEpoch)
 		{
-			Long dorepoch = null;
-			try
-			{
-				dorepoch = Long.parseLong(birthDtl.getDateofreportepoch());
-			}
-			catch (NumberFormatException e) {
-				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
-				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, birthDtl);
+			birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+			importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, birthDtl);
+			return false;
+		}
+		else
+		{
+			Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
+			if(null==dordateRangeEpoch) {
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, birthDtl);
 				return false;
 			}
-			if(dorepoch!=null)
-			{
-				Timestamp dorepochTimestamp = new Timestamp(dorepoch*1000);
-				if(!(dorepochTimestamp.before(beforeDate) && dorepochTimestamp.after(afterDate)))
-				{
-					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
-					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, birthDtl);
-					return false;
-				}
-				birthDtl.setDateofreport(dorepochTimestamp);
-			}
+			birthDtl.setDateofreport(dordateRangeEpoch);
 		}
+		
 		if(birthDtl.getTenantid()==null || birthDtl.getTenantid().isEmpty() ) {
 			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,birthDtl,importBirthWrapper);
 			return false;
@@ -108,6 +101,18 @@ public class BirthValidator {
 		}
 		if(birthDtl.getGender().intValue()!=1 && birthDtl.getGender().intValue()!=2 && birthDtl.getGender().intValue()!=3 ) {
 			setRejectionReason(BirthDeathConstants.GENDER_INVALID,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getInformantsname()!=null && birthDtl.getInformantsname().length()>200) {
+			setRejectionReason(BirthDeathConstants.INFORMANTNAME_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getInformantsaddress()!=null && birthDtl.getInformantsaddress().length()>1000) {
+			setRejectionReason(BirthDeathConstants.INFORMANTADDR_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getPlaceofbirth()!=null && birthDtl.getPlaceofbirth().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PLACEOFBIRTH_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
 		if(birthDtl.getFirstname()!=null && birthDtl.getFirstname().length()>200) {
@@ -146,6 +151,23 @@ public class BirthValidator {
 			setRejectionReason(BirthDeathConstants.F_AADHAR_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
+		if(birthDtl.getBirthFatherInfo().getEducation()!=null && birthDtl.getBirthFatherInfo().getEducation().length()>100) {
+			setRejectionReason(BirthDeathConstants.F_EDUCATION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthFatherInfo().getReligion()!=null && birthDtl.getBirthFatherInfo().getReligion().length()>100) {
+			setRejectionReason(BirthDeathConstants.F_RELIGION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthFatherInfo().getProffession()!=null && birthDtl.getBirthFatherInfo().getProffession().length()>100) {
+			setRejectionReason(BirthDeathConstants.F_PROFFESSION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthFatherInfo().getNationality()!=null && birthDtl.getBirthFatherInfo().getNationality().length()>100) {
+			setRejectionReason(BirthDeathConstants.F_NATIONALITY_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		
 		if(birthDtl.getBirthMotherInfo().getFirstname()!=null && birthDtl.getBirthMotherInfo().getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.M_FIRSTNAME_LARGE,birthDtl,importBirthWrapper);
 			return false;
@@ -162,13 +184,110 @@ public class BirthValidator {
 			setRejectionReason(BirthDeathConstants.M_EMAIL_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
-
 		if(birthDtl.getBirthMotherInfo().getMobileno()!=null && birthDtl.getBirthMotherInfo().getMobileno().length()>20) {
 			setRejectionReason(BirthDeathConstants.M_MOBILE_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
 		if(birthDtl.getBirthMotherInfo().getAadharno()!=null && birthDtl.getBirthMotherInfo().getAadharno().length()>50) {
 			setRejectionReason(BirthDeathConstants.M_AADHAR_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getEducation()!=null && birthDtl.getBirthMotherInfo().getEducation().length()>100) {
+			setRejectionReason(BirthDeathConstants.M_EDUCATION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getReligion()!=null && birthDtl.getBirthMotherInfo().getReligion().length()>100) {
+			setRejectionReason(BirthDeathConstants.M_RELIGION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getProffession()!=null && birthDtl.getBirthMotherInfo().getProffession().length()>100) {
+			setRejectionReason(BirthDeathConstants.M_PROFFESSION_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthMotherInfo().getNationality()!=null && birthDtl.getBirthMotherInfo().getNationality().length()>100) {
+			setRejectionReason(BirthDeathConstants.M_NATIONALITY_LARGE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		
+		if(birthDtl.getBirthPermaddr().getBuildingno()!=null && birthDtl.getBirthPermaddr().getBuildingno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_BUILDINGNO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getHouseno()!=null && birthDtl.getBirthPermaddr().getHouseno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_HOUSENO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getStreetname()!=null && birthDtl.getBirthPermaddr().getStreetname().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_STREETNAME,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getLocality()!=null && birthDtl.getBirthPermaddr().getLocality().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_LOCALITY,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getTehsil()!=null && birthDtl.getBirthPermaddr().getTehsil().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_TEHSIL,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getDistrict()!=null && birthDtl.getBirthPermaddr().getDistrict().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_DISTRICT,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getCity()!=null && birthDtl.getBirthPermaddr().getCity().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_CITY,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getState()!=null && birthDtl.getBirthPermaddr().getState().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_STATE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getPinno()!=null && birthDtl.getBirthPermaddr().getPinno().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_PINNO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPermaddr().getCountry()!=null && birthDtl.getBirthPermaddr().getCountry().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_COUNTRY,birthDtl,importBirthWrapper);
+			return false;
+		}
+		
+		if(birthDtl.getBirthPresentaddr().getBuildingno()!=null && birthDtl.getBirthPresentaddr().getBuildingno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_BUILDINGNO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getHouseno()!=null && birthDtl.getBirthPresentaddr().getHouseno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_HOUSENO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getStreetname()!=null && birthDtl.getBirthPresentaddr().getStreetname().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_STREETNAME,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getLocality()!=null && birthDtl.getBirthPresentaddr().getLocality().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_LOCALITY,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getTehsil()!=null && birthDtl.getBirthPresentaddr().getTehsil().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_TEHSIL,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getDistrict()!=null && birthDtl.getBirthPresentaddr().getDistrict().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_DISTRICT,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getCity()!=null && birthDtl.getBirthPresentaddr().getCity().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_CITY,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getState()!=null && birthDtl.getBirthPresentaddr().getState().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_STATE,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getPinno()!=null && birthDtl.getBirthPresentaddr().getPinno().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_PINNO,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getBirthPresentaddr().getCountry()!=null && birthDtl.getBirthPresentaddr().getCountry().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_COUNTRY,birthDtl,importBirthWrapper);
 			return false;
 		}
 		return true;
@@ -178,5 +297,45 @@ public class BirthValidator {
 	{
 		birthDtl.setRejectReason(reason);
 		importBirthWrapper.updateMaps(reason, birthDtl);
+	}
+	
+	private Long dateFormatHandler(String date)
+	{
+		Long timeLong = null;
+		if(null!=date )
+		{
+			try
+			{
+				timeLong = Long.parseLong(date);
+			}
+			catch (NumberFormatException e) {
+				try {
+					timeLong = sdf1.parse(date).getTime();
+					timeLong = timeLong/1000l;
+				} catch (ParseException e1) {
+					try {
+						timeLong = sdf2.parse(date).getTime();
+						timeLong = timeLong/1000l;
+					} catch (ParseException e2) {
+						return null;
+					}
+				}
+			}
+		}
+		return timeLong;
+	}
+	
+	private Timestamp dateTimeStampHandler(Long time)
+	{
+		Timestamp timeLongTimestamp = null;
+		if(time!=null)
+		{
+			timeLongTimestamp = new Timestamp(time*1000);
+			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
+			{
+				return null;
+			}
+		}
+		return timeLongTimestamp;
 	}
 }

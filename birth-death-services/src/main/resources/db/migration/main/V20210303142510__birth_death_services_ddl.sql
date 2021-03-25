@@ -187,8 +187,36 @@ CREATE TABLE public.eg_death_cert_request_audit
 
 CREATE INDEX idx_eg_death_dtls_tenantid
     ON public.eg_death_dtls USING btree
-    (tenantid ASC NULLS LAST) ;
-    
+    (tenantid ASC NULLS LAST) ;    
 CREATE INDEX idx_eg_birth_dtls_tenantid
     ON public.eg_birth_dtls USING btree
     (tenantid ASC NULLS LAST)  ;
+
+CREATE INDEX idx_eg_birth_father_info_birthdtlid
+    ON public.eg_birth_father_info USING btree
+    (birthdtlid ASC NULLS LAST)  ;    
+CREATE INDEX idx_eg_birth_mother_info_birthdtlid
+    ON public.eg_birth_mother_info USING btree
+    (birthdtlid ASC NULLS LAST)  ;    
+ CREATE INDEX idx_eg_birth_permaddr_info_birthdtlid
+    ON public.eg_birth_permaddr USING btree
+    (birthdtlid ASC NULLS LAST)  ;       
+CREATE INDEX idx_eg_birth_presentaddr_birthdtlid
+    ON public.eg_birth_presentaddr USING btree
+    (birthdtlid ASC NULLS LAST)  ;
+    
+CREATE INDEX idx_eg_death_father_info_deathdtlid
+    ON public.eg_death_father_info USING btree
+    (deathdtlid ASC NULLS LAST)  ;    
+CREATE INDEX idx_eg_death_mother_info_deathdtlid
+    ON public.eg_death_mother_info USING btree
+    (deathdtlid ASC NULLS LAST)  ;
+CREATE INDEX idx_eg_death_spouse_info_deathdtlid
+    ON public.eg_death_spouse_info USING btree
+    (deathdtlid ASC NULLS LAST)  ;    
+CREATE INDEX idx_eg_death_permaddr_info_deathdtlid
+    ON public.eg_death_permaddr USING btree
+    (deathdtlid ASC NULLS LAST)  ;       
+CREATE INDEX idx_eg_death_presentaddr_deathdtlid
+    ON public.eg_death_presentaddr USING btree
+    (deathdtlid ASC NULLS LAST)  ;

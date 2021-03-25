@@ -1,6 +1,8 @@
 package org.bel.birthdeath.death.validator;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import org.bel.birthdeath.death.model.EgDeathDtl;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
@@ -19,6 +21,9 @@ public class DeathValidator {
 	
 	Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+86400000l);
 	Timestamp afterDate = new Timestamp(-5364683608000l);
+	
+	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MM-yyyy");
+	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -43,54 +48,42 @@ public class DeathValidator {
 	}
 	
 	public boolean validateImportFields(EgDeathDtl deathDtl,ImportDeathWrapper importDeathWrapper) {
-		if(null!=deathDtl.getDateofdeathepoch() )
+		Long doddateFormatEpoch = dateFormatHandler(deathDtl.getDateofdeathepoch());
+		if(null == doddateFormatEpoch)
 		{
-			Long dobepoch = null;
-			try
-			{
-				dobepoch = Long.parseLong(deathDtl.getDateofdeathepoch());
-			}
-			catch (NumberFormatException e) {
-				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD);
-				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD, deathDtl);
+			deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD);
+			importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD, deathDtl);
+			return false;
+		}
+		else
+		{
+			Timestamp dobdateRangeEpoch = dateTimeStampHandler(doddateFormatEpoch);
+			if(null==dobdateRangeEpoch) {
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD_RANGE);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD_RANGE, deathDtl);
 				return false;
 			}
-			if(dobepoch!=null)
-			{
-				Timestamp dodepochTimestamp = new Timestamp(dobepoch*1000);
-				if(!(dodepochTimestamp.before(beforeDate) && dodepochTimestamp.after(afterDate)))
-				{
-					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD_RANGE);
-					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD_RANGE, deathDtl);
-					return false;
-				}
-				deathDtl.setDateofdeath(dodepochTimestamp);
-			}
+			deathDtl.setDateofdeath(dobdateRangeEpoch);
 		}
-		if(null!=deathDtl.getDateofreportepoch() && !deathDtl.getDateofreportepoch().isEmpty() )
+		
+		Long dordateFormatEpoch = dateFormatHandler(deathDtl.getDateofreportepoch());
+		if(null == dordateFormatEpoch)
 		{
-			Long dorepoch = null;
-			try
-			{
-				dorepoch = Long.parseLong(deathDtl.getDateofreportepoch());
-			}
-			catch (NumberFormatException e) {
-				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
-				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, deathDtl);
+			deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+			importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, deathDtl);
+			return false;
+		}
+		else
+		{
+			Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
+			if(null==dordateRangeEpoch) {
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, deathDtl);
 				return false;
 			}
-			if(dorepoch!=null)
-			{
-				Timestamp dorepochTimestamp = new Timestamp(dorepoch*1000);
-				if(!(dorepochTimestamp.before(beforeDate) && dorepochTimestamp.after(afterDate)))
-				{
-					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
-					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, deathDtl);
-					return false;
-				}
-				deathDtl.setDateofreport(dorepochTimestamp);
-			}
+			deathDtl.setDateofreport(dordateRangeEpoch);
 		}
+		
 		if(deathDtl.getTenantid()==null || deathDtl.getTenantid().isEmpty() ) {
 			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,deathDtl,importDeathWrapper);
 			return false;
@@ -203,5 +196,45 @@ public class DeathValidator {
 	{
 		egDeathDtl.setRejectReason(reason);
 		importDeathWrapper.updateMaps(reason, egDeathDtl);
+	}
+	
+	private Long dateFormatHandler(String date)
+	{
+		Long timeLong = null;
+		if(null!=date )
+		{
+			try
+			{
+				timeLong = Long.parseLong(date);
+			}
+			catch (NumberFormatException e) {
+				try {
+					timeLong = sdf1.parse(date).getTime();
+					timeLong = timeLong/1000l;
+				} catch (ParseException e1) {
+					try {
+						timeLong = sdf2.parse(date).getTime();
+						timeLong = timeLong/1000l;
+					} catch (ParseException e2) {
+						return null;
+					}
+				}
+			}
+		}
+		return timeLong;
+	}
+	
+	private Timestamp dateTimeStampHandler(Long time)
+	{
+		Timestamp timeLongTimestamp = null;
+		if(time!=null)
+		{
+			timeLongTimestamp = new Timestamp(time*1000);
+			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
+			{
+				return null;
+			}
+		}
+		return timeLongTimestamp;
 	}
 }

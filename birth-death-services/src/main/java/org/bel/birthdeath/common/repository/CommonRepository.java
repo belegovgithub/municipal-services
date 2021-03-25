@@ -161,12 +161,18 @@ public class CommonRepository {
 					uniqueList.put(bdtl.getRegistrationno(), bdtl);
 					if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
 					{
-						bdtl.setHospitalname(bdtl.getHospitalname().trim());
-						if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
-						{
-							uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+						if(bdtl.getHospitalname().length() >500) {
+							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
+							uniqueList.remove(bdtl.getRegistrationno());
 						}
-						uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+						else {
+							bdtl.setHospitalname(bdtl.getHospitalname().trim());
+							if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
+							{
+								uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+							}
+							uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+						}
 					}
 				}
 				else {

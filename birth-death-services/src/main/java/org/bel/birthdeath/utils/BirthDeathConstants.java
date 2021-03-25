@@ -44,6 +44,7 @@ public class BirthDeathConstants {
 	public static final String MANDATORY_MISSING = "DOB/GENDER is empty";
 	public static final String DUPLICATE_REG = "Reg No already exists";
 	public static final String DUPLICATE_REG_EXCEL = "Reg No already exists in Excel";
+	public static final String HOSPNAME_LARGE = "Hospital name cannot exceed 500 chars";
 	public static final String REG_EMPTY = "Reg No cannot be empty";
 	public static final String DOB_EMPTY = "DoB cannot be empty";
 	public static final String GENDER_EMPTY = "Gender cannot be empty";
@@ -54,6 +55,18 @@ public class BirthDeathConstants {
 	public static final String F_FIRSTNAME_LARGE = "Father Firstname cannot exceed 200 chars";
 	public static final String F_MIDDLENAME_LARGE = "Father Middlename cannot exceed 200 chars";
 	public static final String F_LASTNAME_LARGE = "Father Lastname cannot exceed 200 chars";
+	public static final String F_EDUCATION_LARGE = "Father Education cannot exceed 100 chars";
+	public static final String F_RELIGION_LARGE = "Father Religion cannot exceed 100 chars";
+	public static final String F_PROFFESSION_LARGE = "Father Profession cannot exceed 100 chars";
+	public static final String F_NATIONALITY_LARGE = "Father Nationality cannot exceed 100 chars";
+	public static final String M_EDUCATION_LARGE = "Mother Education cannot exceed 100 chars";
+	public static final String M_RELIGION_LARGE = "Mother Religion cannot exceed 100 chars";
+	public static final String M_PROFFESSION_LARGE = "Mother Profession cannot exceed 100 chars";
+	public static final String M_NATIONALITY_LARGE = "Mother Nationality cannot exceed 100 chars";
+	public static final String S_EDUCATION_LARGE = "Spouse Education cannot exceed 100 chars";
+	public static final String S_RELIGION_LARGE = "Spouse Religion cannot exceed 100 chars";
+	public static final String S_PROFFESSION_LARGE = "Spouse Profession cannot exceed 100 chars";
+	public static final String S_NATIONALITY_LARGE = "Spouse Nationality cannot exceed 100 chars";
 	public static final String M_FIRSTNAME_LARGE = "Mother Firstname cannot exceed 200 chars";
 	public static final String M_MIDDLENAME_LARGE = "Mother Middlename cannot exceed 200 chars";
 	public static final String M_LASTNAME_LARGE = "Mother Lastname cannot exceed 200 chars";
@@ -66,7 +79,9 @@ public class BirthDeathConstants {
 	public static final String S_EMAIL_LARGE = "Spouse Email cannot exceed 50 chars";
 	public static final String S_AADHAR_LARGE = "Spouse Aadhar cannot exceed 50 chars";
 	public static final String S_MOBILE_LARGE = "Spouse Mobile cannot exceed 20 chars";
-	
+	public static final String INFORMANTNAME_LARGE = "Informants name cannot exceed 200 chars";
+	public static final String INFORMANTADDR_LARGE = "Informants Address cannot exceed 1000 chars";
+	public static final String PLACEOFBIRTH_LARGE = "Place of Birth cannot exceed 1000 chars";
 	
 	public static final String INVALID_DOB = "DOB not valid";
 	public static final String INVALID_DOB_RANGE = "DOB not in range";
@@ -79,6 +94,28 @@ public class BirthDeathConstants {
 	public static final String S_FIRSTNAME_LARGE = "Spouse Firstname cannot exceed 200 chars";
 	public static final String S_MIDDLENAME_LARGE = "Spouse Middlename cannot exceed 200 chars";
 	public static final String S_LASTNAME_LARGE = "Spouse Lastname cannot exceed 200 chars";
+	
+	public static final String PERM_BUILDINGNO = "Building No in Permanent Address cannot exceed 1000 chars";
+	public static final String PERM_HOUSENO = "House No in Permanent Address cannot exceed 1000 chars";
+	public static final String PERM_STREETNAME = "Street name in Permanent Address cannot exceed 1000 chars";
+	public static final String PERM_LOCALITY = "Locality in Permanent Address cannot exceed 1000 chars";
+	public static final String PERM_TEHSIL = "Tehsil in Permanent Address cannot exceed 1000 chars";
+	public static final String PERM_DISTRICT = "District in Permanent Address cannot exceed 100 chars";
+	public static final String PERM_CITY = "City in Permanent Address cannot exceed 100 chars";
+	public static final String PERM_STATE = "State in Permanent Address cannot exceed 100 chars";
+	public static final String PERM_PINNO = "Pin No in Permanent Address cannot exceed 100 chars";
+	public static final String PERM_COUNTRY = "Country in Permanent Address cannot exceed 100 chars";
+	
+	public static final String PRESENT_BUILDINGNO = "Building No in Present Address cannot exceed 1000 chars";
+	public static final String PRESENT_HOUSENO = "House No in Present Address cannot exceed 1000 chars";
+	public static final String PRESENT_STREETNAME = "Street name in Present Address cannot exceed 1000 chars";
+	public static final String PRESENT_LOCALITY = "Locality in Present Address cannot exceed 1000 chars";
+	public static final String PRESENT_TEHSIL = "Tehsil in Present Address cannot exceed 1000 chars";
+	public static final String PRESENT_DISTRICT = "District in Present Address cannot exceed 100 chars";
+	public static final String PRESENT_CITY = "City in Present Address cannot exceed 100 chars";
+	public static final String PRESENT_STATE = "State in Present Address cannot exceed 100 chars";
+	public static final String PRESENT_PINNO = "Pin No in Present Address cannot exceed 100 chars";
+	public static final String PRESENT_COUNTRY = "Country in Present Address cannot exceed 100 chars";
 	
 	public static final String DATA_ERROR = "Data Error";
     public BirthDeathConstants() {}
