@@ -178,7 +178,8 @@ public class DeathRepository {
 
 	public void updateCounter(String deathDtlId) {
 		try {
-			String updateQry="UPDATE public.eg_death_dtls SET counter=counter+1 WHERE id=?";
+			//String updateQry="UPDATE public.eg_death_dtls SET counter=counter+1 WHERE id=?";
+			String updateQry="UPDATE public.eg_death_dtls SET counter=0 WHERE id=?";
 			jdbcTemplate.update(updateQry, deathDtlId);
 		}catch(Exception e) {
 			e.printStackTrace();
