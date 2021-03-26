@@ -23,6 +23,7 @@ public class BirthValidator {
 	Timestamp afterDate = new Timestamp(-5364683608000l);
 	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MM-yyyy");
 	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
+	SimpleDateFormat sdf3 = new SimpleDateFormat("dd.MM.yyyy");
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -47,42 +48,48 @@ public class BirthValidator {
 	}
 	
 	public boolean validateImportFields(EgBirthDtl birthDtl,ImportBirthWrapper importBirthWrapper) {
-		Long dobdateFormatEpoch = dateFormatHandler(birthDtl.getDateofbirthepoch());
-		if(null == dobdateFormatEpoch)
+		
+		if(null!=birthDtl.getDateofbirthepoch() && !birthDtl.getDateofbirthepoch().isEmpty())
 		{
-			birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB);
-			importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB, birthDtl);
-			return false;
-		}
-		else
-		{
-			Timestamp dobdateRangeEpoch = dateTimeStampHandler(dobdateFormatEpoch);
-			if(null==dobdateRangeEpoch) {
-				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB_RANGE);
-				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB_RANGE, birthDtl);
+			Long dobdateFormatEpoch = dateFormatHandler(birthDtl.getDateofbirthepoch());
+			if(null == dobdateFormatEpoch)
+			{
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB, birthDtl);
 				return false;
 			}
-			birthDtl.setDateofbirth(dobdateRangeEpoch);
+			else
+			{
+				Timestamp dobdateRangeEpoch = dateTimeStampHandler(dobdateFormatEpoch);
+				if(null==dobdateRangeEpoch) {
+					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOB_RANGE);
+					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOB_RANGE, birthDtl);
+					return false;
+				}
+				birthDtl.setDateofbirth(dobdateRangeEpoch);
+			}
 		}
-		
-		Long dordateFormatEpoch = dateFormatHandler(birthDtl.getDateofbirthepoch());
-		if(null == dordateFormatEpoch)
+
+		if(null!=birthDtl.getDateofreportepoch() && !birthDtl.getDateofreportepoch().isEmpty())
 		{
-			birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
-			importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, birthDtl);
-			return false;
-		}
-		else
-		{
-			Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
-			if(null==dordateRangeEpoch) {
-				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
-				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, birthDtl);
+			Long dordateFormatEpoch = dateFormatHandler(birthDtl.getDateofreportepoch());
+			if(null == dordateFormatEpoch)
+			{
+				birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+				importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, birthDtl);
 				return false;
 			}
-			birthDtl.setDateofreport(dordateRangeEpoch);
+			else
+			{
+				Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
+				if(null==dordateRangeEpoch) {
+					birthDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+					importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, birthDtl);
+					return false;
+				}
+				birthDtl.setDateofreport(dordateRangeEpoch);
+			}
 		}
-		
 		if(birthDtl.getTenantid()==null || birthDtl.getTenantid().isEmpty() ) {
 			setRejectionReason(BirthDeathConstants.TENANT_EMPTY,birthDtl,importBirthWrapper);
 			return false;
@@ -317,7 +324,12 @@ public class BirthValidator {
 						timeLong = sdf2.parse(date).getTime();
 						timeLong = timeLong/1000l;
 					} catch (ParseException e2) {
-						return null;
+						try {
+							timeLong = sdf3.parse(date).getTime();
+							timeLong = timeLong/1000l;
+						} catch (ParseException e3) {
+							return null;
+						}
 					}
 				}
 			}
