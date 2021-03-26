@@ -409,16 +409,24 @@ public class CommonRepository {
 			if (deathtl.getRegistrationno() != null) {
 				if (uniqueList.get(deathtl.getRegistrationno()) == null)
 				{
+	
 					uniqueList.put(deathtl.getRegistrationno(), deathtl);
 					if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty() )
 					{
-						deathtl.setHospitalname(deathtl.getHospitalname().trim());
-						if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
-						{
-							uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+						if(deathtl.getHospitalname().length() >500) {
+							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
+							uniqueList.remove(deathtl.getRegistrationno());
 						}
-						uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+						else {
+							deathtl.setHospitalname(deathtl.getHospitalname().trim());
+							if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
+							{
+								uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+							}
+							uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+						}
 					}
+				
 				}
 				else {
 					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);

@@ -71,7 +71,31 @@ public class ImportDeathWrapper {
 			BirthDeathConstants.F_AADHAR_LARGE,
 			BirthDeathConstants.M_AADHAR_LARGE,
 			BirthDeathConstants.S_AADHAR_LARGE,
-			BirthDeathConstants.DATA_ERROR
+			BirthDeathConstants.DATA_ERROR,
+			BirthDeathConstants.HOSPNAME_LARGE,
+			BirthDeathConstants.INFORMANTNAME_LARGE,
+			BirthDeathConstants.INFORMANTADDR_LARGE,
+			BirthDeathConstants.PLACEOFDEATH_LARGE,
+			BirthDeathConstants.PERM_BUILDINGNO ,
+			BirthDeathConstants.PERM_HOUSENO ,
+			BirthDeathConstants.PERM_STREETNAME ,
+			BirthDeathConstants.PERM_LOCALITY ,
+			BirthDeathConstants.PERM_TEHSIL ,
+			BirthDeathConstants.PERM_DISTRICT ,
+			BirthDeathConstants.PERM_CITY ,
+			BirthDeathConstants.PERM_STATE ,
+			BirthDeathConstants.PERM_PINNO ,
+			BirthDeathConstants.PERM_COUNTRY ,
+			BirthDeathConstants.PRESENT_BUILDINGNO ,
+			BirthDeathConstants.PRESENT_HOUSENO ,
+			BirthDeathConstants.PRESENT_STREETNAME ,
+			BirthDeathConstants.PRESENT_LOCALITY ,
+			BirthDeathConstants.PRESENT_TEHSIL ,
+			BirthDeathConstants.PRESENT_DISTRICT ,
+			BirthDeathConstants.PRESENT_CITY ,
+			BirthDeathConstants.PRESENT_STATE ,
+			BirthDeathConstants.PRESENT_PINNO ,
+			BirthDeathConstants.PRESENT_COUNTRY
 			});
     
 	public ImportDeathWrapper() {

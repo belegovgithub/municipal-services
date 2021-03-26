@@ -94,6 +94,7 @@ public class BirthDeathConstants {
 	public static final String S_FIRSTNAME_LARGE = "Spouse Firstname cannot exceed 200 chars";
 	public static final String S_MIDDLENAME_LARGE = "Spouse Middlename cannot exceed 200 chars";
 	public static final String S_LASTNAME_LARGE = "Spouse Lastname cannot exceed 200 chars";
+	public static final String PLACEOFDEATH_LARGE = "Place of Death cannot exceed 1000 chars";
 	
 	public static final String PERM_BUILDINGNO = "Building No in Permanent Address cannot exceed 1000 chars";
 	public static final String PERM_HOUSENO = "House No in Permanent Address cannot exceed 1000 chars";

@@ -104,6 +104,18 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.GENDER_INVALID,deathDtl,importDeathWrapper);
 			return false;
 		}
+		if(deathDtl.getInformantsname()!=null && deathDtl.getInformantsname().length()>200) {
+			setRejectionReason(BirthDeathConstants.INFORMANTNAME_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getInformantsaddress()!=null && deathDtl.getInformantsaddress().length()>1000) {
+			setRejectionReason(BirthDeathConstants.INFORMANTADDR_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getPlaceofdeath()!=null && deathDtl.getPlaceofdeath().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PLACEOFDEATH_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
 		if(deathDtl.getFirstname()!=null && deathDtl.getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
@@ -140,6 +152,7 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.F_AADHAR_LARGE,deathDtl,importDeathWrapper);
 			return false;
 		}
+		
 		if(deathDtl.getDeathMotherInfo().getFirstname()!=null && deathDtl.getDeathMotherInfo().getFirstname().length()>200) {
 			setRejectionReason(BirthDeathConstants.M_FIRSTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
@@ -187,6 +200,88 @@ public class DeathValidator {
 		}
 		if(deathDtl.getDeathSpouseInfo().getAadharno()!=null && deathDtl.getDeathSpouseInfo().getAadharno().length()>50) {
 			setRejectionReason(BirthDeathConstants.S_AADHAR_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		
+		if(deathDtl.getDeathPermaddr().getBuildingno()!=null && deathDtl.getDeathPermaddr().getBuildingno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_BUILDINGNO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getHouseno()!=null && deathDtl.getDeathPermaddr().getHouseno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_HOUSENO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getStreetname()!=null && deathDtl.getDeathPermaddr().getStreetname().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_STREETNAME,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getLocality()!=null && deathDtl.getDeathPermaddr().getLocality().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_LOCALITY,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getTehsil()!=null && deathDtl.getDeathPermaddr().getTehsil().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PERM_TEHSIL,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getDistrict()!=null && deathDtl.getDeathPermaddr().getDistrict().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_DISTRICT,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getCity()!=null && deathDtl.getDeathPermaddr().getCity().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_CITY,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getState()!=null && deathDtl.getDeathPermaddr().getState().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_STATE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getPinno()!=null && deathDtl.getDeathPermaddr().getPinno().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_PINNO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPermaddr().getCountry()!=null && deathDtl.getDeathPermaddr().getCountry().length()>100) {
+			setRejectionReason(BirthDeathConstants.PERM_COUNTRY,deathDtl,importDeathWrapper);
+			return false;
+		}
+		
+		if(deathDtl.getDeathPresentaddr().getBuildingno()!=null && deathDtl.getDeathPresentaddr().getBuildingno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_BUILDINGNO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getHouseno()!=null && deathDtl.getDeathPresentaddr().getHouseno().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_HOUSENO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getStreetname()!=null && deathDtl.getDeathPresentaddr().getStreetname().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_STREETNAME,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getLocality()!=null && deathDtl.getDeathPresentaddr().getLocality().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_LOCALITY,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getTehsil()!=null && deathDtl.getDeathPresentaddr().getTehsil().length()>1000) {
+			setRejectionReason(BirthDeathConstants.PRESENT_TEHSIL,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getDistrict()!=null && deathDtl.getDeathPresentaddr().getDistrict().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_DISTRICT,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getCity()!=null && deathDtl.getDeathPresentaddr().getCity().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_CITY,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getState()!=null && deathDtl.getDeathPresentaddr().getState().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_STATE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getPinno()!=null && deathDtl.getDeathPresentaddr().getPinno().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_PINNO,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getDeathPresentaddr().getCountry()!=null && deathDtl.getDeathPresentaddr().getCountry().length()>100) {
+			setRejectionReason(BirthDeathConstants.PRESENT_COUNTRY,deathDtl,importDeathWrapper);
 			return false;
 		}
 		return true;
