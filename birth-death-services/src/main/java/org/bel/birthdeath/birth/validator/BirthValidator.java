@@ -343,6 +343,9 @@ public class BirthValidator {
 		if(time!=null)
 		{
 			timeLongTimestamp = new Timestamp(time*1000);
+			System.out.println(timeLongTimestamp);
+			System.out.println(beforeDate);
+			System.out.println(afterDate);
 			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
 			{
 				return null;
@@ -350,4 +353,11 @@ public class BirthValidator {
 		}
 		return timeLongTimestamp;
 	}
+	
+	/*
+	 * public static void main(String[] args) { Timestamp timeLongTimestamp = new
+	 * Timestamp(System.currentTimeMillis()); System.out.println(timeLongTimestamp);
+	 * }
+	 */
 }
+
