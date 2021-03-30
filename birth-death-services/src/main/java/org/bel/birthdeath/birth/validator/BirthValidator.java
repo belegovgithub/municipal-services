@@ -345,6 +345,9 @@ public class BirthValidator {
 			Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+10800000l);
 			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
 			{
+				System.out.println("timeLongTimestamp : "+timeLongTimestamp);
+				System.out.println("beforeDate : "+beforeDate);
+				System.out.println("afterDate : "+afterDate);
 				return null;
 			}
 		}

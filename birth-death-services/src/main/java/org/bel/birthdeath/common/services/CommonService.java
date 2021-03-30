@@ -35,4 +35,13 @@ public class CommonService {
 		return importDeathWrapper;
 	}
 
+	public ImportBirthWrapper updateBirthImport(BirthResponse importJSon, RequestInfo requestInfo) {
+		ImportBirthWrapper importBirthWrapper = repository.updateBirthImport(importJSon, requestInfo);
+		return importBirthWrapper;
+	}
+	
+	public ImportDeathWrapper updateDeathImport(DeathResponse importJSon, RequestInfo requestInfo) {
+		ImportDeathWrapper importDeathWrapper = repository.updateDeathImport(importJSon, requestInfo);
+		return importDeathWrapper;
+	}
 }

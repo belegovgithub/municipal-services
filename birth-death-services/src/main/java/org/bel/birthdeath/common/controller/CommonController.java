@@ -60,4 +60,20 @@ public class CommonController {
 		importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
         return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
     }
+	
+	@RequestMapping(value = { "/updateBirthImport"}, method = RequestMethod.POST)
+    public ResponseEntity<ImportBirthWrapper> updateBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper ,
+    		@RequestBody BirthResponse importJSon) {
+        ImportBirthWrapper importBirthWrapper = commonService.updateBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
+        importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+        return new ResponseEntity<>(importBirthWrapper, HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/updateDeathImport"}, method = RequestMethod.POST)
+    public ResponseEntity<ImportDeathWrapper> updateDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper ,
+    		@RequestBody DeathResponse importJSon) {
+		ImportDeathWrapper importDeathWrapper = commonService.updateDeathImport(importJSon,requestInfoWrapper.getRequestInfo());
+		importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+        return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
+    }
 }

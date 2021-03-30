@@ -139,6 +139,51 @@ public class CommonRepository {
 	private static final String hospitalInsertSQL="INSERT INTO public.eg_birth_death_hospitals(id, hospitalname, tenantid) VALUES "
 			+ " (?, ?, ?) ;";
 	
+	private static final String birthDtlUpdateQry="UPDATE public.eg_birth_dtls SET registrationno = :registrationno, hospitalname = :hospitalname, dateofreport = :dateofreport, "
+			+ "dateofbirth = :dateofbirth , firstname= :firstname, middlename = :middlename, lastname = :lastname, placeofbirth= :placeofbirth, informantsname = :informantsname, "
+			+ "informantsaddress = :informantsaddress, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby= :lastmodifiedby, gender = :gender, remarks = :remarks, "
+			+ "hospitalid = :hospitalid , age = :age, eidno = :eidno, aadharno = :aadharno, nationality = :nationality, religion = :religion, icdcode = :icdcode WHERE id = :id;";
+	
+	private static final String birthFatherInfoUpdateQry="UPDATE public.eg_birth_father_info SET firstname = :firstname, middlename = :middlename, lastname = :lastname, "
+			+ "aadharno = :aadharno, emailid = :emailid, mobileno = :mobileno, education = :education, proffession = :proffession, nationality = :nationality, "
+			+ "religion = :religion, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby = :lastmodifiedby WHERE birthdtlid = :birthdtlid;";
+	
+	private static final String birthMotherInfoUpdateQry="UPDATE public.eg_birth_mother_info SET firstname = :firstname, middlename = :middlename, lastname = :lastname, "
+			+ "aadharno = :aadharno, emailid = :emailid, mobileno = :mobileno, education = :education, proffession = :proffession, nationality = :nationality, "
+			+ "religion = :religion, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby = :lastmodifiedby WHERE birthdtlid = :birthdtlid;";
+	
+	private static final String birthPermAddrUpdateQry = "UPDATE public.eg_birth_permaddr SET buildingno = :buildingno, houseno = :houseno, streetname = :streetname, "
+			+ "locality = :locality, tehsil = :tehsil, district = :district, city = :city, state = :state, pinno = :pinno, country = :country, "
+			+ "lastmodifiedby = :lastmodifiedby, lastmodifiedtime = :lastmodifiedtime WHERE birthdtlid = :birthdtlid;";
+	
+	private static final String birthPresentAddrUpdateQry="UPDATE public.eg_birth_presentaddr SET buildingno = :buildingno, houseno = :houseno, streetname = :streetname, "
+			+ "locality = :locality, tehsil = :tehsil, district = :district, city = :city, state = :state, pinno = :pinno, country = :country, "
+			+ "lastmodifiedby = :lastmodifiedby, lastmodifiedtime = :lastmodifiedtime WHERE birthdtlid = :birthdtlid;";
+	
+	
+	private static final String deathDtlUpdateQry="UPDATE public.eg_death_dtls SET registrationno = :registrationno, hospitalname = :hospitalname, dateofreport = :dateofreport, "
+			+ "dateofdeath = :dateofdeath , firstname= :firstname, middlename = :middlename, lastname = :lastname, placeofdeath= :placeofdeath, informantsname = :informantsname, "
+			+ "informantsaddress = :informantsaddress, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby= :lastmodifiedby, gender = :gender, remarks = :remarks, "
+			+ "hospitalid = :hospitalid WHERE id = :id;";
+	
+	private static final String deathFatherInfoUpdateQry="UPDATE public.eg_death_father_info SET firstname = :firstname, middlename = :middlename, lastname = :lastname, "
+			+ "aadharno = :aadharno, emailid = :emailid, mobileno = :mobileno, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby = :lastmodifiedby WHERE deathdtlid = :deathdtlid;";
+	
+	private static final String deathMotherInfoUpdateQry="UPDATE public.eg_death_mother_info SET firstname = :firstname, middlename = :middlename, lastname = :lastname, "
+			+ "aadharno = :aadharno, emailid = :emailid, mobileno = :mobileno, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby = :lastmodifiedby WHERE deathdtlid = :deathdtlid;";
+	
+	private static final String deathSpouseInfoUpdateQry="UPDATE public.eg_death_spouse_info SET firstname = :firstname, middlename = :middlename, lastname = :lastname, "
+			+ "aadharno = :aadharno, emailid = :emailid, mobileno = :mobileno, lastmodifiedtime = :lastmodifiedtime, lastmodifiedby = :lastmodifiedby WHERE deathdtlid = :deathdtlid;";
+	
+	private static final String deathPermAddrUpdateQry = "UPDATE public.eg_death_permaddr SET buildingno = :buildingno, houseno = :houseno, streetname = :streetname, "
+			+ "locality = :locality, tehsil = :tehsil, district = :district, city = :city, state = :state, pinno = :pinno, country = :country, "
+			+ "lastmodifiedby = :lastmodifiedby, lastmodifiedtime = :lastmodifiedtime WHERE deathdtlid = :deathdtlid;";
+	
+	private static final String deathPresentAddrUpdateQry="UPDATE public.eg_death_presentaddr SET buildingno = :buildingno, houseno = :houseno, streetname = :streetname, "
+			+ "locality = :locality, tehsil = :tehsil, district = :district, city = :city, state = :state, pinno = :pinno, country = :country, "
+			+ "lastmodifiedby = :lastmodifiedby, lastmodifiedtime = :lastmodifiedtime WHERE deathdtlid = :deathdtlid;";
+	
+	
 	public List<EgHospitalDtl> getHospitalDtls(String tenantId) {
 		List<Object> preparedStmtList = new ArrayList<>();
         String query = queryBuilder.getHospitalDtls(tenantId, preparedStmtList);
@@ -207,11 +252,11 @@ public class CommonRepository {
 			}
 			if(birthValidator.validateUniqueRegNo(birthDtl,importBirthWrapper) && birthValidator.validateImportFields(birthDtl,importBirthWrapper)){
 				try {
-					namedParameterJdbcTemplate.update(birthDtlSaveQry, getParametersForBirthDtl(birthDtl, auditDetails));
-					namedParameterJdbcTemplate.update(birthFatherInfoSaveQry, getParametersForFatherInfo(birthDtl, auditDetails));
-					namedParameterJdbcTemplate.update(birthMotherInfoSaveQry, getParametersForMotherInfo(birthDtl, auditDetails));
-					namedParameterJdbcTemplate.update(birthPermAddrSaveQry, getParametersForPermAddr(birthDtl, auditDetails));
-					namedParameterJdbcTemplate.update(birthPresentAddrSaveQry, getParametersForPresentAddr(birthDtl, auditDetails));
+					namedParameterJdbcTemplate.update(birthDtlSaveQry, getParametersForBirthDtl(birthDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(birthFatherInfoSaveQry, getParametersForFatherInfo(birthDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(birthMotherInfoSaveQry, getParametersForMotherInfo(birthDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(birthPermAddrSaveQry, getParametersForPermAddr(birthDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(birthPresentAddrSaveQry, getParametersForPresentAddr(birthDtl, auditDetails, true));
 					finalCount++;
 				}
 				catch (Exception e) {
@@ -280,7 +325,7 @@ public class CommonRepository {
 		}
 	}
 	
-	private MapSqlParameterSource getParametersForPresentAddr(EgBirthDtl birthDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForPresentAddr(EgBirthDtl birthDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgBirthPresentaddr presentaddr = birthDtl.getBirthPresentaddr();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -296,13 +341,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("country", presentaddr.getCountry());
 		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
 		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("lastmodifiedby", null);
-		sqlParameterSource.addValue("lastmodifiedtime", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForPermAddr(EgBirthDtl birthDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForPermAddr(EgBirthDtl birthDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgBirthPermaddr permaddr = birthDtl.getBirthPermaddr();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -318,13 +371,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("country", permaddr.getCountry());
 		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
 		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("lastmodifiedby", null);
-		sqlParameterSource.addValue("lastmodifiedtime", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForMotherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForMotherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails, boolean isInsert) {
 		EgBirthMotherInfo birthMotherInfo = encryptionDecryptionUtil.encryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -338,15 +399,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("proffession", birthMotherInfo.getProffession());
 		sqlParameterSource.addValue("nationality", birthMotherInfo.getNationality());
 		sqlParameterSource.addValue("religion", birthMotherInfo.getReligion());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForFatherInfo(EgBirthDtl birthDtl, AuditDetails auditDetails, boolean isInsert) {
 		EgBirthFatherInfo birthFatherInfo = encryptionDecryptionUtil.encryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -360,18 +427,28 @@ public class CommonRepository {
 		sqlParameterSource.addValue("proffession", birthFatherInfo.getProffession());
 		sqlParameterSource.addValue("nationality", birthFatherInfo.getNationality());
 		sqlParameterSource.addValue("religion", birthFatherInfo.getReligion());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("birthdtlid", birthDtl.getId());
 		
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForBirthDtl(EgBirthDtl birthDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForBirthDtl(EgBirthDtl birthDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-		String id= UUID.randomUUID().toString();
+		String id= "";
+		if(isInsert)
+			id= UUID.randomUUID().toString();
+		else
+			id=birthDtl.getId();
 		sqlParameterSource.addValue("id", id);
 		sqlParameterSource.addValue("registrationno", birthDtl.getRegistrationno());
 		sqlParameterSource.addValue("hospitalname", birthDtl.getHospitalname());
@@ -383,10 +460,16 @@ public class CommonRepository {
 		sqlParameterSource.addValue("placeofbirth", birthDtl.getPlaceofbirth());
 		sqlParameterSource.addValue("informantsname", birthDtl.getInformantsname());
 		sqlParameterSource.addValue("informantsaddress", birthDtl.getInformantsaddress());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("counter", birthDtl.getCounter());
 		sqlParameterSource.addValue("tenantid", birthDtl.getTenantid());
 		sqlParameterSource.addValue("gender", birthDtl.getGender());
@@ -460,12 +543,12 @@ public class CommonRepository {
 			}
 			if(deathValidator.validateUniqueRegNo(deathDtl,importDeathWrapper) && deathValidator.validateImportFields(deathDtl,importDeathWrapper)){
 				try {
-					namedParameterJdbcTemplate.update(deathDtlSaveQry, getParametersForDeathDtl(deathDtl, auditDetails));
-					namedParameterJdbcTemplate.update(deathFatherInfoSaveQry, getParametersForFatherInfo(deathDtl, auditDetails));
-					namedParameterJdbcTemplate.update(deathMotherInfoSaveQry, getParametersForMotherInfo(deathDtl, auditDetails));
-					namedParameterJdbcTemplate.update(deathSpouseInfoSaveQry, getParametersForMotherInfo(deathDtl, auditDetails));
-					namedParameterJdbcTemplate.update(deathPermAddrSaveQry, getParametersForPermAddr(deathDtl, auditDetails));
-					namedParameterJdbcTemplate.update(deathPresentAddrSaveQry, getParametersForPresentAddr(deathDtl, auditDetails));
+					namedParameterJdbcTemplate.update(deathDtlSaveQry, getParametersForDeathDtl(deathDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(deathFatherInfoSaveQry, getParametersForFatherInfo(deathDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(deathMotherInfoSaveQry, getParametersForMotherInfo(deathDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(deathSpouseInfoSaveQry, getParametersForSpouseInfo(deathDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(deathPermAddrSaveQry, getParametersForPermAddr(deathDtl, auditDetails, true));
+					namedParameterJdbcTemplate.update(deathPresentAddrSaveQry, getParametersForPresentAddr(deathDtl, auditDetails, true));
 					finalCount++;
 				}
 				catch (Exception e) {
@@ -491,7 +574,7 @@ public class CommonRepository {
 		return importDeathWrapper;
 	}
 
-	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForPresentAddr(EgDeathDtl deathDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgDeathPresentaddr presentaddr = deathDtl.getDeathPresentaddr();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -505,15 +588,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("state", presentaddr.getState());
 		sqlParameterSource.addValue("pinno", presentaddr.getPinno());
 		sqlParameterSource.addValue("country", presentaddr.getCountry());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("lastmodifiedby", null);
-		sqlParameterSource.addValue("lastmodifiedtime", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForPermAddr(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForPermAddr(EgDeathDtl deathDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgDeathPermaddr permaddr = deathDtl.getDeathPermaddr();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -527,15 +616,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("state", permaddr.getState());
 		sqlParameterSource.addValue("pinno", permaddr.getPinno());
 		sqlParameterSource.addValue("country", permaddr.getCountry());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("lastmodifiedby", null);
-		sqlParameterSource.addValue("lastmodifiedtime", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForMotherInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForMotherInfo(EgDeathDtl deathDtl, AuditDetails auditDetails, boolean isInsert) {
 		EgDeathMotherInfo deathMotherInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathMotherInfo(), "BndDetail", EgDeathMotherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -545,15 +640,21 @@ public class CommonRepository {
 		sqlParameterSource.addValue("aadharno", deathMotherInfo.getAadharno());
 		sqlParameterSource.addValue("emailid", deathMotherInfo.getEmailid());
 		sqlParameterSource.addValue("mobileno", deathMotherInfo.getMobileno());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
 		return sqlParameterSource;
 	}
 	
-	private MapSqlParameterSource getParametersForSpouseInfo(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForSpouseInfo(EgDeathDtl deathDtl, AuditDetails auditDetails, boolean isInsert) {
 		EgDeathSpouseInfo deathSpouseInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathSpouseInfo(), "BndDetail", EgDeathSpouseInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -563,16 +664,22 @@ public class CommonRepository {
 		sqlParameterSource.addValue("aadharno", deathSpouseInfo.getAadharno());
 		sqlParameterSource.addValue("emailid", deathSpouseInfo.getEmailid());
 		sqlParameterSource.addValue("mobileno", deathSpouseInfo.getMobileno());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
 		return sqlParameterSource;
 	}
 
 	private MapSqlParameterSource getParametersForFatherInfo(EgDeathDtl deathDtl,
-			AuditDetails auditDetails) {
+			AuditDetails auditDetails, boolean isInsert) {
 		EgDeathFatherInfo deathFatherInfo = encryptionDecryptionUtil.encryptObject(deathDtl.getDeathFatherInfo(), "BndDetail", EgDeathFatherInfo.class);
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		sqlParameterSource.addValue("id", UUID.randomUUID().toString());
@@ -582,18 +689,28 @@ public class CommonRepository {
 		sqlParameterSource.addValue("aadharno", deathFatherInfo.getAadharno());
 		sqlParameterSource.addValue("emailid", deathFatherInfo.getEmailid());
 		sqlParameterSource.addValue("mobileno", deathFatherInfo.getMobileno());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("deathdtlid", deathDtl.getId());
 		return sqlParameterSource;
 	}
 
-	private MapSqlParameterSource getParametersForDeathDtl(EgDeathDtl deathDtl, AuditDetails auditDetails) {
+	private MapSqlParameterSource getParametersForDeathDtl(EgDeathDtl deathDtl, AuditDetails auditDetails, boolean isInsert) {
 		MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 		EgDeathDtl deathDtlEnc = encryptionDecryptionUtil.encryptObject(deathDtl, "BndDetail", EgDeathDtl.class);
-		String id= UUID.randomUUID().toString();
+		String id="";
+		if(isInsert)
+			id= UUID.randomUUID().toString();
+		else
+			id=deathDtl.getId();
 		sqlParameterSource.addValue("id", id);
 		sqlParameterSource.addValue("registrationno", deathDtl.getRegistrationno());
 		sqlParameterSource.addValue("hospitalname", deathDtl.getHospitalname());
@@ -605,10 +722,16 @@ public class CommonRepository {
 		sqlParameterSource.addValue("placeofdeath", deathDtl.getPlaceofdeath());
 		sqlParameterSource.addValue("informantsname", deathDtl.getInformantsname());
 		sqlParameterSource.addValue("informantsaddress", deathDtl.getInformantsaddress());
-		sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
-		sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
-		sqlParameterSource.addValue("lastmodifiedtime", null);
-		sqlParameterSource.addValue("lastmodifiedby", null);
+		if(isInsert) {
+			sqlParameterSource.addValue("createdtime", auditDetails.getCreatedTime());
+			sqlParameterSource.addValue("createdby", auditDetails.getCreatedBy());
+			sqlParameterSource.addValue("lastmodifiedtime", null);
+			sqlParameterSource.addValue("lastmodifiedby", null);
+		}
+		else{
+			sqlParameterSource.addValue("lastmodifiedtime", auditDetails.getLastModifiedTime());
+			sqlParameterSource.addValue("lastmodifiedby", auditDetails.getLastModifiedBy());
+		}
 		sqlParameterSource.addValue("counter", deathDtl.getCounter());
 		sqlParameterSource.addValue("tenantid", deathDtl.getTenantid());
 		sqlParameterSource.addValue("gender", deathDtl.getGender());
@@ -623,5 +746,186 @@ public class CommonRepository {
 		deathDtl.setId(id);
 		return sqlParameterSource;
 
+	}
+	
+	public ImportBirthWrapper updateBirthImport(BirthResponse response, RequestInfo requestInfo) {
+		ImportBirthWrapper importBirthWrapper = new ImportBirthWrapper();
+		try {
+		Map<String,EgBirthDtl> uniqueList = new HashMap<String, EgBirthDtl>();
+		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
+		Set<String> duplicates = new HashSet<String>();
+		response.getBirthCerts().forEach(bdtl -> {
+			if (bdtl.getRegistrationno() != null) {
+				if (uniqueList.get(bdtl.getRegistrationno()) == null)
+				{
+					uniqueList.put(bdtl.getRegistrationno(), bdtl);
+					if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
+					{
+						if(bdtl.getHospitalname().length() >500) {
+							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
+							uniqueList.remove(bdtl.getRegistrationno());
+						}
+						else {
+							bdtl.setHospitalname(bdtl.getHospitalname().trim());
+							if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
+							{
+								uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+							}
+							uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+						}
+					}
+				}
+				else {
+					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
+					duplicates.add(bdtl.getRegistrationno());
+				}
+			}
+		});
+		for (String regno : duplicates) {
+			importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
+			uniqueList.remove(regno);
+		}
+		modifyHospIdBirth(uniqueHospList , response.getBirthCerts().get(0).getTenantid());
+		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), false);
+		int finalCount=0;
+		for (Entry<String, EgBirthDtl> entry : uniqueList.entrySet()) {
+			EgBirthDtl birthDtl = entry.getValue();
+			birthDtl.setGenderStr(birthDtl.getGenderStr()==null?"":birthDtl.getGenderStr().trim().toLowerCase());
+			switch (birthDtl.getGenderStr()) {
+			case "male":
+				birthDtl.setGender(1);
+				break;
+			case "female":
+				birthDtl.setGender(2);
+				break;
+			case "transgender":
+				birthDtl.setGender(3);
+				break;
+			default:
+				birthDtl.setGender(0);
+				break;
+			}
+			if(birthValidator.validateImportFields(birthDtl,importBirthWrapper)){
+				try {
+					namedParameterJdbcTemplate.update(birthDtlUpdateQry, getParametersForBirthDtl(birthDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(birthFatherInfoUpdateQry, getParametersForFatherInfo(birthDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(birthMotherInfoUpdateQry, getParametersForMotherInfo(birthDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(birthPermAddrUpdateQry, getParametersForPermAddr(birthDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(birthPresentAddrUpdateQry, getParametersForPresentAddr(birthDtl, auditDetails, false));
+					finalCount++;
+				}
+				catch (Exception e) {
+					birthDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
+					importBirthWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, birthDtl);
+					Map<String, String> params = new HashMap<>();
+					params.put("tenantid", birthDtl.getTenantid());
+					params.put("registrationno", birthDtl.getRegistrationno());
+					namedParameterJdbcTemplate.update(birthDtlDeleteQry, params);
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		log.info("completed " + finalCount);
+		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),finalCount);
+		}
+		catch (Exception e) {
+			importBirthWrapper.setServiceError("Service Error in Updating");
+			e.printStackTrace();
+		}
+		return importBirthWrapper;
+	}
+	
+	public ImportDeathWrapper updateDeathImport(DeathResponse response, RequestInfo requestInfo) {
+		ImportDeathWrapper importDeathWrapper =  new ImportDeathWrapper();
+		try {
+		//DeathResponse response= mapper.convertValue(importJSon, DeathResponse.class);
+		Map<String,EgDeathDtl> uniqueList = new HashMap<String, EgDeathDtl>();
+		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
+		Set<String> duplicates = new HashSet<String>();
+		response.getDeathCerts().forEach(deathtl -> {
+			if (deathtl.getRegistrationno() != null) {
+				if (uniqueList.get(deathtl.getRegistrationno()) == null)
+				{
+	
+					uniqueList.put(deathtl.getRegistrationno(), deathtl);
+					if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty() )
+					{
+						if(deathtl.getHospitalname().length() >500) {
+							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
+							uniqueList.remove(deathtl.getRegistrationno());
+						}
+						else {
+							deathtl.setHospitalname(deathtl.getHospitalname().trim());
+							if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
+							{
+								uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+							}
+							uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+						}
+					}
+				
+				}
+				else {
+					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
+					duplicates.add(deathtl.getRegistrationno());
+				}
+			}
+		});
+		for (String regno : duplicates) {
+			importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
+			uniqueList.remove(regno);
+		}
+		modifyHospIdDeath(uniqueHospList , response.getDeathCerts().get(0).getTenantid());
+		AuditDetails auditDetails = commUtils.getAuditDetails(requestInfo.getUserInfo().getUuid(), true);
+		int finalCount=0;
+		for (Entry<String, EgDeathDtl> entry : uniqueList.entrySet()) {
+			EgDeathDtl deathDtl = entry.getValue();
+			deathDtl.setGenderStr(deathDtl.getGenderStr()==null?"":deathDtl.getGenderStr().trim().toLowerCase());
+			switch (deathDtl.getGenderStr()) {
+			case "male":
+				deathDtl.setGender(1);
+				break;
+			case "female":
+				deathDtl.setGender(2);
+				break;
+			case "transgender":
+				deathDtl.setGender(3);
+				break;
+			default:
+				deathDtl.setGender(0);
+				break;
+			}
+			if(deathValidator.validateImportFields(deathDtl,importDeathWrapper)){
+				try {
+					namedParameterJdbcTemplate.update(deathDtlUpdateQry, getParametersForDeathDtl(deathDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(deathFatherInfoUpdateQry, getParametersForFatherInfo(deathDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(deathMotherInfoUpdateQry, getParametersForMotherInfo(deathDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(deathSpouseInfoUpdateQry, getParametersForSpouseInfo(deathDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(deathPermAddrUpdateQry, getParametersForPermAddr(deathDtl, auditDetails, false));
+					namedParameterJdbcTemplate.update(deathPresentAddrUpdateQry, getParametersForPresentAddr(deathDtl, auditDetails, false));
+					finalCount++;
+				}
+				catch (Exception e) {
+					deathDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
+					importDeathWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, deathDtl);
+					Map<String, String> params = new HashMap<>();
+					params.put("tenantid", deathDtl.getTenantid());
+					params.put("registrationno", deathDtl.getRegistrationno());
+					namedParameterJdbcTemplate.update(deathDtlDeleteQry, params);
+					e.printStackTrace();
+				}
+			}
+		}
+		//log.info(new Gson().toJson(deathDtlSource));
+		
+		log.info("completed " + finalCount);
+		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),finalCount);
+		}
+		catch (Exception e) {
+			importDeathWrapper.setServiceError("Service Error in Updating");
+			e.printStackTrace();
+		}
+		return importDeathWrapper;
 	}
 }
