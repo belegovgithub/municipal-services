@@ -34,6 +34,8 @@ import org.bel.birthdeath.death.model.EgDeathPresentaddr;
 import org.bel.birthdeath.death.model.EgDeathSpouseInfo;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
+import org.egov.common.contract.request.RequestInfo;
+import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,7 +67,7 @@ public class StorageController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<ImportBirthWrapper> uploadBirth(@RequestParam(value = "file", required = false) List<MultipartFile> files,
-            @RequestParam(value = "tenantId" , required = false) String tenantId ,@RequestBody RequestInfoWrapper requestInfoWrapper) {
+            @RequestParam(value = "tenantId" , required = false) String tenantId) {
         String extension = "";
         Path testFile = null;
         BirthResponse importJSon = new BirthResponse();
@@ -291,8 +293,12 @@ public class StorageController {
                     e.printStackTrace();
                 }
                  
-				ImportBirthWrapper importBirthWrapper = commonService.saveBirthImport(importJSon,requestInfoWrapper.getRequestInfo());
-                importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+				RequestInfo requestInfo = new RequestInfo();
+				User userInfo = new User();
+				userInfo.setUuid("import-user");
+				requestInfo.setUserInfo(userInfo);
+				ImportBirthWrapper importBirthWrapper = commonService.saveBirthImport(importJSon,requestInfo);
+                importBirthWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true));
                 return new ResponseEntity<>(importBirthWrapper, HttpStatus.OK);
             }
         }catch (Exception e) {
