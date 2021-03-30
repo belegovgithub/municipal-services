@@ -19,11 +19,11 @@ public class DeathValidator {
 	@Autowired
 	DeathRepository repository;
 	
-	Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+86400000l);
 	Timestamp afterDate = new Timestamp(-5364683608000l);
 	
 	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MM-yyyy");
 	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
+	SimpleDateFormat sdf3 = new SimpleDateFormat("dd.MM.yyyy");
 	
 	public boolean validateFields(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
@@ -48,40 +48,46 @@ public class DeathValidator {
 	}
 	
 	public boolean validateImportFields(EgDeathDtl deathDtl,ImportDeathWrapper importDeathWrapper) {
-		Long doddateFormatEpoch = dateFormatHandler(deathDtl.getDateofdeathepoch());
-		if(null == doddateFormatEpoch)
+		if(null!=deathDtl.getDateofdeathepoch() && !deathDtl.getDateofdeathepoch().isEmpty())
 		{
-			deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD);
-			importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD, deathDtl);
-			return false;
-		}
-		else
-		{
-			Timestamp dobdateRangeEpoch = dateTimeStampHandler(doddateFormatEpoch);
-			if(null==dobdateRangeEpoch) {
-				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD_RANGE);
-				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD_RANGE, deathDtl);
+			Long doddateFormatEpoch = dateFormatHandler(deathDtl.getDateofdeathepoch());
+			if(null == doddateFormatEpoch)
+			{
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD, deathDtl);
 				return false;
 			}
-			deathDtl.setDateofdeath(dobdateRangeEpoch);
+			else
+			{
+				Timestamp dobdateRangeEpoch = dateTimeStampHandler(doddateFormatEpoch);
+				if(null==dobdateRangeEpoch) {
+					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOD_RANGE);
+					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOD_RANGE, deathDtl);
+					return false;
+				}
+				deathDtl.setDateofdeath(dobdateRangeEpoch);
+			}
 		}
 		
-		Long dordateFormatEpoch = dateFormatHandler(deathDtl.getDateofreportepoch());
-		if(null == dordateFormatEpoch)
+		if(null!=deathDtl.getDateofreportepoch() && !deathDtl.getDateofreportepoch().isEmpty())
 		{
-			deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
-			importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, deathDtl);
-			return false;
-		}
-		else
-		{
-			Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
-			if(null==dordateRangeEpoch) {
-				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
-				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, deathDtl);
+			Long dordateFormatEpoch = dateFormatHandler(deathDtl.getDateofreportepoch());
+			if(null == dordateFormatEpoch)
+			{
+				deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR);
+				importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR, deathDtl);
 				return false;
 			}
-			deathDtl.setDateofreport(dordateRangeEpoch);
+			else
+			{
+				Timestamp dordateRangeEpoch = dateTimeStampHandler(dordateFormatEpoch);
+				if(null==dordateRangeEpoch) {
+					deathDtl.setRejectReason(BirthDeathConstants.INVALID_DOR_RANGE);
+					importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DOR_RANGE, deathDtl);
+					return false;
+				}
+				deathDtl.setDateofreport(dordateRangeEpoch);
+			}
 		}
 		
 		if(deathDtl.getTenantid()==null || deathDtl.getTenantid().isEmpty() ) {
@@ -311,7 +317,12 @@ public class DeathValidator {
 						timeLong = sdf2.parse(date).getTime();
 						timeLong = timeLong/1000l;
 					} catch (ParseException e2) {
-						return null;
+						try {
+							timeLong = sdf3.parse(date).getTime();
+							timeLong = timeLong/1000l;
+						} catch (ParseException e3) {
+							return null;
+						}
 					}
 				}
 			}
@@ -325,6 +336,7 @@ public class DeathValidator {
 		if(time!=null)
 		{
 			timeLongTimestamp = new Timestamp(time*1000);
+			Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+10800000l);
 			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
 			{
 				return null;

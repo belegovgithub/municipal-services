@@ -19,7 +19,6 @@ public class BirthValidator {
 	
 	@Autowired
 	BirthRepository repository;
-	Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+86400000l);
 	Timestamp afterDate = new Timestamp(-5364683608000l);
 	SimpleDateFormat sdf1 = new SimpleDateFormat("dd-MM-yyyy");
 	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
@@ -343,9 +342,7 @@ public class BirthValidator {
 		if(time!=null)
 		{
 			timeLongTimestamp = new Timestamp(time*1000);
-			System.out.println(timeLongTimestamp);
-			System.out.println(beforeDate);
-			System.out.println(afterDate);
+			Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+10800000l);
 			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
 			{
 				return null;
@@ -353,11 +350,5 @@ public class BirthValidator {
 		}
 		return timeLongTimestamp;
 	}
-	
-	/*
-	 * public static void main(String[] args) { Timestamp timeLongTimestamp = new
-	 * Timestamp(System.currentTimeMillis()); System.out.println(timeLongTimestamp);
-	 * }
-	 */
 }
 
