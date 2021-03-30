@@ -23,6 +23,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class DeathResponse   {
+	
+	@JsonProperty("RequestInfo")
+	private RequestInfo requestInfo;
         @JsonProperty("ResponseInfo")
         private ResponseInfo responseInfo = null;
 

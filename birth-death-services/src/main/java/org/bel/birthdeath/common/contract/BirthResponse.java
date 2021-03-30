@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.bel.birthdeath.birth.certmodel.BirthCertificate;
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.response.ResponseInfo;
@@ -24,6 +23,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class BirthResponse   {
+	
+	@JsonProperty("RequestInfo")
+	private RequestInfo requestInfo;
         @JsonProperty("ResponseInfo")
         private ResponseInfo responseInfo = null;
 
