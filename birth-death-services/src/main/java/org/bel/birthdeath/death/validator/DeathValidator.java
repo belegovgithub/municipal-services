@@ -336,7 +336,7 @@ public class DeathValidator {
 		if(time!=null)
 		{
 			timeLongTimestamp = new Timestamp(time*1000);
-			Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+10800000l);
+			Timestamp beforeDate =  new Timestamp(System.currentTimeMillis()+108000000l);
 			if(!(timeLongTimestamp.before(beforeDate) && timeLongTimestamp.after(afterDate)))
 			{
 				return null;
