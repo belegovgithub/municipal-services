@@ -76,5 +76,19 @@ public class CommonController {
         return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
     }
 	
-
+	@RequestMapping(value = { "/deleteBirthImport"}, method = RequestMethod.POST)
+    public ResponseEntity<String>  deleteBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+            @ModelAttribute SearchCriteria criteria) {
+		int deletedRecords=0;
+        deletedRecords = commonService.deleteBirthImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+        return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
+    }
+	
+	@RequestMapping(value = { "/deleteDeathImport"}, method = RequestMethod.POST)
+	public ResponseEntity<String>  deleteDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
+            @ModelAttribute SearchCriteria criteria) {
+		int deletedRecords=0;
+        deletedRecords = commonService.deleteDeathImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+        return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
+    }
 }

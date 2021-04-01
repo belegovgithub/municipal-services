@@ -322,7 +322,7 @@ public class StorageController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<ImportDeathWrapper> uploadDeath(@RequestParam(value = "file", required = false) List<MultipartFile> files,
-            @RequestParam(value = "tenantId" , required = false) String tenantId,@RequestBody RequestInfoWrapper requestInfoWrapper) {
+            @RequestParam(value = "tenantId" , required = false) String tenantId) {
         String extension = "";
         Path testFile = null;
         DeathResponse importJSon = new DeathResponse();
@@ -564,8 +564,12 @@ public class StorageController {
                 }catch(Exception e){
                     e.printStackTrace();
                 }
-				ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,requestInfoWrapper.getRequestInfo());
-                importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true));
+                RequestInfo requestInfo = new RequestInfo();
+				User userInfo = new User();
+				userInfo.setUuid("import-user");
+				requestInfo.setUserInfo(userInfo);
+				ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,requestInfo);
+                importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true));
                 return new ResponseEntity<>(new ImportDeathWrapper(), HttpStatus.OK);
             }
         }catch (Exception e) {

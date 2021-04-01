@@ -44,4 +44,12 @@ public class CommonService {
 		ImportDeathWrapper importDeathWrapper = repository.updateDeathImport(importJSon, requestInfo);
 		return importDeathWrapper;
 	}
+
+	public int deleteBirthImport(String tenantId, RequestInfo requestInfo) {
+		return repository.deleteBirthImport(tenantId,requestInfo);
+	}
+	
+	public int deleteDeathImport(String tenantId, RequestInfo requestInfo) {
+		return repository.deleteDeathImport(tenantId,requestInfo);
+	}
 }

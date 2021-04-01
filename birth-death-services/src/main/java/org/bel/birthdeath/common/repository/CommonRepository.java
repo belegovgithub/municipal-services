@@ -36,6 +36,7 @@ import org.bel.birthdeath.death.validator.DeathValidator;
 import org.bel.birthdeath.utils.BirthDeathConstants;
 import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -79,6 +80,10 @@ public class CommonRepository {
 	private static final String birthDtlDeleteQry="Delete from eg_birth_dtls where tenantid = :tenantid and registrationno = :registrationno; ";
 	
 	private static final String deathDtlDeleteQry="Delete from eg_death_dtls where tenantid = :tenantid and registrationno = :registrationno; ";
+	
+	private static final String birthAllDeleteQry="Delete from eg_birth_dtls where tenantid = :tenantid ; ";
+	
+	private static final String deathAllDeleteQry="Delete from eg_death_dtls where tenantid = :tenantid ; ";
 	
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -817,10 +822,6 @@ public class CommonRepository {
 				catch (Exception e) {
 					birthDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
 					importBirthWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, birthDtl);
-					Map<String, String> params = new HashMap<>();
-					params.put("tenantid", birthDtl.getTenantid());
-					params.put("registrationno", birthDtl.getRegistrationno());
-					namedParameterJdbcTemplate.update(birthDtlDeleteQry, params);
 					e.printStackTrace();
 				}
 			}
@@ -909,10 +910,6 @@ public class CommonRepository {
 				catch (Exception e) {
 					deathDtl.setRejectReason(BirthDeathConstants.DATA_ERROR);
 					importDeathWrapper.updateMaps(BirthDeathConstants.DATA_ERROR, deathDtl);
-					Map<String, String> params = new HashMap<>();
-					params.put("tenantid", deathDtl.getTenantid());
-					params.put("registrationno", deathDtl.getRegistrationno());
-					namedParameterJdbcTemplate.update(deathDtlDeleteQry, params);
 					e.printStackTrace();
 				}
 			}
@@ -927,5 +924,27 @@ public class CommonRepository {
 			e.printStackTrace();
 		}
 		return importDeathWrapper;
+	}
+
+	public int deleteBirthImport(String tenantId, RequestInfo requestInfo) {
+		try {
+			Map<String, String> params = new HashMap<>();
+			params.put("tenantid", tenantId);
+			return namedParameterJdbcTemplate.update(birthAllDeleteQry, params);
+		}
+		catch(Exception e) {
+			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
+		}
+	}
+
+	public int deleteDeathImport(String tenantId, RequestInfo requestInfo) {
+		try {
+			Map<String, String> params = new HashMap<>();
+			params.put("tenantid", tenantId);
+			return namedParameterJdbcTemplate.update(deathAllDeleteQry, params);
+		}
+		catch(Exception e) {
+			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
+		}
 	}
 }
