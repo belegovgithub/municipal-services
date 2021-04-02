@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.EgovPdfResp;
@@ -30,6 +31,7 @@ import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
@@ -84,6 +87,12 @@ public class DeathRepository {
 	
 	@Autowired
 	private CommonUtils commonUtils;
+	
+	@Value("${egov.bnd.freedownload.tenants}")
+    private String freeDownloadTenants;
+	
+	@Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 	
 	public List<EgDeathDtl> getDeathDtls(SearchCriteria criteria) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -178,9 +187,11 @@ public class DeathRepository {
 
 	public void updateCounter(String deathDtlId) {
 		try {
-			//String updateQry="UPDATE public.eg_death_dtls SET counter=counter+1 WHERE id=?";
-			String updateQry="UPDATE public.eg_death_dtls SET counter=0 WHERE id=?";
-			jdbcTemplate.update(updateQry, deathDtlId);
+			String updateQry="UPDATE public.eg_birth_dtls SET counter=counter+1 WHERE id=:id and tenantid not in (:tenantIds)";
+			Map<String, Object> params = new HashMap<>();
+			params.put("id", deathDtlId);
+			params.put("tenantIds",Arrays.asList(freeDownloadTenants.split(",")));
+			namedParameterJdbcTemplate.update(updateQry ,params);
 		}catch(Exception e) {
 			e.printStackTrace();
 			throw new CustomException("Invalid_data","Error in updating");

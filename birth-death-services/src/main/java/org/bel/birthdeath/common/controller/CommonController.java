@@ -15,6 +15,7 @@ import org.bel.birthdeath.common.services.CommonService;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,6 +34,9 @@ public class CommonController {
 	
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
+	
+	@Value("${egov.bnd.excelimport.flag}")
+    private boolean excelImportFlag;
 	
 	@RequestMapping(value = { "/getHospitals"}, method = RequestMethod.POST)
     public ResponseEntity<HospitalResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
@@ -80,7 +84,9 @@ public class CommonController {
     public ResponseEntity<String>  deleteBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
             @ModelAttribute SearchCriteria criteria) {
 		int deletedRecords=0;
-        deletedRecords = commonService.deleteBirthImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+        if(excelImportFlag) {	
+        	deletedRecords = commonService.deleteBirthImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+        }
         return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
     }
 	
@@ -88,7 +94,9 @@ public class CommonController {
 	public ResponseEntity<String>  deleteDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
             @ModelAttribute SearchCriteria criteria) {
 		int deletedRecords=0;
-        deletedRecords = commonService.deleteDeathImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+		if(excelImportFlag) {
+			deletedRecords = commonService.deleteDeathImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
+		}
         return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
     }
 }

@@ -230,6 +230,10 @@ public class CommonRepository {
 					duplicates.add(bdtl.getRegistrationno());
 				}
 			}
+			else
+			{
+				importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
+			}
 		});
 		for (String regno : duplicates) {
 			importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
@@ -521,6 +525,10 @@ public class CommonRepository {
 					duplicates.add(deathtl.getRegistrationno());
 				}
 			}
+			else
+			{
+				importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
+			}
 		});
 		for (String regno : duplicates) {
 			importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
@@ -785,6 +793,10 @@ public class CommonRepository {
 					duplicates.add(bdtl.getRegistrationno());
 				}
 			}
+			else
+			{
+				importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
+			}
 		});
 		for (String regno : duplicates) {
 			importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
@@ -871,6 +883,10 @@ public class CommonRepository {
 					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
 					duplicates.add(deathtl.getRegistrationno());
 				}
+			}
+			else
+			{
+				importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
 			}
 		});
 		for (String regno : duplicates) {

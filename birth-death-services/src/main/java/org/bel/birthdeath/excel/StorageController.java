@@ -38,6 +38,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.egov.common.contract.request.User;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -62,12 +63,16 @@ public class StorageController {
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
 	
+	@Value("${egov.bnd.excelimport.flag}")
+    private boolean excelImportFlag;
+	
 	@RequestMapping(value = { "/_birth"}, method = RequestMethod.POST)
     @PostMapping(produces = APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<ImportBirthWrapper> uploadBirth(@RequestParam(value = "file", required = false) List<MultipartFile> files,
             @RequestParam(value = "tenantId" , required = false) String tenantId) {
+		if(excelImportFlag)	{
         String extension = "";
         Path testFile = null;
         BirthResponse importJSon = new BirthResponse();
@@ -110,7 +115,7 @@ public class StorageController {
                         Iterator<Cell> cellIterator = row.cellIterator();
                         EgBirthDtl birthDtl =  new EgBirthDtl();
                         birthDtl.setTenantid(tenantId);
-                    	birthDtl.setCounter(1);
+                    	birthDtl.setCounter(0);
                     	birthDtl.setExcelrowindex(""+(row.getRowNum()+1));
                     	birthCerts.add(birthDtl);
                     	
@@ -313,6 +318,7 @@ public class StorageController {
                 e.printStackTrace();
             }
         }
+		}
 		return null;
     }
 	
@@ -323,6 +329,7 @@ public class StorageController {
     @ResponseBody
     public ResponseEntity<ImportDeathWrapper> uploadDeath(@RequestParam(value = "file", required = false) List<MultipartFile> files,
             @RequestParam(value = "tenantId" , required = false) String tenantId) {
+		if(excelImportFlag)	{
         String extension = "";
         Path testFile = null;
         DeathResponse importJSon = new DeathResponse();
@@ -368,7 +375,7 @@ public class StorageController {
                         Iterator<Cell> cellIterator = row.cellIterator();
                         EgDeathDtl deathDtl =  new EgDeathDtl();
                         deathDtl.setTenantid(tenantId);
-                    	deathDtl.setCounter(1);
+                    	deathDtl.setCounter(0);
                     	deathDtl.setExcelrowindex(""+(row.getRowNum()+1));
                     	deathCerts.add(deathDtl);
                     	
@@ -570,7 +577,7 @@ public class StorageController {
 				requestInfo.setUserInfo(userInfo);
 				ImportDeathWrapper importDeathWrapper = commonService.saveDeathImport(importJSon,requestInfo);
                 importDeathWrapper.setResponseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(requestInfo, true));
-                return new ResponseEntity<>(new ImportDeathWrapper(), HttpStatus.OK);
+                return new ResponseEntity<>(importDeathWrapper, HttpStatus.OK);
             }
         }catch (Exception e) {
         	e.printStackTrace();
@@ -584,6 +591,7 @@ public class StorageController {
                 e.printStackTrace();
             }
         }
+		}
 		return null;
     }
     
