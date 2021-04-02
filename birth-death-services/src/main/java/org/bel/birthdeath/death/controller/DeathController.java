@@ -1,9 +1,13 @@
 package org.bel.birthdeath.death.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
+import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
 import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
@@ -17,6 +21,7 @@ import org.bel.birthdeath.death.model.SearchCriteria;
 import org.bel.birthdeath.death.service.DeathService;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -36,9 +41,23 @@ public class DeathController {
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
 	
+	@Value("#{'${egov.bnd.live.citizen.tenants}'.split(',')}")
+    private String[] liveCitizenTenants;
+	
+	private List<String> liveCitizenTenantsList = new ArrayList<String>();
+	
+	@PostConstruct
+    public void loadTenants() {
+    	liveCitizenTenantsList = Arrays.asList(liveCitizenTenants);
+    }
+	
 	@RequestMapping(value = { "/_search"}, method = RequestMethod.POST)
     public ResponseEntity<DeathResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
+		if(requestInfoWrapper.getRequestInfo().getUserInfo().getType().equalsIgnoreCase("CITIZEN") && !liveCitizenTenantsList.contains(criteria.getTenantId()))
+		{
+			return new ResponseEntity<>(new DeathResponse(), HttpStatus.OK);
+		}
         List<EgDeathDtl> deathCerts = deathService.search(criteria);
         DeathResponse response = DeathResponse.builder().deathCerts(deathCerts).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
@@ -49,7 +68,10 @@ public class DeathController {
 	@RequestMapping(value = { "/_download"}, method = RequestMethod.POST)
     public ResponseEntity<DeathCertResponse> download(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
-		
+		if(!liveCitizenTenantsList.contains(criteria.getTenantId()))
+		{
+			return new ResponseEntity<>(new DeathCertResponse(), HttpStatus.OK);
+		}
         DeathCertificate deathCert = deathService.download(criteria,requestInfoWrapper.getRequestInfo());
         DeathCertResponse response ;
         if(deathCert.getCounter()<=0)

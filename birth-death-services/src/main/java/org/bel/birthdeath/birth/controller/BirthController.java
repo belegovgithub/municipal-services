@@ -1,7 +1,10 @@
 package org.bel.birthdeath.birth.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
@@ -17,6 +20,7 @@ import org.bel.birthdeath.common.contract.BirthResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -38,9 +42,24 @@ public class BirthController {
 	@Autowired
 	private ResponseInfoFactory responseInfoFactory;
 	
+	@Value("#{'${egov.bnd.live.citizen.tenants}'.split(',')}")
+    private String[] liveCitizenTenants;
+	
+	private List<String> liveCitizenTenantsList = new ArrayList<String>();
+	
+	@PostConstruct
+    public void loadTenants() {
+    	liveCitizenTenantsList = Arrays.asList(liveCitizenTenants);
+    }
+	
+    
 	@RequestMapping(value = { "/_search"}, method = RequestMethod.POST)
     public ResponseEntity<BirthResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
+		if(requestInfoWrapper.getRequestInfo().getUserInfo().getType().equalsIgnoreCase("CITIZEN") && !liveCitizenTenantsList.contains(criteria.getTenantId()))
+		{
+			return new ResponseEntity<>(new BirthResponse(), HttpStatus.OK);
+		}
         List<EgBirthDtl> birthCerts = birthService.search(criteria);
         BirthResponse response = BirthResponse.builder().birthCerts(birthCerts).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
@@ -51,7 +70,10 @@ public class BirthController {
 	@RequestMapping(value = { "/_download"}, method = RequestMethod.POST)
     public ResponseEntity<BirthCertResponse> download(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
-		
+		if(!liveCitizenTenantsList.contains(criteria.getTenantId()))
+		{
+			return new ResponseEntity<>(new BirthCertResponse(), HttpStatus.OK);
+		}
         BirthCertificate birthCert = birthService.download(criteria,requestInfoWrapper.getRequestInfo());
         BirthCertResponse response ;
         if(birthCert.getCounter()<=0)
