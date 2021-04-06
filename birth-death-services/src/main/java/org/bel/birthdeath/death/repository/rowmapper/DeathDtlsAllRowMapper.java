@@ -33,71 +33,71 @@ public class DeathDtlsAllRowMapper implements ResultSetExtractor<List<EgDeathDtl
 			while (rs.next()) {
 				String deathdtlid = rs.getString("deathdtlid");
 				EgDeathDtl deathDtl = deathDtlMap.get(deathdtlid);
-
+				System.out.println("rs.getString(bdtlfn) "+rs.getString("bdtlfn"));
 				if (deathDtl == null) {
 					EgDeathMotherInfo motherInfo = EgDeathMotherInfo.builder()
-							.firstname(null!=rs.getString("bmotfn")?rs.getString("bmotfn").trim():rs.getString("bmotfn"))
-							.middlename(null!=rs.getString("bmotmn")?rs.getString("bmotmn").trim():rs.getString("bmotmn"))
-							.lastname(null!=rs.getString("bmotln")?rs.getString("bmotln").trim():rs.getString("bmotln"))
-							.aadharno(null!=rs.getString("bmotaadharno")?rs.getString("bmotaadharno").trim():rs.getString("bmotaadharno")).build();
+							.firstname(null!=rs.getString("bmotfn")?rs.getString("bmotfn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.middlename(null!=rs.getString("bmotmn")?rs.getString("bmotmn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.lastname(null!=rs.getString("bmotln")?rs.getString("bmotln").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.aadharno(null!=rs.getString("bmotaadharno")?rs.getString("bmotaadharno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					motherInfo.setFullName(utils.addfullName(motherInfo.getFirstname(),motherInfo.getMiddlename(),motherInfo.getLastname()));
 					
 					EgDeathFatherInfo fatherInfo = EgDeathFatherInfo.builder()
-							.firstname(null!=rs.getString("bfatfn")?rs.getString("bfatfn").trim():rs.getString("bfatfn"))
-							.middlename(null!=rs.getString("bfatmn")?rs.getString("bfatmn").trim():rs.getString("bfatmn"))
-							.lastname(null!=rs.getString("bfatln")?rs.getString("bfatln").trim():rs.getString("bfatln"))
-							.aadharno(null!=rs.getString("bfataadharno")?rs.getString("bfataadharno").trim():rs.getString("bfataadharno")).build();
+							.firstname(null!=rs.getString("bfatfn")?rs.getString("bfatfn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.middlename(null!=rs.getString("bfatmn")?rs.getString("bfatmn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.lastname(null!=rs.getString("bfatln")?rs.getString("bfatln").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.aadharno(null!=rs.getString("bfataadharno")?rs.getString("bfataadharno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					fatherInfo.setFullName(utils.addfullName(fatherInfo.getFirstname(),fatherInfo.getMiddlename(),fatherInfo.getLastname()));
 					
 					EgDeathSpouseInfo spouseInfo = EgDeathSpouseInfo.builder()
-							.firstname(null!=rs.getString("bspsfn")?rs.getString("bspsfn").trim():rs.getString("bspsfn"))
-							.middlename(null!=rs.getString("bspsmn")?rs.getString("bspsmn").trim():rs.getString("bspsmn"))
-							.lastname(null!=rs.getString("bspsln")?rs.getString("bspsln").trim():rs.getString("bspsln"))
-							.aadharno(null!=rs.getString("bspsaadharno")?rs.getString("bspsaadharno").trim():rs.getString("bspsaadharno")).build();
+							.firstname(null!=rs.getString("bspsfn")?rs.getString("bspsfn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.middlename(null!=rs.getString("bspsmn")?rs.getString("bspsmn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.lastname(null!=rs.getString("bspsln")?rs.getString("bspsln").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.aadharno(null!=rs.getString("bspsaadharno")?rs.getString("bspsaadharno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					spouseInfo.setFullName(utils.addfullName(spouseInfo.getFirstname(),spouseInfo.getMiddlename(),spouseInfo.getLastname()));
 					
 					EgDeathPermaddr	permaddr = EgDeathPermaddr.builder()
-							.houseno(null!=rs.getString("pmhouseno")?rs.getString("pmhouseno").trim():rs.getString("pmhouseno"))
-							.buildingno(null!=rs.getString("pmbuildingno")?rs.getString("pmbuildingno").trim():rs.getString("pmbuildingno"))
-							.streetname(null!=rs.getString("pmstreetname")?rs.getString("pmstreetname").trim():rs.getString("pmstreetname"))
-							.locality(null!=rs.getString("pmlocality")?rs.getString("pmlocality").trim():rs.getString("pmlocality"))
-							.tehsil(null!=rs.getString("pmtehsil")?rs.getString("pmtehsil").trim():rs.getString("pmtehsil"))
-							.district(null!=rs.getString("pmdistrict")?rs.getString("pmdistrict").trim():rs.getString("pmdistrict"))
-							.city(null!=rs.getString("pmcity")?rs.getString("pmcity").trim():rs.getString("pmcity"))
-							.state(null!=rs.getString("pmstate")?rs.getString("pmstate").trim():rs.getString("pmstate"))
-							.pinno(null!=rs.getString("pmpinno")?rs.getString("pmpinno").trim():rs.getString("pmpinno"))
-							.country(null!=rs.getString("pmcountry")?rs.getString("pmcountry").trim():rs.getString("pmcountry")).build();
+							.houseno(null!=rs.getString("pmhouseno")?rs.getString("pmhouseno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.buildingno(null!=rs.getString("pmbuildingno")?rs.getString("pmbuildingno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.streetname(null!=rs.getString("pmstreetname")?rs.getString("pmstreetname").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.locality(null!=rs.getString("pmlocality")?rs.getString("pmlocality").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.tehsil(null!=rs.getString("pmtehsil")?rs.getString("pmtehsil").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.district(null!=rs.getString("pmdistrict")?rs.getString("pmdistrict").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.city(null!=rs.getString("pmcity")?rs.getString("pmcity").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.state(null!=rs.getString("pmstate")?rs.getString("pmstate").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.pinno(null!=rs.getString("pmpinno")?rs.getString("pmpinno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.country(null!=rs.getString("pmcountry")?rs.getString("pmcountry").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					permaddr.setFullAddress(utils.addFullAddress(permaddr.getHouseno(),permaddr.getBuildingno(),permaddr.getStreetname(),permaddr.getLocality(),permaddr.getTehsil(),
 							permaddr.getDistrict(),permaddr.getCity(),permaddr.getState(),permaddr.getPinno(),permaddr.getCountry()));
 					
 					EgDeathPresentaddr presentaddr= EgDeathPresentaddr.builder()
-							.houseno(null!=rs.getString("pshouseno")?rs.getString("pshouseno").trim():rs.getString("pshouseno"))
-							.buildingno(null!=rs.getString("psbuildingno")?rs.getString("psbuildingno").trim():rs.getString("psbuildingno"))
-							.streetname(null!=rs.getString("psstreetname")?rs.getString("psstreetname").trim():rs.getString("psstreetname"))
-							.locality(null!=rs.getString("pslocality")?rs.getString("pslocality").trim():rs.getString("pslocality"))
-							.tehsil(null!=rs.getString("pstehsil")?rs.getString("pstehsil").trim():rs.getString("pstehsil"))
-							.district(null!=rs.getString("psdistrict")?rs.getString("psdistrict").trim():rs.getString("psdistrict"))
-							.city(null!=rs.getString("pscity")?rs.getString("pscity").trim():rs.getString("pscity"))
-							.state(null!=rs.getString("psstate")?rs.getString("psstate").trim():rs.getString("psstate"))
-							.pinno(null!=rs.getString("pspinno")?rs.getString("pspinno").trim():rs.getString("pspinno"))
-							.country(null!=rs.getString("pscountry")?rs.getString("pscountry").trim():rs.getString("pscountry")).build();
+							.houseno(null!=rs.getString("pshouseno")?rs.getString("pshouseno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.buildingno(null!=rs.getString("psbuildingno")?rs.getString("psbuildingno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.streetname(null!=rs.getString("psstreetname")?rs.getString("psstreetname").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.locality(null!=rs.getString("pslocality")?rs.getString("pslocality").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.tehsil(null!=rs.getString("pstehsil")?rs.getString("pstehsil").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.district(null!=rs.getString("psdistrict")?rs.getString("psdistrict").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.city(null!=rs.getString("pscity")?rs.getString("pscity").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.state(null!=rs.getString("psstate")?rs.getString("psstate").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.pinno(null!=rs.getString("pspinno")?rs.getString("pspinno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.country(null!=rs.getString("pscountry")?rs.getString("pscountry").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					presentaddr.setFullAddress(utils.addFullAddress(presentaddr.getHouseno(),presentaddr.getBuildingno(),presentaddr.getStreetname(),presentaddr.getLocality(),presentaddr.getTehsil(),
 							presentaddr.getDistrict(),presentaddr.getCity(),presentaddr.getState(),presentaddr.getPinno(),presentaddr.getCountry()));
 					
 					deathDtl = EgDeathDtl.builder().id(deathdtlid)
-							.registrationno(null!=rs.getString("registrationno")?rs.getString("registrationno").trim():rs.getString("registrationno"))
-							.hospitalname(null!=rs.getString("hospitalname")?rs.getString("hospitalname").trim():rs.getString("hospitalname"))
+							.registrationno(null!=rs.getString("registrationno")?rs.getString("registrationno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.hospitalname(null!=rs.getString("hospitalname")?rs.getString("hospitalname").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
 							.dateofreport(rs.getTimestamp("dateofreport")).gender(rs.getInt("gender"))
 							.dateofdeath(rs.getTimestamp("dateofdeath")).counter(rs.getInt("counter")).genderStr(rs.getString("genderstr")).tenantid(rs.getString("tenantid")).dateofissue(System.currentTimeMillis())
-							.firstname(null!=rs.getString("bdtlfn")?rs.getString("bdtlfn").trim():rs.getString("bdtlfn"))
-							.middlename(null!=rs.getString("bdtlmn")?rs.getString("bdtlmn").trim():rs.getString("bdtlmn"))
-							.lastname(null!=rs.getString("bdtlln")?rs.getString("bdtlln").trim():rs.getString("bdtlln"))
+							.firstname(null!=rs.getString("bdtlfn")?rs.getString("bdtlfn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.middlename(null!=rs.getString("bdtlmn")?rs.getString("bdtlmn").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.lastname(null!=rs.getString("bdtlln")?rs.getString("bdtlln").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
 							.deathMotherInfo(motherInfo).deathFatherInfo(fatherInfo).deathSpouseInfo(spouseInfo)
 							.deathPermaddr(permaddr).deathPresentaddr(presentaddr)
-							.placeofdeath(null!=rs.getString("placeofdeath")?rs.getString("placeofdeath").trim():rs.getString("placeofdeath"))
-							.remarks(null!=rs.getString("remarks")?rs.getString("remarks").trim():rs.getString("remarks"))
-							.age(rs.getString("age").trim())
-							.aadharno(null!=rs.getString("bdtlaadharno")?rs.getString("bdtlaadharno").trim():rs.getString("bdtlaadharno")).build();
+							.placeofdeath(null!=rs.getString("placeofdeath")?rs.getString("placeofdeath").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.remarks(null!=rs.getString("remarks")?rs.getString("remarks").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null)
+							.age(rs.getString("age").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"))
+							.aadharno(null!=rs.getString("bdtlaadharno")?rs.getString("bdtlaadharno").replaceAll("(\\r|\\n|\\t)", "").replace("\"","\'"):null).build();
 					deathDtl.setFullName(utils.addfullName(deathDtl.getFirstname(), deathDtl.getMiddlename(), deathDtl.getLastname()));
 					deathDtlMap.put(deathdtlid, deathDtl);
 				}

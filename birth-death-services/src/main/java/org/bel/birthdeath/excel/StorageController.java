@@ -290,9 +290,9 @@ public class StorageController {
                     			break;                              	
                     		}
 
-                    		System.out.print(getStringVal(cell) + "-" + cell.getColumnIndex());
+                    		//System.out.print(getStringVal(cell) + "-" + cell.getColumnIndex());
                     	}
-                    	System.out.println("Imported Row No "+row.getRowNum());
+                    	//System.out.println("Imported Row No "+row.getRowNum());
                     }
                 }catch(Exception e){
                     e.printStackTrace();
@@ -564,9 +564,9 @@ public class StorageController {
                     			break;                              	
                     		}
 
-                    		System.out.print(getStringVal(cell) + "-" + cell.getColumnIndex());
+                    		//System.out.print(getStringVal(cell) + "-" + cell.getColumnIndex());
                     	}
-                    	System.out.println("Imported Row No "+row.getRowNum());
+                    	//System.out.println("Imported Row No "+row.getRowNum());
                     }
                 }catch(Exception e){
                     e.printStackTrace();

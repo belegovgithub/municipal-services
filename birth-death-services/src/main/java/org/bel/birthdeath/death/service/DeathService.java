@@ -45,6 +45,7 @@ public class DeathService {
 	}
 
 	public DeathCertificate download(SearchCriteria criteria, RequestInfo requestInfo) {
+		try {
 		DeathCertificate deathCertificate = new DeathCertificate();
 		deathCertificate.setDeathDtlId(criteria.getId());
 		deathCertificate.setTenantId(criteria.getTenantId());
@@ -74,6 +75,11 @@ public class DeathService {
 		deathCertificate.setCounter(deathDtls.get(0).getCounter());
 		repository.save(deathCertRequest);
 		return deathCertificate;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("DOWNLOAD_ERROR","Error in Downloading Certificate");
+		}
 	}
 
 	public DeathCertificate getDeathCertReqByConsumerCode(SearchCriteria criteria, RequestInfo requestInfo) {

@@ -45,6 +45,7 @@ public class BirthService {
 	}
 
 	public BirthCertificate download(SearchCriteria criteria, RequestInfo requestInfo) {
+		try {
 		BirthCertificate birthCertificate = new BirthCertificate();
 		birthCertificate.setBirthDtlId(criteria.getId());
 		birthCertificate.setTenantId(criteria.getTenantId());
@@ -74,6 +75,11 @@ public class BirthService {
 		birthCertificate.setCounter(birtDtls.get(0).getCounter());
 		repository.save(birthCertRequest);
 		return birthCertificate;
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("DOWNLOAD_ERROR","Error in Downloading Certificate");
+		}
 	}
 
 	public BirthCertificate getBirthCertReqByConsumerCode(SearchCriteria criteria, RequestInfo requestInfo) {

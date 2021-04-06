@@ -146,6 +146,7 @@ public class BirthRepository {
 		}
 		}catch(Exception e) {
 			e.printStackTrace();
+			throw new CustomException("PDF_ERROR","Error in generating PDF");
 		}
 		return null;
 	}
