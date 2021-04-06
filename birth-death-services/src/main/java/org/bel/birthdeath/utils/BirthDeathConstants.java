@@ -119,6 +119,7 @@ public class BirthDeathConstants {
 	public static final String PRESENT_COUNTRY = "Country in Present Address cannot exceed 100 chars";
 	
 	public static final String DATA_ERROR = "Data Error";
+	public static final String UPDATE_ERROR = "Id cannot be empty for Updation";
     public BirthDeathConstants() {}
 
 }

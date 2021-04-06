@@ -95,7 +95,8 @@ public class ImportDeathWrapper {
 			BirthDeathConstants.PRESENT_CITY ,
 			BirthDeathConstants.PRESENT_STATE ,
 			BirthDeathConstants.PRESENT_PINNO ,
-			BirthDeathConstants.PRESENT_COUNTRY
+			BirthDeathConstants.PRESENT_COUNTRY,
+			BirthDeathConstants.UPDATE_ERROR
 			});
     
 	public ImportDeathWrapper() {

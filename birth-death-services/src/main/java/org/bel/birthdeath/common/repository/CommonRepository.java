@@ -85,6 +85,10 @@ public class CommonRepository {
 	
 	private static final String deathAllDeleteQry="Delete from eg_death_dtls where tenantid = :tenantid ; ";
 	
+	private static final String birthHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_death_dtls dtl where dtl.tenantid = :tenantid ) ;";
+	
+	private static final String deathHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_birth_dtls dtl where dtl.tenantid = :tenantid ) ;";
+	
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
     		+ "createdtime, createdby, lastmodifiedtime, lastmodifiedby, counter, tenantid, gender, remarks, hospitalid) "
@@ -768,6 +772,7 @@ public class CommonRepository {
 		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getBirthCerts().forEach(bdtl -> {
+		if(bdtl.getId()!= null) {
 			if (bdtl.getRegistrationno() != null) {
 				if (uniqueList.get(bdtl.getRegistrationno()) == null)
 				{
@@ -797,6 +802,12 @@ public class CommonRepository {
 			{
 				importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
 			}
+		}
+		else
+		{
+			importBirthWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, bdtl);
+		}
+			
 		});
 		for (String regno : duplicates) {
 			importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
@@ -857,6 +868,7 @@ public class CommonRepository {
 		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getDeathCerts().forEach(deathtl -> {
+		if(deathtl.getId()!= null) {
 			if (deathtl.getRegistrationno() != null) {
 				if (uniqueList.get(deathtl.getRegistrationno()) == null)
 				{
@@ -888,6 +900,11 @@ public class CommonRepository {
 			{
 				importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
 			}
+		}
+		else
+		{
+			importDeathWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, deathtl);
+		}
 		});
 		for (String regno : duplicates) {
 			importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
@@ -944,9 +961,12 @@ public class CommonRepository {
 
 	public int deleteBirthImport(String tenantId, RequestInfo requestInfo) {
 		try {
+			int deleteCount=0;
 			Map<String, String> params = new HashMap<>();
 			params.put("tenantid", tenantId);
-			return namedParameterJdbcTemplate.update(birthAllDeleteQry, params);
+			deleteCount = namedParameterJdbcTemplate.update(birthAllDeleteQry, params);
+			namedParameterJdbcTemplate.update(birthHospDeleteQry, params);
+			return deleteCount;
 		}
 		catch(Exception e) {
 			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
@@ -955,9 +975,12 @@ public class CommonRepository {
 
 	public int deleteDeathImport(String tenantId, RequestInfo requestInfo) {
 		try {
+			int deleteCount=0;
 			Map<String, String> params = new HashMap<>();
 			params.put("tenantid", tenantId);
-			return namedParameterJdbcTemplate.update(deathAllDeleteQry, params);
+			deleteCount = namedParameterJdbcTemplate.update(deathAllDeleteQry, params);
+			namedParameterJdbcTemplate.update(deathHospDeleteQry, params);
+			return deleteCount;
 		}
 		catch(Exception e) {
 			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
