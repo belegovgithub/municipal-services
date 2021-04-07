@@ -85,9 +85,9 @@ public class CommonRepository {
 	
 	private static final String deathAllDeleteQry="Delete from eg_death_dtls where tenantid = :tenantid ; ";
 	
-	private static final String birthHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_death_dtls dtl where dtl.tenantid = :tenantid ) ;";
+	private static final String birthHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_death_dtls dtl where dtl.tenantid = :tenantid ) and tenantid = :tenantid ;";
 	
-	private static final String deathHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_birth_dtls dtl where dtl.tenantid = :tenantid ) ;";
+	private static final String deathHospDeleteQry="Delete from eg_birth_death_hospitals where id not in (select distinct dtl.hospitalid from eg_birth_dtls dtl where dtl.tenantid = :tenantid ) and tenantid = :tenantid ;";
 	
 	private static final String birthDtlSaveQry="INSERT INTO public.eg_birth_dtls(id, registrationno, hospitalname, dateofreport, "
     		+ "dateofbirth, firstname, middlename, lastname, placeofbirth, informantsname, informantsaddress, "
@@ -969,6 +969,7 @@ public class CommonRepository {
 			return deleteCount;
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
 		}
 	}
@@ -983,6 +984,7 @@ public class CommonRepository {
 			return deleteCount;
 		}
 		catch(Exception e) {
+			e.printStackTrace();
 			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
 		}
 	}
