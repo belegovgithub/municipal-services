@@ -218,6 +218,9 @@ public class CommonRepository {
 						if(bdtl.getHospitalname().length() >500) {
 							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
 							uniqueList.remove(bdtl.getRegistrationno());
+						}else if(bdtl.getHospitalname().contains("\t") || bdtl.getHospitalname().contains("\r") || bdtl.getHospitalname().contains("\n")) {
+							importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DATA_SPACES, bdtl);
+							uniqueList.remove(bdtl.getRegistrationno());
 						}
 						else {
 							bdtl.setHospitalname(bdtl.getHospitalname().trim());
@@ -512,6 +515,9 @@ public class CommonRepository {
 						if(deathtl.getHospitalname().length() >500) {
 							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
 							uniqueList.remove(deathtl.getRegistrationno());
+						}else if(deathtl.getHospitalname().contains("\t") || deathtl.getHospitalname().contains("\r") || deathtl.getHospitalname().contains("\n")) {
+							importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DATA_SPACES, deathtl);
+							uniqueList.remove(deathtl.getRegistrationno());
 						}
 						else {
 							deathtl.setHospitalname(deathtl.getHospitalname().trim());
@@ -782,6 +788,9 @@ public class CommonRepository {
 						if(bdtl.getHospitalname().length() >500) {
 							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
 							uniqueList.remove(bdtl.getRegistrationno());
+						}else if(bdtl.getHospitalname().contains("\t") || bdtl.getHospitalname().contains("\r") || bdtl.getHospitalname().contains("\n")) {
+							importBirthWrapper.updateMaps(BirthDeathConstants.INVALID_DATA_SPACES, bdtl);
+							uniqueList.remove(bdtl.getRegistrationno());
 						}
 						else {
 							bdtl.setHospitalname(bdtl.getHospitalname().trim());
@@ -878,6 +887,9 @@ public class CommonRepository {
 					{
 						if(deathtl.getHospitalname().length() >500) {
 							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
+							uniqueList.remove(deathtl.getRegistrationno());
+						}else if(deathtl.getHospitalname().contains("\t") || deathtl.getHospitalname().contains("\r") || deathtl.getHospitalname().contains("\n")) {
+							importDeathWrapper.updateMaps(BirthDeathConstants.INVALID_DATA_SPACES, deathtl);
 							uniqueList.remove(deathtl.getRegistrationno());
 						}
 						else {

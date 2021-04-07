@@ -3,7 +3,6 @@ package org.bel.birthdeath.birth.validator;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.bel.birthdeath.birth.model.EgBirthDtl;
 import org.bel.birthdeath.birth.model.ImportBirthWrapper;
@@ -107,6 +106,10 @@ public class BirthValidator {
 		}
 		if(birthDtl.getGender().intValue()!=1 && birthDtl.getGender().intValue()!=2 && birthDtl.getGender().intValue()!=3 ) {
 			setRejectionReason(BirthDeathConstants.GENDER_INVALID,birthDtl,importBirthWrapper);
+			return false;
+		}
+		if(birthDtl.getRegistrationno().length()>64) {
+			setRejectionReason(BirthDeathConstants.REGNO_LARGE,birthDtl,importBirthWrapper);
 			return false;
 		}
 		if(birthDtl.getInformantsname()!=null && birthDtl.getInformantsname().length()>200) {
@@ -296,7 +299,60 @@ public class BirthValidator {
 			setRejectionReason(BirthDeathConstants.PRESENT_COUNTRY,birthDtl,importBirthWrapper);
 			return false;
 		}
+		if(containsInvalidCharsMain(birthDtl)) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES,birthDtl,importBirthWrapper);
+			return false;
+		}
 		return true;
+	}
+	
+	private boolean containsInvalidCharsMain(EgBirthDtl birthDtl) {
+		if( containsInvalidCharsSub(birthDtl.getRegistrationno()) ||
+			containsInvalidCharsSub(birthDtl.getFirstname()) ||
+			containsInvalidCharsSub(birthDtl.getMiddlename()) ||
+			containsInvalidCharsSub(birthDtl.getLastname()) ||
+			containsInvalidCharsSub(birthDtl.getPlaceofbirth()) ||
+			containsInvalidCharsSub(birthDtl.getRemarks()) ||
+			containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getFirstname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getMiddlename()) ||
+			containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getLastname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getAadharno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getFirstname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getMiddlename()) ||
+			containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getLastname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getAadharno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getHouseno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getBuildingno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getStreetname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getLocality()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getTehsil()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getDistrict()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getCity()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getState()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getPinno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPermaddr().getCountry()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getHouseno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getBuildingno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getStreetname()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getLocality()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getTehsil()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getDistrict()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getCity()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getState()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getPinno()) ||
+			containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getCountry())
+			){
+			return true ;
+		}
+		else 
+			return false;
+	}
+
+	private boolean containsInvalidCharsSub(String string) {
+		if(null!=string && (string.contains("\t") || string.contains("\r") || string.contains("\n")))
+			return true;
+		else
+			return false;
 	}
 	
 	private void setRejectionReason(String reason,EgBirthDtl birthDtl,ImportBirthWrapper importBirthWrapper)

@@ -52,6 +52,7 @@ public class BirthDeathConstants {
 	public static final String FIRSTNAME_LARGE = "Firstname cannot exceed 200 chars";
 	public static final String MIDDLENAME_LARGE = "Middlename cannot exceed 200 chars";
 	public static final String LASTNAME_LARGE = "Lastname cannot exceed 200 chars";
+	public static final String REGNO_LARGE = "Registration No. cannot exceed 64 chars";
 	public static final String F_FIRSTNAME_LARGE = "Father Firstname cannot exceed 200 chars";
 	public static final String F_MIDDLENAME_LARGE = "Father Middlename cannot exceed 200 chars";
 	public static final String F_LASTNAME_LARGE = "Father Lastname cannot exceed 200 chars";
@@ -82,6 +83,12 @@ public class BirthDeathConstants {
 	public static final String INFORMANTNAME_LARGE = "Informants name cannot exceed 200 chars";
 	public static final String INFORMANTADDR_LARGE = "Informants Address cannot exceed 1000 chars";
 	public static final String PLACEOFBIRTH_LARGE = "Place of Birth cannot exceed 1000 chars";
+	public static final String AGE_LARGE = "Age cannot exceed 100 chars";
+	public static final String EIDNO_LARGE = "EID No cannot exceed 100 chars";
+	public static final String AADHAR_LARGE = "Aadhar No cannot exceed 150 chars";
+	public static final String NATIONALITY_LARGE = "Nationality cannot exceed 100 chars";
+	public static final String RELIGION_LARGE = "Religion cannot exceed 100 chars";
+	public static final String ICDCODE_LARGE = "ICD Code cannot exceed 300 chars";	
 	
 	public static final String INVALID_DOB = "DOB not valid";
 	public static final String INVALID_DOB_RANGE = "DOB not in range";
@@ -120,6 +127,7 @@ public class BirthDeathConstants {
 	
 	public static final String DATA_ERROR = "Data Error";
 	public static final String UPDATE_ERROR = "Id cannot be empty for Updation";
+	public static final String INVALID_DATA_SPACES = "Data contains extra spaces";
     public BirthDeathConstants() {}
 
 }

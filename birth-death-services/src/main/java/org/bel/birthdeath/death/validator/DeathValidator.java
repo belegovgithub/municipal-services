@@ -110,6 +110,10 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.GENDER_INVALID,deathDtl,importDeathWrapper);
 			return false;
 		}
+		if(deathDtl.getRegistrationno().length()>64) {
+			setRejectionReason(BirthDeathConstants.REGNO_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
 		if(deathDtl.getInformantsname()!=null && deathDtl.getInformantsname().length()>200) {
 			setRejectionReason(BirthDeathConstants.INFORMANTNAME_LARGE,deathDtl,importDeathWrapper);
 			return false;
@@ -290,9 +294,92 @@ public class DeathValidator {
 			setRejectionReason(BirthDeathConstants.PRESENT_COUNTRY,deathDtl,importDeathWrapper);
 			return false;
 		}
+		if(deathDtl.getAge()!=null && deathDtl.getAge().length()>100) {
+			setRejectionReason(BirthDeathConstants.AGE_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getEidno()!=null && deathDtl.getEidno().length()>100) {
+			setRejectionReason(BirthDeathConstants.EIDNO_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getAadharno()!=null && deathDtl.getAadharno().length()>150) {
+			setRejectionReason(BirthDeathConstants.AADHAR_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getNationality()!=null && deathDtl.getNationality().length()>100) {
+			setRejectionReason(BirthDeathConstants.NATIONALITY_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getReligion()!=null && deathDtl.getReligion().length()>100) {
+			setRejectionReason(BirthDeathConstants.RELIGION_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(deathDtl.getIcdcode()!=null && deathDtl.getIcdcode().length()>300) {
+			setRejectionReason(BirthDeathConstants.ICDCODE_LARGE,deathDtl,importDeathWrapper);
+			return false;
+		}
+		if(containsInvalidCharsMain(deathDtl)) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES,deathDtl,importDeathWrapper);
+			return false;
+		}
 		return true;
 	}
 	
+	private boolean containsInvalidCharsMain(EgDeathDtl deathDtl) {
+		if( containsInvalidCharsSub(deathDtl.getRegistrationno()) ||
+			containsInvalidCharsSub(deathDtl.getFirstname()) ||
+			containsInvalidCharsSub(deathDtl.getMiddlename()) ||
+			containsInvalidCharsSub(deathDtl.getLastname()) ||
+			containsInvalidCharsSub(deathDtl.getPlaceofdeath()) ||
+			containsInvalidCharsSub(deathDtl.getRemarks()) ||
+			containsInvalidCharsSub(deathDtl.getAge()) ||
+			containsInvalidCharsSub(deathDtl.getAadharno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathMotherInfo().getFirstname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathMotherInfo().getMiddlename()) ||
+			containsInvalidCharsSub(deathDtl.getDeathMotherInfo().getLastname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathMotherInfo().getAadharno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathFatherInfo().getFirstname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathFatherInfo().getMiddlename()) ||
+			containsInvalidCharsSub(deathDtl.getDeathFatherInfo().getLastname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathFatherInfo().getAadharno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathSpouseInfo().getFirstname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathSpouseInfo().getMiddlename()) ||
+			containsInvalidCharsSub(deathDtl.getDeathSpouseInfo().getLastname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathSpouseInfo().getAadharno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getHouseno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getBuildingno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getStreetname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getLocality()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getTehsil()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getDistrict()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getCity()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getState()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getPinno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPermaddr().getCountry()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getHouseno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getBuildingno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getStreetname()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getLocality()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getTehsil()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getDistrict()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getCity()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getState()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getPinno()) ||
+			containsInvalidCharsSub(deathDtl.getDeathPresentaddr().getCountry())
+			){
+			return true ;
+		}
+		else 
+			return false;
+	}
+
+	private boolean containsInvalidCharsSub(String string) {
+		if(null!=string && (string.contains("\t") || string.contains("\r") || string.contains("\n")))
+			return true;
+		else
+			return false;
+	}
+
 	private void setRejectionReason(String reason,EgDeathDtl egDeathDtl,ImportDeathWrapper importDeathWrapper)
 	{
 		egDeathDtl.setRejectReason(reason);
@@ -344,4 +431,5 @@ public class DeathValidator {
 		}
 		return timeLongTimestamp;
 	}
+	
 }

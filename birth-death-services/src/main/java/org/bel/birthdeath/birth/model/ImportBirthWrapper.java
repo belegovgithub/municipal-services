@@ -100,7 +100,9 @@ public class ImportBirthWrapper {
 			BirthDeathConstants.PRESENT_STATE ,
 			BirthDeathConstants.PRESENT_PINNO ,
 			BirthDeathConstants.PRESENT_COUNTRY,
-			BirthDeathConstants.UPDATE_ERROR
+			BirthDeathConstants.UPDATE_ERROR,
+			BirthDeathConstants.INVALID_DATA_SPACES,
+			BirthDeathConstants.REGNO_LARGE
 			});
     
 	public ImportBirthWrapper() {

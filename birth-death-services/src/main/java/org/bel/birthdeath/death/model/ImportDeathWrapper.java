@@ -96,7 +96,15 @@ public class ImportDeathWrapper {
 			BirthDeathConstants.PRESENT_STATE ,
 			BirthDeathConstants.PRESENT_PINNO ,
 			BirthDeathConstants.PRESENT_COUNTRY,
-			BirthDeathConstants.UPDATE_ERROR
+			BirthDeathConstants.UPDATE_ERROR,
+			BirthDeathConstants.INVALID_DATA_SPACES,
+			BirthDeathConstants.REGNO_LARGE,
+			BirthDeathConstants.AGE_LARGE,
+    		BirthDeathConstants.EIDNO_LARGE,
+    		BirthDeathConstants.AADHAR_LARGE,
+    		BirthDeathConstants.NATIONALITY_LARGE,
+    		BirthDeathConstants.RELIGION_LARGE,
+    		BirthDeathConstants.ICDCODE_LARGE	
 			});
     
 	public ImportDeathWrapper() {
