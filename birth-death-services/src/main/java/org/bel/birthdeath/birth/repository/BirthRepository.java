@@ -242,7 +242,8 @@ public class BirthRepository {
         birthCertMasterDtl.forEach(birthDtl -> {
         	birthDtl.setBirthFatherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthFatherInfo(), "BndDetail", EgBirthFatherInfo.class, requestInfo));
         	birthDtl.setBirthMotherInfo(encryptionDecryptionUtil.decryptObject(birthDtl.getBirthMotherInfo(), "BndDetail", EgBirthMotherInfo.class, requestInfo));
-        	commonUtils.maskAndShowLast4Chars(birthDtl);
+        	if(!requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE"))
+        		commonUtils.maskAndShowLast4Chars(birthDtl);
         });
         return birthCertMasterDtl;
 	}
