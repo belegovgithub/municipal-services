@@ -10,7 +10,15 @@ public class BillingSlab {
 	private String id;
 	private String buildingType = null;
 	private String connectionType = null;
-
+	private String propertyLocation =null;
+	private String ownershipCategory=null;
+	private String buildingSubType =null;
+	private String waterSource=null;
+	private String ownerType =null;
+	private String calculationAttribute = null;
+	private double minimumCharge;
+	private double maximumCharge;
+	private double unAuthorizedConnection;
 	public String getId() {
 		return id;
 	}
@@ -59,7 +67,64 @@ public class BillingSlab {
 		this.slabs = slabs;
 	}
 
-	private String calculationAttribute = null;
-	private double minimumCharge;
+	public String getPropertyLocation() {
+		return propertyLocation;
+	}
+
+	public void setPropertyLocation(String propertyLocation) {
+		this.propertyLocation = propertyLocation;
+	}
+
+	public double getUnAuthorizedConnection() {
+		return unAuthorizedConnection;
+	}
+
+	public void setUnAuthorizedConnection(double unAuthorizedConnection) {
+		this.unAuthorizedConnection = unAuthorizedConnection;
+	}
+
+	public String getOwnershipCategory() {
+		return ownershipCategory;
+	}
+
+	public void setOwnershipCategory(String ownershipCategory) {
+		this.ownershipCategory = ownershipCategory;
+	}
+
+	public String getBuildingSubType() {
+		return buildingSubType;
+	}
+
+	public void setBuildingSubType(String buildingSubType) {
+		this.buildingSubType = buildingSubType;
+	}
+
+	public String getWaterSource() {
+		return waterSource;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
+	}
+
+
+	public double getMaximumCharge() {
+		return maximumCharge;
+	}
+
+	public void setMaximumCharge(double maximumCharge) {
+		this.maximumCharge = maximumCharge;
+	}
+
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+
 	private List<Slab> slabs = new ArrayList<>();
 }

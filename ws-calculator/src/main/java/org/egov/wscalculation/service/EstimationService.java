@@ -25,6 +25,7 @@ import org.egov.wscalculation.web.models.RoadTypeEst;
 import org.egov.wscalculation.web.models.SearchCriteria;
 import org.egov.wscalculation.web.models.Slab;
 import org.egov.wscalculation.web.models.TaxHeadEstimate;
+import org.egov.wscalculation.web.models.Unit;
 import org.egov.wscalculation.web.models.WaterConnection;
 import org.egov.wscalculation.web.models.WaterConnectionRequest;
 import org.egov.wscalculation.web.models.WsTaxHeads;
@@ -159,7 +160,9 @@ public class EstimationService {
 		JSONObject calculationAttributeMaster = new JSONObject();
 		calculationAttributeMaster.put(WSCalculationConstant.CALCULATION_ATTRIBUTE_CONST, billingSlabMaster.get(WSCalculationConstant.CALCULATION_ATTRIBUTE_CONST));
         String calculationAttribute = getCalculationAttribute(calculationAttributeMaster, waterConnection.getConnectionType());
-		List<BillingSlab> billingSlabs = getSlabsFiltered(waterConnection, mappingBillingSlab, calculationAttribute, requestInfo);
+		List<String> filterAttrs =getFilterAttribute(calculationAttributeMaster, waterConnection.getConnectionType());
+		 
+		List<BillingSlab> billingSlabs = getSlabsFiltered(waterConnection, mappingBillingSlab, calculationAttribute, filterAttrs, requestInfo);
 		if (billingSlabs == null || billingSlabs.isEmpty())
 			throw new CustomException("BILLING_SLAB_NOT_FOUND", "Billing Slab are Empty");
 		if (billingSlabs.size() > 1)
@@ -170,32 +173,41 @@ public class EstimationService {
 
 		// WaterCharge Calculation
 		Double totalUOM = getUnitOfMeasurement(waterConnection, calculationAttribute, criteria);
-		if (totalUOM == 0.0)
-			return waterCharge;
+		
 		BillingSlab billSlab = billingSlabs.get(0);
 		// IF calculation type is flat then take flat rate else take slab and calculate the charge
 		//For metered connection calculation on graded fee slab
 		//For Non metered connection calculation on normal connection
 		if (isRangeCalculation(calculationAttribute)) {
-			if (waterConnection.getConnectionType().equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {
+			if (totalUOM == 0.0)
+				return waterCharge;
+			if (waterConnection.getConnectionType().equalsIgnoreCase(WSCalculationConstant.meteredConnectionType) ||
+					(waterConnection.getConnectionType().equalsIgnoreCase(WSCalculationConstant.nonMeterdConnection) && 
+							billSlab.getCalculationAttribute().equalsIgnoreCase(WSCalculationConstant.noOfTapsConst)
+							)) {
 				for (Slab slab : billSlab.getSlabs()) {
 					if (totalUOM > slab.getTo()) {
 						waterCharge = waterCharge.add(BigDecimal.valueOf(((slab.getTo()) - (slab.getFrom())) * slab.getCharge()));
-						totalUOM = totalUOM - ((slab.getTo()) - (slab.getFrom()));
-					} else if (totalUOM < slab.getTo()) {
-						waterCharge = waterCharge.add(BigDecimal.valueOf(totalUOM * slab.getCharge()));
-						totalUOM = ((slab.getTo()) - (slab.getFrom())) - totalUOM;
+					} else if (totalUOM <= slab.getTo()) {
+						waterCharge = waterCharge.add(BigDecimal.valueOf((totalUOM-slab.getFrom()) * slab.getCharge()));
 						break;
 					}
 				}
 				if (billSlab.getMinimumCharge() > waterCharge.doubleValue()) {
 					waterCharge = BigDecimal.valueOf(billSlab.getMinimumCharge());
 				}
+				if (billSlab.getMaximumCharge() > 0 && billSlab.getMaximumCharge() < waterCharge.doubleValue()) {
+					waterCharge = BigDecimal.valueOf(billSlab.getMaximumCharge());
+				}
 			} else if (waterConnection.getConnectionType()
 					.equalsIgnoreCase(WSCalculationConstant.nonMeterdConnection)) {
 				for (Slab slab : billSlab.getSlabs()) {
 					if (totalUOM >= slab.getFrom() && totalUOM < slab.getTo()) {
-						waterCharge = BigDecimal.valueOf((totalUOM * slab.getCharge()));
+						if(slab.getType()!=null && slab.getType().equalsIgnoreCase(WSCalculationConstant.CALC_TYPE_RATE)) {
+							waterCharge = BigDecimal.valueOf((totalUOM * slab.getCharge()));	
+						}else {
+							waterCharge = BigDecimal.valueOf((slab.getCharge()));
+						}
 						if (billSlab.getMinimumCharge() > waterCharge.doubleValue()) {
 							waterCharge = BigDecimal.valueOf(billSlab.getMinimumCharge());
 						}
@@ -205,29 +217,141 @@ public class EstimationService {
 			}
 		} else {
 			waterCharge = BigDecimal.valueOf(billSlab.getMinimumCharge());
+			//To handle Unauthorized Connection Charges
+			waterCharge.add(new BigDecimal(billSlab.getUnAuthorizedConnection()));
 		}
+		
+		
+		
 		return waterCharge;
 	}
-
+	
+	
 	private List<BillingSlab> getSlabsFiltered(WaterConnection waterConnection, List<BillingSlab> billingSlabs,
-			String calculationAttribute, RequestInfo requestInfo) {
-
+			String calculationAttribute,List<String> filterAttr, RequestInfo requestInfo) {
 		Property property = wSCalculationUtil.getProperty(
 				WaterConnectionRequest.builder().waterConnection(waterConnection).requestInfo(requestInfo).build());
-		// get billing Slab
-		log.debug(" the slabs count : " + billingSlabs.size());
-		final String buildingType = (property.getUsageCategory() != null) ? property.getUsageCategory().split("\\.")[0]
-				: "";
-		// final String buildingType = "Domestic";
 		final String connectionType = waterConnection.getConnectionType();
-
-		return billingSlabs.stream().filter(slab -> {
-			boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(buildingType);
-			boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
-			boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
-					.equalsIgnoreCase(calculationAttribute);
-			return isBuildingTypeMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
-		}).collect(Collectors.toList());
+		
+		for (String filterName : filterAttr) {
+			switch (filterName) {
+			case "PropertyLocation":
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					final String propLoc = (property.getAddress()!=null && property.getAddress().getLocation()!=null)?property.getAddress().getLocation() :"";
+					boolean ispropLocMatching = slab.getPropertyLocation().equalsIgnoreCase(propLoc);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return ispropLocMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;
+			case "waterSource":
+				long count =billingSlabs.stream().filter(slab -> {
+					final String waterSource = waterConnection.getWaterSource()!=null ?waterConnection.getWaterSource() :"";
+					boolean isWaterSourceMatching = slab.getWaterSource().equalsIgnoreCase(waterSource);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return  isWaterSourceMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).count();
+				final String waterSource = count > 0 ?  waterConnection.getWaterSource() :WSCalculationConstant.GENERIC_ATTRIBUTE;
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean isWaterSourceMatching = slab.getWaterSource().equalsIgnoreCase(waterSource);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return isWaterSourceMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;
+			case "buildingType":
+				final String buildingType = (property.getUsageCategory() != null) ? property.getUsageCategory()	: "";
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(buildingType);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return isBuildingTypeMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;
+			case "majorUsageType":
+				final String majorUsgType = (property.getUsageCategory() != null) ? property.getUsageCategory().split("\\.")[0]	: "";
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean isBuildingTypeMatching = slab.getBuildingType().equalsIgnoreCase(majorUsgType);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return isBuildingTypeMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;
+			case "buildingSubType":
+				final List<String> buildingSubType = new ArrayList<String>();
+				if(property.getUnits()!=null && property.getUnits().size()>0) {
+					buildingSubType.addAll(property.getUnits().stream().map(u -> u.getUsageCategory()).collect(Collectors.toList()));
+				}
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean isBuildingSubTypeMatching = buildingSubType.contains(slab.getBuildingSubType());
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return isBuildingSubTypeMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;
+			case "ownershipCategory":
+				final String ownershipCategory =  property.getOwnershipCategory() ;
+				//Check if specific value exist for category
+				long ownershipCount =billingSlabs.stream().filter(slab -> {
+					boolean ownershipCategoryMatching = slab.getOwnershipCategory().equalsIgnoreCase(ownershipCategory);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return  ownershipCategoryMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).count();
+				//If count is zero then change to generic category
+				final String ownership = ownershipCount > 0 ? ownershipCategory :  WSCalculationConstant.GENERIC_ATTRIBUTE;
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean ownershipCategoryMatching = slab.getOwnershipCategory().equalsIgnoreCase(ownership);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return (ownershipCategoryMatching)  && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;	
+			case "ownerType":
+				String ownerType = null;
+				if(!CollectionUtils.isEmpty(waterConnection.getConnectionHolders())) {
+					ownerType = waterConnection.getConnectionHolders().get(0).getOwnerType();
+				}else if(!CollectionUtils.isEmpty(property.getOwners())) {
+					ownerType =  property.getOwners().get(0).getOwnerType();
+				}
+				final String ownerType_lambda = ownerType !=null ? ownerType :"" ;
+				//Check if specific value exist for category
+				long ownerTypeCount =billingSlabs.stream().filter(slab -> {
+					boolean ownershipCategoryMatching = slab.getOwnerType().equalsIgnoreCase(ownerType_lambda);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return  ownershipCategoryMatching && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).count();
+				//If count is zero then change to generic category
+				final String  ownerType_lambda2 = ownerTypeCount > 0 ? ownerType :  WSCalculationConstant.GENERIC_ATTRIBUTE;
+				billingSlabs= billingSlabs.stream().filter(slab -> {
+					boolean ownershipCategoryMatching = slab.getOwnerType().equalsIgnoreCase(ownerType_lambda2);
+					boolean isConnectionTypeMatching = slab.getConnectionType().equalsIgnoreCase(connectionType);
+					boolean isCalculationAttributeMatching = slab.getCalculationAttribute()
+							.equalsIgnoreCase(calculationAttribute);
+					return (ownershipCategoryMatching)  && isConnectionTypeMatching && isCalculationAttributeMatching;
+				}).collect(Collectors.toList());
+				break;	
+								
+				
+			default:
+				log.info("INVALID USECASE "+ filterName);
+				break;
+			}
+		}
+		
+		
+		return billingSlabs;
 	}
 	
 	private String getCalculationAttribute(Map<String, Object> calculationAttributeMap, String connectionType) {
@@ -238,6 +362,23 @@ public class EstimationService {
 				"$.CalculationAttribute[?(@.name=='" + connectionType + "')]");
 		JSONObject master = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
 		return master.getAsString(WSCalculationConstant.ATTRIBUTE);
+	}
+	
+	
+	private List<String> getFilterAttribute(Map<String, Object> calculationAttributeMap, String connectionType) {
+		if (calculationAttributeMap == null)
+			throw new CustomException("CALCULATION_ATTRIBUTE_MASTER_NOT_FOUND",
+					"Calculation attribute master not found!!");
+		JSONArray filteredMasters = JsonPath.read(calculationAttributeMap,
+				"$.CalculationAttribute[?(@.name=='" + connectionType + "')]");
+		JSONObject master = mapper.convertValue(filteredMasters.get(0), JSONObject.class);
+		JSONArray array =mapper.convertValue(master.get(WSCalculationConstant.FILTER_ATTRIBUTE), JSONArray.class);
+		List<String> arr =new ArrayList<String>();
+		if(array!=null) {
+			arr =array.stream().map(obj ->obj.toString()).collect(Collectors.toList());
+		}
+		System.out.println(array.toArray());
+		return arr;
 	}
 	
 	/**
@@ -284,6 +425,25 @@ public class EstimationService {
 			return waterConnection.getPipeSize();
 		}
 		return 0.0;
+	}
+	
+	public Map<String, Object> getYearStartAndEndDate(Map<String, Object> billingPeriod){
+		Date date = new Date();
+		Calendar fromDateCalendar = Calendar.getInstance();
+		fromDateCalendar.setTime(date);
+		if(fromDateCalendar.get(Calendar.MONTH)< 3) {
+			fromDateCalendar.add(Calendar.YEAR, -1);	
+		}
+		fromDateCalendar.set(Calendar.MONTH, Calendar.APRIL);
+		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1); 
+		setTimeToBeginningOfDay(fromDateCalendar);
+		Calendar toDateCalendar = Calendar.getInstance();
+		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis());
+		toDateCalendar.add(Calendar.YEAR, 1);
+		toDateCalendar.add(Calendar.DAY_OF_MONTH, -1);
+		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, fromDateCalendar.getTimeInMillis());
+		billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES, toDateCalendar.getTimeInMillis());	
+		return billingPeriod;
 	}
 	
 	public Map<String, Object> getQuarterStartAndEndDate(Map<String, Object> billingPeriod){
