@@ -12,7 +12,10 @@ public enum Source {
     
   FIELD_SURVEY("FIELD_SURVEY"),
 	
-  WATER_CHARGES("WATER_CHARGES");
+  WATER_CHARGES("WATER_CHARGES"),
+  
+  LEGACY_RECORD("LEGACY_RECORD");
+	
 
   private String value;
 

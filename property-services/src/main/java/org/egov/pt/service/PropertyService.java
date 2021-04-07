@@ -13,6 +13,7 @@ import org.egov.pt.models.OwnerInfo;
 import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
 import org.egov.pt.models.enums.CreationReason;
+import org.egov.pt.models.enums.Source;
 import org.egov.pt.models.enums.Status;
 import org.egov.pt.models.user.UserDetailResponse;
 import org.egov.pt.models.user.UserSearchRequest;
@@ -79,7 +80,8 @@ public class PropertyService {
 		enrichmentService.enrichCreateRequest(request);
 		userService.createUser(request);
 		if (config.getIsWorkflowEnabled()
-				&& !request.getProperty().getCreationReason().equals(CreationReason.DATA_UPLOAD)) {
+				&& !request.getProperty().getCreationReason().equals(CreationReason.DATA_UPLOAD)
+				&& !Source.LEGACY_RECORD.equals(request.getProperty().getSource())) {
 			wfService.updateWorkflow(request, request.getProperty().getCreationReason());
 
 		} else {
