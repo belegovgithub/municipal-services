@@ -510,12 +510,13 @@ public class PropertyValidator {
      */
 	private void validateAssessees(PropertyRequest request,Property propertyFromSearch, Map<String, String> errorMap) {
 
+		String mobileNumberFromRequestInfo = request.getRequestInfo().getUserInfo().getMobileNumber();
 		String uuid = request.getRequestInfo().getUserInfo().getUuid();
 		Property property = request.getProperty();
 
-		Set<String> ownerIds = propertyFromSearch.getOwners().stream().map(OwnerInfo::getUuid).collect(Collectors.toSet());
+		Set<String> ownerMobileNumbers = propertyFromSearch.getOwners().stream().map(OwnerInfo::getMobileNumber).collect(Collectors.toSet());
 
-		if (!(ownerIds.contains(uuid) || uuid.equalsIgnoreCase(propertyFromSearch.getAccountId()))) {
+		if (!(ownerMobileNumbers.contains(mobileNumberFromRequestInfo) || uuid.equalsIgnoreCase(propertyFromSearch.getAccountId()))) {
 			errorMap.put("EG_PT_UPDATE AUTHORIZATION FAILURE",
 					"Not Authorized to update property with propertyId " + property.getPropertyId());
 		}
@@ -577,6 +578,7 @@ public class PropertyValidator {
 		Boolean isCriteriaEmpty = CollectionUtils.isEmpty(criteria.getOldpropertyids())
 				&& CollectionUtils.isEmpty(criteria.getAcknowledgementIds())
 				&& CollectionUtils.isEmpty(criteria.getPropertyIds())
+				&& CollectionUtils.isEmpty(criteria.getAbasPropertyids())
 				&& CollectionUtils.isEmpty(criteria.getOwnerIds()) 
 				&& CollectionUtils.isEmpty(criteria.getUuids())
 				&& null == criteria.getMobileNumber()
@@ -615,6 +617,9 @@ public class PropertyValidator {
 
         if(!CollectionUtils.isEmpty(criteria.getOwnerIds()) && !allowedParams.contains("ownerids"))
             throw new CustomException("EG_PT_INVALID_SEARCH","Search based on ownerId is not available for : " + userType);
+        
+        if(!CollectionUtils.isEmpty(criteria.getAbasPropertyids()) && !allowedParams.contains("abasPropertyids"))
+            throw new CustomException("EG_PT_INVALID_SEARCH","Search based on abasPropertyid is not available for userType : " + userType);
     }
 
 	/**
@@ -629,7 +634,7 @@ public class PropertyValidator {
 			return false;
 		else if (mobileNumber.length() != 10)
 			return false;
-		else if (Character.getNumericValue(mobileNumber.charAt(0)) < 5)
+		else if (Character.getNumericValue(mobileNumber.charAt(0)) < 3)
 			return false;
 		else
 			return true;
