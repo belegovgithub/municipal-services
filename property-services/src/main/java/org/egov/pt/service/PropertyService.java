@@ -1,5 +1,6 @@
 package org.egov.pt.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -133,6 +134,23 @@ public class PropertyService {
 		if (CreationReason.CREATE.equals(request.getProperty().getCreationReason())) {
 			userService.createUser(request);
 		} else {
+			if ("LEGACY_RECORD".equals(request.getProperty().getSource().toString())) {
+				userService.createUser(request);
+
+				for (OwnerInfo info : propertyFromSearch.getOwners()) {
+					info.setStatus(Status.INACTIVE);
+				}
+				
+				for (OwnerInfo info : request.getProperty().getOwners()) {
+					info.setStatus(Status.ACTIVE);
+				}
+				
+				List<OwnerInfo> collectedOwners = new ArrayList<OwnerInfo>();
+				collectedOwners.addAll(propertyFromSearch.getOwners());
+				collectedOwners.addAll(request.getProperty().getOwners());
+
+				request.getProperty().setOwners(util.getCopyOfOwners(collectedOwners));
+			}else 
 			request.getProperty().setOwners(util.getCopyOfOwners(propertyFromSearch.getOwners()));
 		}
 

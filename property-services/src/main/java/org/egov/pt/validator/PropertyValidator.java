@@ -21,6 +21,7 @@ import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
 import org.egov.pt.models.Unit;
 import org.egov.pt.models.enums.CreationReason;
+import org.egov.pt.models.enums.Source;
 import org.egov.pt.models.enums.Status;
 import org.egov.pt.models.workflow.BusinessService;
 import org.egov.pt.models.workflow.ProcessInstance;
@@ -157,7 +158,7 @@ public class PropertyValidator {
         if(request.getRequestInfo().getUserInfo().getType().equalsIgnoreCase("CITIZEN"))
             validateAssessees(request,propertyFromSearch, errorMap);
 
-		if (configs.getIsWorkflowEnabled() && request.getProperty().getWorkflow() == null)
+		if (configs.getIsWorkflowEnabled() && request.getProperty().getWorkflow() == null && !Source.LEGACY_RECORD.equals(request.getProperty().getSource()))
 			throw new CustomException("EG_PT_UPDATE_WF_ERROR", "Workflow information is mandatory for update process");
 
 		// third variable is needed only for mutation
@@ -205,10 +206,10 @@ public class PropertyValidator {
 
 		if (!CollectionUtils.isEmpty(uuidsNotFound))
 			errorMap.put("EG_PT_UPDATE_OWNER_UUID_ERROR", "Invalid owners found in request : " + uuidsNotFound);
-
+		if(!Source.LEGACY_RECORD.equals(request.getProperty().getSource())) {
 		if(searchOwnerUuids.size() != request.getProperty().getOwners().size())
 			errorMap.put("EG_PT_UPDATE_OWNER_SIZE_ERROR", "Update request cannot change owner Information please use mutation process");
-		
+		}
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
     }

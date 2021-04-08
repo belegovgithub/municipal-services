@@ -13,6 +13,7 @@ import org.egov.pt.models.Institution;
 import org.egov.pt.models.OwnerInfo;
 import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
+import org.egov.pt.models.enums.Source;
 import org.egov.pt.models.enums.Status;
 import org.egov.pt.models.user.User;
 import org.egov.pt.util.PTConstants;
@@ -113,7 +114,7 @@ public class EnrichmentService {
 		Boolean isWfEnabled = config.getIsWorkflowEnabled();
 		Boolean iswfStarting = propertyFromDb.getStatus().equals(Status.ACTIVE);
 
-		if (!isWfEnabled) {
+		if (!isWfEnabled || Source.LEGACY_RECORD.equals(request.getProperty().getSource())) {
 
 			property.setStatus(Status.ACTIVE);
 			property.getAddress().setId(propertyFromDb.getAddress().getId());
