@@ -29,7 +29,7 @@ public class EgDeathDtl{
 	
 	private String dateofdeathepoch;
 
-	private String excelrowindex;
+	private int excelrowindex;
 	
 	private String dateofreportepoch;
 	

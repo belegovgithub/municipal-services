@@ -127,7 +127,7 @@ public class BirthDeathConstants {
 	
 	public static final String DATA_ERROR = "Data Error";
 	public static final String UPDATE_ERROR = "Id cannot be empty for Updation";
-	public static final String INVALID_DATA_SPACES = "Data contains extra spaces";
+	//public static final String INVALID_DATA_SPACES = "Data contains extra spaces";
     public BirthDeathConstants() {}
 
 }

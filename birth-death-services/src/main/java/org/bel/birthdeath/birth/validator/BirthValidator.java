@@ -299,14 +299,179 @@ public class BirthValidator {
 			setRejectionReason(BirthDeathConstants.PRESENT_COUNTRY,birthDtl,importBirthWrapper);
 			return false;
 		}
-		if(containsInvalidCharsMain(birthDtl)) {
-			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES,birthDtl,importBirthWrapper);
+		/*if(containsInvalidCharsSub(birthDtl.getRegistrationno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Registration No.",birthDtl,importBirthWrapper);
 			return false;
 		}
+		if (containsInvalidCharsSub(birthDtl.getFirstname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in First Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getMiddlename())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Middle Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getLastname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Last Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getPlaceofbirth())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Place of Birth.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getRemarks())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Remarks.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getFirstname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Mother First Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getMiddlename())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Mother Midddle Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getLastname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Mother Last Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthMotherInfo().getAadharno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Mother Aadhar No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getFirstname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Father First Name", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getMiddlename())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Father Middle Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getLastname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Father Last Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthFatherInfo().getAadharno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Father Aadhar No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getHouseno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address House No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getBuildingno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address Building No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getStreetname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address Street Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getLocality())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address Locality.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getTehsil())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address Tehsil.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getDistrict())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address District.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getCity())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address City.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getState())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address State.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getPinno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address PIN No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPermaddr().getCountry())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Permanent Address Country.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getHouseno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address House No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getBuildingno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address Building No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getStreetname())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address Street Name.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getLocality())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address Locality.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getTehsil())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address Tehsil.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getDistrict())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address District.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getCity())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address City.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getState())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address State.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getPinno())) {
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address PIN No.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}
+		if (containsInvalidCharsSub(birthDtl.getBirthPresentaddr().getCountry())){
+			setRejectionReason(BirthDeathConstants.INVALID_DATA_SPACES + " in Present Address Country.", birthDtl,
+					importBirthWrapper);
+			return false;
+		}*/
 		return true;
 	}
 	
-	private boolean containsInvalidCharsMain(EgBirthDtl birthDtl) {
+	/*private boolean containsInvalidCharsMain(EgBirthDtl birthDtl) {
 		if( containsInvalidCharsSub(birthDtl.getRegistrationno()) ||
 			containsInvalidCharsSub(birthDtl.getFirstname()) ||
 			containsInvalidCharsSub(birthDtl.getMiddlename()) ||
@@ -353,6 +518,58 @@ public class BirthValidator {
 			return true;
 		else
 			return false;
+	}*/
+	
+	public void removeSpaceChars(EgBirthDtl birthDtl)
+	{
+		birthDtl.setFirstname(replaceSpaceChars(birthDtl.getFirstname()));
+		birthDtl.setMiddlename(replaceSpaceChars(birthDtl.getMiddlename()));
+		birthDtl.setLastname(replaceSpaceChars(birthDtl.getLastname()));
+		birthDtl.setPlaceofbirth(replaceSpaceChars(birthDtl.getPlaceofbirth()));
+		birthDtl.setRemarks(replaceSpaceChars(birthDtl.getRemarks()));
+		birthDtl.setHospitalname(replaceSpaceChars(birthDtl.getHospitalname()));
+		birthDtl.getBirthMotherInfo().setFirstname(replaceSpaceChars(birthDtl.getBirthMotherInfo().getFirstname()));
+		birthDtl.getBirthMotherInfo().setMiddlename(replaceSpaceChars(birthDtl.getBirthMotherInfo().getMiddlename()));
+		birthDtl.getBirthMotherInfo().setLastname(replaceSpaceChars(birthDtl.getBirthMotherInfo().getLastname()));
+		birthDtl.getBirthMotherInfo().setAadharno(replaceSpaceChars(birthDtl.getBirthMotherInfo().getAadharno()));
+		birthDtl.getBirthMotherInfo().setNationality(replaceSpaceChars(birthDtl.getBirthMotherInfo().getNationality()));
+		birthDtl.getBirthMotherInfo().setProffession(replaceSpaceChars(birthDtl.getBirthMotherInfo().getProffession()));
+		birthDtl.getBirthMotherInfo().setReligion(replaceSpaceChars(birthDtl.getBirthMotherInfo().getReligion()));
+		birthDtl.getBirthFatherInfo().setFirstname(replaceSpaceChars(birthDtl.getBirthFatherInfo().getFirstname()));
+		birthDtl.getBirthFatherInfo().setMiddlename(replaceSpaceChars(birthDtl.getBirthFatherInfo().getMiddlename()));
+		birthDtl.getBirthFatherInfo().setLastname(replaceSpaceChars(birthDtl.getBirthFatherInfo().getLastname()));
+		birthDtl.getBirthFatherInfo().setAadharno(replaceSpaceChars(birthDtl.getBirthFatherInfo().getAadharno()));
+		birthDtl.getBirthFatherInfo().setNationality(replaceSpaceChars(birthDtl.getBirthFatherInfo().getNationality()));
+		birthDtl.getBirthFatherInfo().setProffession(replaceSpaceChars(birthDtl.getBirthFatherInfo().getProffession()));
+		birthDtl.getBirthFatherInfo().setReligion(replaceSpaceChars(birthDtl.getBirthFatherInfo().getReligion()));
+		birthDtl.getBirthPermaddr().setHouseno(replaceSpaceChars(birthDtl.getBirthPermaddr().getHouseno()));
+		birthDtl.getBirthPermaddr().setBuildingno(replaceSpaceChars(birthDtl.getBirthPermaddr().getBuildingno()));
+		birthDtl.getBirthPermaddr().setStreetname(replaceSpaceChars(birthDtl.getBirthPermaddr().getStreetname()));
+		birthDtl.getBirthPermaddr().setLocality(replaceSpaceChars(birthDtl.getBirthPermaddr().getLocality()));
+		birthDtl.getBirthPermaddr().setTehsil(replaceSpaceChars(birthDtl.getBirthPermaddr().getTehsil()));
+		birthDtl.getBirthPermaddr().setDistrict(replaceSpaceChars(birthDtl.getBirthPermaddr().getDistrict()));
+		birthDtl.getBirthPermaddr().setCity(replaceSpaceChars(birthDtl.getBirthPermaddr().getCity()));
+		birthDtl.getBirthPermaddr().setState(replaceSpaceChars(birthDtl.getBirthPermaddr().getState()));
+		birthDtl.getBirthPermaddr().setPinno(replaceSpaceChars(birthDtl.getBirthPermaddr().getPinno()));
+		birthDtl.getBirthPermaddr().setCountry(replaceSpaceChars(birthDtl.getBirthPermaddr().getCountry()));
+		birthDtl.getBirthPresentaddr().setHouseno(replaceSpaceChars(birthDtl.getBirthPresentaddr().getHouseno()));
+		birthDtl.getBirthPresentaddr().setBuildingno(replaceSpaceChars(birthDtl.getBirthPresentaddr().getBuildingno()));
+		birthDtl.getBirthPresentaddr().setStreetname(replaceSpaceChars(birthDtl.getBirthPresentaddr().getStreetname()));
+		birthDtl.getBirthPresentaddr().setLocality(replaceSpaceChars(birthDtl.getBirthPresentaddr().getLocality()));
+		birthDtl.getBirthPresentaddr().setTehsil(replaceSpaceChars(birthDtl.getBirthPresentaddr().getTehsil()));
+		birthDtl.getBirthPresentaddr().setDistrict(replaceSpaceChars(birthDtl.getBirthPresentaddr().getDistrict()));
+		birthDtl.getBirthPresentaddr().setCity(replaceSpaceChars(birthDtl.getBirthPresentaddr().getCity()));
+		birthDtl.getBirthPresentaddr().setState(replaceSpaceChars(birthDtl.getBirthPresentaddr().getState()));
+		birthDtl.getBirthPresentaddr().setPinno(replaceSpaceChars(birthDtl.getBirthPresentaddr().getPinno()));
+		birthDtl.getBirthPresentaddr().setCountry(replaceSpaceChars(birthDtl.getBirthPresentaddr().getCountry()));
+	}
+
+	private String replaceSpaceChars(String string) {
+		if(null!=string)
+		{
+			string = string.replaceAll("\\t|\\r|\\n", " ");
+		}
+		return string;
 	}
 	
 	private void setRejectionReason(String reason,EgBirthDtl birthDtl,ImportBirthWrapper importBirthWrapper)

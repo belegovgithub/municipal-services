@@ -116,7 +116,7 @@ public class StorageController {
                         EgBirthDtl birthDtl =  new EgBirthDtl();
                         birthDtl.setTenantid(tenantId);
                     	birthDtl.setCounter(0);
-                    	birthDtl.setExcelrowindex(""+(row.getRowNum()+1));
+                    	birthDtl.setExcelrowindex((row.getRowNum()+1));
                     	birthCerts.add(birthDtl);
                     	
                     	EgBirthFatherInfo birthFatherInfo = new EgBirthFatherInfo();
@@ -376,7 +376,7 @@ public class StorageController {
                         EgDeathDtl deathDtl =  new EgDeathDtl();
                         deathDtl.setTenantid(tenantId);
                     	deathDtl.setCounter(0);
-                    	deathDtl.setExcelrowindex(""+(row.getRowNum()+1));
+                    	deathDtl.setExcelrowindex((row.getRowNum()+1));
                     	deathCerts.add(deathDtl);
                     	
                     	EgDeathFatherInfo deathFatherInfo = new EgDeathFatherInfo();

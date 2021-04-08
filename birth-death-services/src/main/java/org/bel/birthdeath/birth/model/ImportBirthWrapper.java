@@ -101,7 +101,6 @@ public class ImportBirthWrapper {
 			BirthDeathConstants.PRESENT_PINNO ,
 			BirthDeathConstants.PRESENT_COUNTRY,
 			BirthDeathConstants.UPDATE_ERROR,
-			BirthDeathConstants.INVALID_DATA_SPACES,
 			BirthDeathConstants.REGNO_LARGE
 			});
     
@@ -120,7 +119,7 @@ public class ImportBirthWrapper {
 	{
 		statsMap.put(error,statsMap.get(error)+1);
 		statsMapData.get(error).add(record);
-		errorRowMap.get(error).add(record.getExcelrowindex());
+		errorRowMap.get(error).add(String.valueOf(record.getExcelrowindex()));
 	}
 
 	public void finaliseStats(int total, int success) {

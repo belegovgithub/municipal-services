@@ -38,7 +38,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_dtls_audit() RETURNS TRIGGER AS $eg_
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_dtls_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;
@@ -74,7 +74,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_father_info_audit() RETURNS TRIGGER 
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_father_info_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;
@@ -111,7 +111,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_mother_info_audit() RETURNS TRIGGER 
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_mother_info_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;
@@ -152,7 +152,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_permaddr_audit() RETURNS TRIGGER AS 
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_permaddr_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;
@@ -192,7 +192,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_presentaddr_audit() RETURNS TRIGGER 
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_presentaddr_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;
@@ -228,7 +228,7 @@ CREATE OR REPLACE FUNCTION process_eg_death_spouse_info_audit() RETURNS TRIGGER 
             RETURN OLD;
         ELSIF (TG_OP = 'UPDATE') THEN
             INSERT INTO eg_death_spouse_info_audit SELECT 'U', now(), OLD.*;
-            RETURN OLD;
+            RETURN NEW;
         END IF;
         RETURN NULL;
     END;

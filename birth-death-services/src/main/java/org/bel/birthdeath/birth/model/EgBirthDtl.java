@@ -31,7 +31,7 @@ public class EgBirthDtl{
 
 	private String dateofreportepoch;
 	
-	private String excelrowindex;
+	private int excelrowindex;
 	//@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
 	private Long dateofissue;
 
