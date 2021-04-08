@@ -103,7 +103,11 @@ public class SewerageServiceImpl implements SewerageService {
 		userService.createUser(sewerageConnectionRequest);
 		sewerageDao.saveSewerageConnection(sewerageConnectionRequest);
 		// call work-flow
-		if (config.getIsExternalWorkFlowEnabled())
+		SewerageConnection conn = sewerageConnectionRequest.getSewerageConnection();
+		 
+		if(conn.getOldApplication()!=null && conn.getOldApplication() && !StringUtils.isEmpty(conn.getOldConnectionNo())) {
+			enrichmentService.legacyStatusEnrichment(sewerageConnectionRequest);
+		}if (config.getIsExternalWorkFlowEnabled())
 			wfIntegrator.callWorkFlow(sewerageConnectionRequest, property);
 		return Arrays.asList(sewerageConnectionRequest.getSewerageConnection());
 	}

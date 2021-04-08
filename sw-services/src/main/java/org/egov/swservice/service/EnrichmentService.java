@@ -196,7 +196,16 @@ public class EnrichmentService {
 			setConnectionNO(sewerageConnectionRequest);
 		}
 	}
-
+	
+	/**
+	 * Enrich water connection request and add connection no if connection is legacy data
+	 * @param sewerageConnectionRequest
+	 */
+	public void legacyStatusEnrichment(SewerageConnectionRequest sewerageConnectionRequest) {
+		if (sewerageConnectionRequest.getSewerageConnection().getApplicationStatus().equals("CONNECTION_ACTIVATED")  ) {
+			setConnectionNO(sewerageConnectionRequest);
+		}
+	}
 	/**
 	 * Enrich sewerage connection request and set sewerage connection no
 	 * 
