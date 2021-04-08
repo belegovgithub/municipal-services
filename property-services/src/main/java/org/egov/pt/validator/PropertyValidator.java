@@ -171,6 +171,7 @@ public class PropertyValidator {
 		 *  
 		 *  creation reason will change for begining of a workflow 
 		 */
+		if(null != property.getWorkflow()){
 		if (property.getWorkflow().getAction().equalsIgnoreCase(configs.getMutationOpenState())
 				&& propertyFromSearch.getStatus().equals(Status.ACTIVE)) {
 			fieldsUpdated.remove("creationReason");
@@ -194,7 +195,7 @@ public class PropertyValidator {
 			throw new CustomException("EG_PT_WF_UPDATE_ERROR",
 					"The current state of workflow does not allow chnages to property");
 		
-	    
+		}
         /*
          * Blocking owner changes in update flow
          */
