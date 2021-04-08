@@ -113,6 +113,8 @@ public class SWConstants {
 			.unmodifiableList(Arrays.asList(VARIABLE_WFDOCUMENTS, VARIABLE_PLUMBER));
 
 	public static final String APPROVE_CONNECTION_CONST = "APPROVE_FOR_CONNECTION";
+	
+	public static final String PENDING_APPROVAL_FOR_CONNECTION_CODE ="PENDING_APPROVAL_FOR_CONNECTION";
 
 	public static final String SC_ROADTYPE_MASTER = "RoadType";
 	
