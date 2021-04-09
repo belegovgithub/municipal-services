@@ -467,6 +467,11 @@ public class DemandService {
 		BigDecimal rebate = rebatePenaltyEstimates.get(PT_TIME_REBATE);
 		BigDecimal penalty = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_PENALTY);
 		BigDecimal interest = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_INTEREST);
+		System.out.println("taxperiod--"+taxPeriod.getFromDate() +"to"+ taxPeriod.getToDate());
+		System.out.println("rebate::::::"+rebate);
+		System.out.println("penalty::::::"+penalty);
+		System.out.println("rebate::::::"+penalty);
+
 
 		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail;
 
