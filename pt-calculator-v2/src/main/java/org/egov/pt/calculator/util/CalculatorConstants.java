@@ -26,6 +26,16 @@ public class CalculatorConstants {
 	public static final String MAX_PRIORITY_VALUE = "MAX_PRIORITY_VALUE";
 
 	public static final String PT_TAX = "PT_TAX";
+	
+	public static final String PT_HOUSE_TAX = "PT_HOUSE_TAX";
+	
+	public static final String PT_WATER_TAX = "PT_WATER_TAX";
+	
+	public static final String PT_CONSERVANCY_TAX = "PT_CONSERVANCY_TAX";
+	
+	public static final String PT_LIGHTINING_TAX = "PT_LIGHTINING_TAX";
+	
+	public static final String PT_EDUCATION_TAX = "PT_EDUCATION_TAX";
 
 	public static final String PT_UNIT_USAGE_EXEMPTION = "PT_UNIT_USAGE_EXEMPTION";
 
@@ -64,13 +74,13 @@ public class CalculatorConstants {
 	public static final String ALLOWED_RECEIPT_STATUS = "APPROVED,REMITTED";
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD_WHEN_CALUCLATING_REBATE_AND_PENALTY = Collections.unmodifiableList(Arrays
-			.asList(PT_TAX));
+			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX));
 	
 	public static final List<String> TAXES_TO_BE_SUBTRACTED_WHEN_CALCULATING_REBATE_AND_PENALTY = Collections.unmodifiableList(Arrays
 			.asList(PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION ));
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD = Collections.unmodifiableList(Arrays
-			.asList(PT_TAX,PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION ));
+			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX,PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION ));
 	/*
 	 * these lists has to be updated with every new additional taxes which will be applied on the principle tax(PT_TAX)  
 	 */
