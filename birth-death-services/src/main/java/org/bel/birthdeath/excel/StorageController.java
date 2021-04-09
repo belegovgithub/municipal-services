@@ -222,64 +222,64 @@ public class StorageController {
                     				birthMotherInfo.setReligion(getStringVal(cell));
                     				break;    
                     			case 31:
-                    				birthPermaddr.setBuildingno(getStringVal(cell));
-                    				break;  
-                    			case 32:
-                    				birthPermaddr.setHouseno(getStringVal(cell));
-                    				break;
-                    			case 33:
-                    				birthPermaddr.setStreetname(getStringVal(cell));
-                    				break;  
-                    			case 34:
-                    				birthPermaddr.setLocality(getStringVal(cell));
-                    				break;  
-                    			case 35:
-                    				birthPermaddr.setTehsil(getStringVal(cell));
-                    				break;  
-                    			case 36:
-                    				birthPermaddr.setDistrict(getStringVal(cell));
-                    				break;  
-                    			case 37:
-                    				birthPermaddr.setCity(getStringVal(cell));
-                    				break; 
-                    			case 38:
-                    				birthPermaddr.setState(getStringVal(cell));
-                    				break;    
-                    			case 39:
-                    				birthPermaddr.setPinno(getStringVal(cell));
-                    				break; 
-                    			case 40:
-                    				birthPermaddr.setCountry(getStringVal(cell));
-                    				break;   
-                    			case 41:
                     				birthPresentaddr.setBuildingno(getStringVal(cell));
                     				break;  
-                    			case 42:
+                    			case 32:
                     				birthPresentaddr.setHouseno(getStringVal(cell));
                     				break;
-                    			case 43:
+                    			case 33:
                     				birthPresentaddr.setStreetname(getStringVal(cell));
                     				break;  
-                    			case 44:
+                    			case 34:
                     				birthPresentaddr.setLocality(getStringVal(cell));
                     				break;  
-                    			case 45:
+                    			case 35:
                     				birthPresentaddr.setTehsil(getStringVal(cell));
                     				break;  
-                    			case 46:
+                    			case 36:
                     				birthPresentaddr.setDistrict(getStringVal(cell));
                     				break;  
-                    			case 47:
+                    			case 37:
                     				birthPresentaddr.setCity(getStringVal(cell));
                     				break; 
-                    			case 48:
+                    			case 38:
                     				birthPresentaddr.setState(getStringVal(cell));
                     				break;    
-                    			case 49:
+                    			case 39:
                     				birthPresentaddr.setPinno(getStringVal(cell));
                     				break; 
-                    			case 50:
+                    			case 40:
                     				birthPresentaddr.setCountry(getStringVal(cell));
+                    				break;   
+                    			case 41:
+                    				birthPermaddr.setBuildingno(getStringVal(cell));
+                    				break;  
+                    			case 42:
+                    				birthPermaddr.setHouseno(getStringVal(cell));
+                    				break;
+                    			case 43:
+                    				birthPermaddr.setStreetname(getStringVal(cell));
+                    				break;  
+                    			case 44:
+                    				birthPermaddr.setLocality(getStringVal(cell));
+                    				break;  
+                    			case 45:
+                    				birthPermaddr.setTehsil(getStringVal(cell));
+                    				break;  
+                    			case 46:
+                    				birthPermaddr.setDistrict(getStringVal(cell));
+                    				break;  
+                    			case 47:
+                    				birthPermaddr.setCity(getStringVal(cell));
+                    				break; 
+                    			case 48:
+                    				birthPermaddr.setState(getStringVal(cell));
+                    				break;    
+                    			case 49:
+                    				birthPermaddr.setPinno(getStringVal(cell));
+                    				break; 
+                    			case 50:
+                    				birthPermaddr.setCountry(getStringVal(cell));
                     				break;
                     			case 51:
                     				birthDtl.setInformantsname(getStringVal(cell));
@@ -501,64 +501,64 @@ public class StorageController {
 									deathMotherInfo.setMobileno(getStringVal(cell));
 									break;
 								case 35:
-									deathPermaddr.setBuildingno(getStringVal(cell));
-									break;
-								case 36:
-									deathPermaddr.setHouseno(getStringVal(cell));
-									break;
-								case 37:
-									deathPermaddr.setStreetname(getStringVal(cell));
-									break;
-								case 38:
-									deathPermaddr.setLocality(getStringVal(cell));
-									break;
-								case 39:
-									deathPermaddr.setTehsil(getStringVal(cell));
-									break;
-								case 40:
-									deathPermaddr.setDistrict(getStringVal(cell));
-									break;
-								case 41:
-									deathPermaddr.setState(getStringVal(cell));
-									break;
-								case 42:
-									deathPermaddr.setCity(getStringVal(cell));
-									break;
-								case 43:
-									deathPermaddr.setPinno(getStringVal(cell));
-									break;
-								case 44:
-									deathPermaddr.setCountry(getStringVal(cell));
-									break;
-								case 45:
 									deathPresentaddr.setBuildingno(getStringVal(cell));
 									break;
-								case 46:
+								case 36:
 									deathPresentaddr.setHouseno(getStringVal(cell));
 									break;
-								case 47:
+								case 37:
 									deathPresentaddr.setStreetname(getStringVal(cell));
 									break;
-								case 48:
+								case 38:
 									deathPresentaddr.setLocality(getStringVal(cell));
 									break;
-								case 49:
+								case 39:
 									deathPresentaddr.setTehsil(getStringVal(cell));
 									break;
-								case 50:
+								case 40:
 									deathPresentaddr.setDistrict(getStringVal(cell));
 									break;
-								case 51:
+								case 41:
 									deathPresentaddr.setState(getStringVal(cell));
 									break;
-								case 52:
+								case 42:
 									deathPresentaddr.setCity(getStringVal(cell));
 									break;
-								case 53:
+								case 43:
 									deathPresentaddr.setPinno(getStringVal(cell));
 									break;
-								case 54:
+								case 44:
 									deathPresentaddr.setCountry(getStringVal(cell));
+									break;
+								case 45:
+									deathPermaddr.setBuildingno(getStringVal(cell));
+									break;
+								case 46:
+									deathPermaddr.setHouseno(getStringVal(cell));
+									break;
+								case 47:
+									deathPermaddr.setStreetname(getStringVal(cell));
+									break;
+								case 48:
+									deathPermaddr.setLocality(getStringVal(cell));
+									break;
+								case 49:
+									deathPermaddr.setTehsil(getStringVal(cell));
+									break;
+								case 50:
+									deathPermaddr.setDistrict(getStringVal(cell));
+									break;
+								case 51:
+									deathPermaddr.setState(getStringVal(cell));
+									break;
+								case 52:
+									deathPermaddr.setCity(getStringVal(cell));
+									break;
+								case 53:
+									deathPermaddr.setPinno(getStringVal(cell));
+									break;
+								case 54:
+									deathPermaddr.setCountry(getStringVal(cell));
 									break;
 								case 55:
 									deathDtl.setInformantsname(getStringVal(cell));
