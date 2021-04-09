@@ -103,7 +103,8 @@ public class ImportDeathWrapper {
     		BirthDeathConstants.AADHAR_LARGE,
     		BirthDeathConstants.NATIONALITY_LARGE,
     		BirthDeathConstants.RELIGION_LARGE,
-    		BirthDeathConstants.ICDCODE_LARGE	
+    		BirthDeathConstants.ICDCODE_LARGE,
+			BirthDeathConstants.EXCEL_DATA_ERROR	
 			});
     
 	public ImportDeathWrapper() {
@@ -121,7 +122,14 @@ public class ImportDeathWrapper {
 	{
 		statsMap.put(error,statsMap.get(error)+1);
 		statsMapData.get(error).add(record);
-		errorRowMap.get(error).add(String.valueOf(record.getExcelrowindex()));
+		if(error.equalsIgnoreCase(BirthDeathConstants.EXCEL_DATA_ERROR))
+		{
+			errorRowMap.get(error).add((record.getRejectReason()!=null?record.getRejectReason():""));
+		}
+		else
+		{
+			errorRowMap.get(error).add(String.valueOf(record.getExcelrowindex()));
+		}
 	}
 
 	public void finaliseStats(int total, int success) {

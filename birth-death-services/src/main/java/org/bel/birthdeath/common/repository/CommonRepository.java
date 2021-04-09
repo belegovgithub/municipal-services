@@ -209,35 +209,42 @@ public class CommonRepository {
 		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getBirthCerts().forEach(bdtl -> {
-			if (bdtl.getRegistrationno() != null) {
-				if (uniqueList.get(bdtl.getRegistrationno()) == null)
-				{
-					birthValidator.removeSpaceChars(bdtl);
-					uniqueList.put(bdtl.getRegistrationno(), bdtl);
-					if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
-					{
-						if(bdtl.getHospitalname().length() >500) {
-							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
-							uniqueList.remove(bdtl.getRegistrationno());
-						}
-						else {
-							bdtl.setHospitalname(bdtl.getHospitalname().trim());
-							if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
-							{
-								uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
-							}
-							uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
-						}
-					}
-				}
-				else {
-					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
-					duplicates.add(bdtl.getRegistrationno());
-				}
+			if(null != bdtl.getRejectReason())
+			{
+				importBirthWrapper.updateMaps(BirthDeathConstants.EXCEL_DATA_ERROR, bdtl);
 			}
 			else
 			{
-				importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
+				if (bdtl.getRegistrationno() != null) {
+					if (uniqueList.get(bdtl.getRegistrationno()) == null)
+					{
+						birthValidator.removeSpaceChars(bdtl);
+						uniqueList.put(bdtl.getRegistrationno(), bdtl);
+						if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
+						{
+							if(bdtl.getHospitalname().length() >500) {
+								importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
+								uniqueList.remove(bdtl.getRegistrationno());
+							}
+							else {
+								bdtl.setHospitalname(bdtl.getHospitalname().trim());
+								if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
+								{
+									uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+								}
+								uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+							}
+						}
+					}
+					else {
+						importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
+						duplicates.add(bdtl.getRegistrationno());
+					}
+				}
+				else
+				{
+					importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
+				}
 			}
 		});
 		for (String regno : duplicates) {
@@ -503,36 +510,33 @@ public class CommonRepository {
 		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getDeathCerts().forEach(deathtl -> {
-			if (deathtl.getRegistrationno() != null) {
-				if (uniqueList.get(deathtl.getRegistrationno()) == null)
-				{
-					deathValidator.removeSpaceChars(deathtl);
-					uniqueList.put(deathtl.getRegistrationno(), deathtl);
-					if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty() )
-					{
-						if(deathtl.getHospitalname().length() >500) {
-							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
-							uniqueList.remove(deathtl.getRegistrationno());
-						}
-						else {
-							deathtl.setHospitalname(deathtl.getHospitalname().trim());
-							if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
-							{
-								uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+			if (null != deathtl.getRejectReason()) {
+				importDeathWrapper.updateMaps(BirthDeathConstants.EXCEL_DATA_ERROR, deathtl);
+			} else {
+				if (deathtl.getRegistrationno() != null) {
+					if (uniqueList.get(deathtl.getRegistrationno()) == null) {
+						deathValidator.removeSpaceChars(deathtl);
+						uniqueList.put(deathtl.getRegistrationno(), deathtl);
+						if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty()) {
+							if (deathtl.getHospitalname().length() > 500) {
+								importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
+								uniqueList.remove(deathtl.getRegistrationno());
+							} else {
+								deathtl.setHospitalname(deathtl.getHospitalname().trim());
+								if (!uniqueHospList.containsKey(deathtl.getHospitalname())) {
+									uniqueHospList.put(deathtl.getHospitalname(), new ArrayList<EgDeathDtl>());
+								}
+								uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
 							}
-							uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
 						}
+
+					} else {
+						importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
+						duplicates.add(deathtl.getRegistrationno());
 					}
-				
+				} else {
+					importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
 				}
-				else {
-					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
-					duplicates.add(deathtl.getRegistrationno());
-				}
-			}
-			else
-			{
-				importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
 			}
 		});
 		for (String regno : duplicates) {
@@ -773,42 +777,37 @@ public class CommonRepository {
 		Map<String, List<EgBirthDtl>> uniqueHospList = new HashMap<String, List<EgBirthDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getBirthCerts().forEach(bdtl -> {
-		if(bdtl.getId()!= null) {
-			if (bdtl.getRegistrationno() != null) {
-				if (uniqueList.get(bdtl.getRegistrationno()) == null)
-				{
-					birthValidator.removeSpaceChars(bdtl);
-					uniqueList.put(bdtl.getRegistrationno(), bdtl);
-					if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
-					{
-						if(bdtl.getHospitalname().length() >500) {
-							importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
-							uniqueList.remove(bdtl.getRegistrationno());
-						}
-						else {
-							bdtl.setHospitalname(bdtl.getHospitalname().trim());
-							if(!uniqueHospList.containsKey(bdtl.getHospitalname()))
-							{
-								uniqueHospList.put(bdtl.getHospitalname(),new ArrayList<EgBirthDtl>());
+			if (null != bdtl.getRejectReason()) {
+				importBirthWrapper.updateMaps(BirthDeathConstants.EXCEL_DATA_ERROR, bdtl);
+			} else {
+				if (bdtl.getId() != null) {
+					if (bdtl.getRegistrationno() != null) {
+						if (uniqueList.get(bdtl.getRegistrationno()) == null) {
+							birthValidator.removeSpaceChars(bdtl);
+							uniqueList.put(bdtl.getRegistrationno(), bdtl);
+							if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty()) {
+								if (bdtl.getHospitalname().length() > 500) {
+									importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
+									uniqueList.remove(bdtl.getRegistrationno());
+								} else {
+									bdtl.setHospitalname(bdtl.getHospitalname().trim());
+									if (!uniqueHospList.containsKey(bdtl.getHospitalname())) {
+										uniqueHospList.put(bdtl.getHospitalname(), new ArrayList<EgBirthDtl>());
+									}
+									uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+								}
 							}
-							uniqueHospList.get(bdtl.getHospitalname()).add(bdtl);
+						} else {
+							importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
+							duplicates.add(bdtl.getRegistrationno());
 						}
+					} else {
+						importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
 					}
-				}
-				else {
-					importBirthWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, bdtl);
-					duplicates.add(bdtl.getRegistrationno());
+				} else {
+					importBirthWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, bdtl);
 				}
 			}
-			else
-			{
-				importBirthWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, bdtl);
-			}
-		}
-		else
-		{
-			importBirthWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, bdtl);
-		}
 			
 		});
 		for (String regno : duplicates) {
@@ -870,43 +869,38 @@ public class CommonRepository {
 		Map<String, List<EgDeathDtl>> uniqueHospList = new HashMap<String, List<EgDeathDtl>>();
 		Set<String> duplicates = new HashSet<String>();
 		response.getDeathCerts().forEach(deathtl -> {
-		if(deathtl.getId()!= null) {
-			if (deathtl.getRegistrationno() != null) {
-				if (uniqueList.get(deathtl.getRegistrationno()) == null)
-				{
-					deathValidator.removeSpaceChars(deathtl);
-					uniqueList.put(deathtl.getRegistrationno(), deathtl);
-					if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty() )
-					{
-						if(deathtl.getHospitalname().length() >500) {
-							importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
-							uniqueList.remove(deathtl.getRegistrationno());
-						}
-						else {
-							deathtl.setHospitalname(deathtl.getHospitalname().trim());
-							if(!uniqueHospList.containsKey(deathtl.getHospitalname()))
-							{
-								uniqueHospList.put(deathtl.getHospitalname(),new ArrayList<EgDeathDtl>());
+			if (null != deathtl.getRejectReason()) {
+				importDeathWrapper.updateMaps(BirthDeathConstants.EXCEL_DATA_ERROR, deathtl);
+			} else {
+				if (deathtl.getId() != null) {
+					if (deathtl.getRegistrationno() != null) {
+						if (uniqueList.get(deathtl.getRegistrationno()) == null) {
+							deathValidator.removeSpaceChars(deathtl);
+							uniqueList.put(deathtl.getRegistrationno(), deathtl);
+							if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty()) {
+								if (deathtl.getHospitalname().length() > 500) {
+									importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
+									uniqueList.remove(deathtl.getRegistrationno());
+								} else {
+									deathtl.setHospitalname(deathtl.getHospitalname().trim());
+									if (!uniqueHospList.containsKey(deathtl.getHospitalname())) {
+										uniqueHospList.put(deathtl.getHospitalname(), new ArrayList<EgDeathDtl>());
+									}
+									uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+								}
 							}
-							uniqueHospList.get(deathtl.getHospitalname()).add(deathtl);
+
+						} else {
+							importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
+							duplicates.add(deathtl.getRegistrationno());
 						}
+					} else {
+						importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
 					}
-				
-				}
-				else {
-					importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, deathtl);
-					duplicates.add(deathtl.getRegistrationno());
+				} else {
+					importDeathWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, deathtl);
 				}
 			}
-			else
-			{
-				importDeathWrapper.updateMaps(BirthDeathConstants.REG_EMPTY, deathtl);
-			}
-		}
-		else
-		{
-			importDeathWrapper.updateMaps(BirthDeathConstants.UPDATE_ERROR, deathtl);
-		}
 		});
 		for (String regno : duplicates) {
 			importDeathWrapper.updateMaps(BirthDeathConstants.DUPLICATE_REG_EXCEL, uniqueList.get(regno));
