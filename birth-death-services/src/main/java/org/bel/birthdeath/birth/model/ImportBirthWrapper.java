@@ -41,7 +41,7 @@ public class ImportBirthWrapper {
     @JsonIgnore
 	List<String> keyList = Arrays.asList(new String[] { 
 			BirthDeathConstants.TENANT_EMPTY,
-			BirthDeathConstants.MANDATORY_MISSING,
+			BirthDeathConstants.B_MANDATORY_MISSING,
 			BirthDeathConstants.DUPLICATE_REG,
 			BirthDeathConstants.REG_EMPTY,
 			BirthDeathConstants.DOB_EMPTY,
