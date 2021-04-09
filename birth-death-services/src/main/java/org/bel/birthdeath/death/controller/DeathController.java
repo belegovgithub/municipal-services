@@ -58,7 +58,7 @@ public class DeathController {
 		{
 			return new ResponseEntity<>(new DeathResponse(), HttpStatus.OK);
 		}
-        List<EgDeathDtl> deathCerts = deathService.search(criteria);
+        List<EgDeathDtl> deathCerts = deathService.search(criteria,requestInfoWrapper.getRequestInfo());
         DeathResponse response = DeathResponse.builder().deathCerts(deathCerts).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();

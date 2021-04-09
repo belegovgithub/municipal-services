@@ -9,6 +9,7 @@ import org.bel.birthdeath.birth.model.ImportBirthWrapper;
 import org.bel.birthdeath.birth.model.SearchCriteria;
 import org.bel.birthdeath.birth.repository.BirthRepository;
 import org.bel.birthdeath.utils.BirthDeathConstants;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,14 +24,21 @@ public class BirthValidator {
 	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
 	SimpleDateFormat sdf3 = new SimpleDateFormat("dd.MM.yyyy");
 	
-	public boolean validateFields(SearchCriteria criteria) {
+	public boolean validateFieldsCitizen(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
 				|| criteria.getDateOfBirth() == null || criteria.getDateOfBirth().isEmpty() )
-			throw new CustomException("null_input", BirthDeathConstants.MANDATORY_MISSING);
+			throw new CustomException("null_input", BirthDeathConstants.B_MANDATORY_MISSING);
 		/*if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
 				&& (criteria.getHospitalname() == null || criteria.getHospitalname().isEmpty() ||
 						criteria.getMotherName() == null || criteria.getMotherName().isEmpty() ))
 			throw new CustomException("null_input", "Search criteria not meeting.");*/
+		return true;
+	}
+	
+	public boolean validateFieldsEmployee(SearchCriteria criteria) {
+		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
+				|| criteria.getFromDate() == null || criteria.getFromDate().isEmpty()  || criteria.getToDate() == null || criteria.getToDate().isEmpty())
+			throw new CustomException("null_input", BirthDeathConstants.B_MANDATORY_MISSING);
 		return true;
 	}
 

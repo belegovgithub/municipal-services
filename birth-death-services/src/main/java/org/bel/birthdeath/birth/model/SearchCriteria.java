@@ -48,4 +48,8 @@ public class SearchCriteria {
 	private String fatherName;
 	
 	private String birthcertificateno; 
+	
+	private String fromDate;
+	
+	private String toDate;
 }

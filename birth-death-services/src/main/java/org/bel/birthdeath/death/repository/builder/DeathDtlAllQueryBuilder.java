@@ -185,6 +185,30 @@ public class DeathDtlAllQueryBuilder {
 				e.printStackTrace();
 			}
 		}
+		if (criteria.getFromDate() != null) {
+			SimpleDateFormat sdf= new SimpleDateFormat("dd-MM-yyyy");
+			try {
+				Date dob = sdf.parse(criteria.getFromDate());
+				//Timestamp ts = new Timestamp(dob.getTime());
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" CAST(bdtl.dateofdeath as DATE) >= ?");
+				preparedStmtList.add(dob);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		if (criteria.getToDate() != null) {
+			SimpleDateFormat sdf= new SimpleDateFormat("dd-MM-yyyy");
+			try {
+				Date dob = sdf.parse(criteria.getToDate());
+				//Timestamp ts = new Timestamp(dob.getTime());
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" CAST(bdtl.dateofdeath as DATE) <= ?");
+				preparedStmtList.add(dob);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 		if(criteria.getName() !=null) {
 			addClauseIfRequired(preparedStmtList, builder);
 			builder.append(" ( bdtl.firstname ilike ? or bdtl.middlename ilike ? or bdtl.lastname ilike ? )");

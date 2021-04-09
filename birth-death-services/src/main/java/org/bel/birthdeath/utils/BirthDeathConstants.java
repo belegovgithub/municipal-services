@@ -41,7 +41,8 @@ public class BirthDeathConstants {
 	public static final String DEATH_CERT_FEE = "DEATH_CERT_FEE";
 	
 	public static final String TENANT_EMPTY = "Tenantid cannot be empty";
-	public static final String MANDATORY_MISSING = "DOB/GENDER is empty";
+	public static final String B_MANDATORY_MISSING = "DOB/GENDER is empty";
+	public static final String D_MANDATORY_MISSING = "DOD/GENDER is empty";
 	public static final String DUPLICATE_REG = "Reg No already exists";
 	public static final String DUPLICATE_REG_EXCEL = "Reg No already exists in Excel";
 	public static final String HOSPNAME_LARGE = "Hospital name cannot exceed 500 chars";

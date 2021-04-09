@@ -179,6 +179,30 @@ public class BirthDtlAllQueryBuilder {
 				e.printStackTrace();
 			}
 		}
+		if (criteria.getFromDate() != null) {
+			SimpleDateFormat sdf= new SimpleDateFormat("dd-MM-yyyy");
+			try {
+				Date dob = sdf.parse(criteria.getFromDate());
+				//Timestamp ts = new Timestamp(dob.getTime());
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" CAST(bdtl.dateofbirth as DATE) >= ?");
+				preparedStmtList.add(dob);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		if (criteria.getToDate() != null) {
+			SimpleDateFormat sdf= new SimpleDateFormat("dd-MM-yyyy");
+			try {
+				Date dob = sdf.parse(criteria.getToDate());
+				//Timestamp ts = new Timestamp(dob.getTime());
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" CAST(bdtl.dateofbirth as DATE) <= ?");
+				preparedStmtList.add(dob);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 		return builder.toString();
 	}
 

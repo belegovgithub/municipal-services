@@ -1,5 +1,6 @@
 package org.bel.birthdeath.death.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.common.contract.DeathPdfApplicationRequest;
@@ -37,10 +38,18 @@ public class DeathService {
 	@Autowired
 	CommonUtils commUtils;
 	
-	public List<EgDeathDtl> search(SearchCriteria criteria) {
-		List<EgDeathDtl> deathDtls = null ;
-		if(validator.validateFields(criteria))
-			deathDtls = repository.getDeathDtls(criteria);
+	public List<EgDeathDtl> search(SearchCriteria criteria,RequestInfo requestInfo) {
+		List<EgDeathDtl> deathDtls = new ArrayList<EgDeathDtl>() ;
+		if(requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE")) {
+			if(validator.validateFieldsEmployee(criteria)) {
+				deathDtls = repository.getDeathDtls(criteria);
+			}
+		}
+		else {
+			if(validator.validateFieldsCitizen(criteria)) {
+				deathDtls = repository.getDeathDtls(criteria);
+			}
+		}
 		return deathDtls;
 	}
 

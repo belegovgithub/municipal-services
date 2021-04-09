@@ -1,5 +1,6 @@
 package org.bel.birthdeath.birth.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bel.birthdeath.birth.certmodel.BirthCertAppln;
@@ -37,10 +38,18 @@ public class BirthService {
 	@Autowired
 	CommonUtils commUtils;
 	
-	public List<EgBirthDtl> search(SearchCriteria criteria) {
-		List<EgBirthDtl> birthDtls = null ;
-		if(validator.validateFields(criteria)) 
-			birthDtls = repository.getBirthDtls(criteria);
+	public List<EgBirthDtl> search(SearchCriteria criteria, RequestInfo requestInfo) {
+		List<EgBirthDtl> birthDtls = new ArrayList<EgBirthDtl>() ;
+		if(requestInfo.getUserInfo().getType().equalsIgnoreCase("EMPLOYEE")) {
+			if(validator.validateFieldsEmployee(criteria)) {
+				birthDtls = repository.getBirthDtls(criteria);
+			}
+		}
+		else {
+			if(validator.validateFieldsCitizen(criteria)) {
+				birthDtls = repository.getBirthDtls(criteria);
+			}
+		}
 		return birthDtls;
 	}
 

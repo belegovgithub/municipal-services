@@ -26,10 +26,21 @@ public class DeathValidator {
 	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
 	SimpleDateFormat sdf3 = new SimpleDateFormat("dd.MM.yyyy");
 	
-	public boolean validateFields(SearchCriteria criteria) {
+	public boolean validateFieldsCitizen(SearchCriteria criteria) {
 		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
 			|| criteria.getDateOfDeath() == null	|| criteria.getDateOfDeath().isEmpty() )
-			throw new CustomException("null_input", "Mandatory fileds can not be empty.");
+			throw new CustomException("null_input", BirthDeathConstants.D_MANDATORY_MISSING);
+		/*if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
+				&& (criteria.getHospitalname() == null || criteria.getHospitalname().isEmpty() ||
+						criteria.getMotherName() == null || criteria.getMotherName().isEmpty() ))
+			throw new CustomException("null_input", "Search criteria not meeting.");*/
+		return true;
+	}
+	
+	public boolean validateFieldsEmployee(SearchCriteria criteria) {
+		if (criteria.getTenantId() == null || criteria.getTenantId().isEmpty() || criteria.getGender() == null
+			|| criteria.getFromDate() == null	|| criteria.getFromDate().isEmpty() || criteria.getToDate() == null	|| criteria.getToDate().isEmpty())
+			throw new CustomException("null_input", BirthDeathConstants.D_MANDATORY_MISSING);
 		/*if ((criteria.getRegistrationNo() == null || criteria.getRegistrationNo().isEmpty())
 				&& (criteria.getHospitalname() == null || criteria.getHospitalname().isEmpty() ||
 						criteria.getMotherName() == null || criteria.getMotherName().isEmpty() ))

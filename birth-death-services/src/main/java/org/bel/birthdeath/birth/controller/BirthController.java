@@ -60,7 +60,7 @@ public class BirthController {
 		{
 			return new ResponseEntity<>(new BirthResponse(), HttpStatus.OK);
 		}
-        List<EgBirthDtl> birthCerts = birthService.search(criteria);
+        List<EgBirthDtl> birthCerts = birthService.search(criteria,requestInfoWrapper.getRequestInfo());
         BirthResponse response = BirthResponse.builder().birthCerts(birthCerts).responseInfo(
                 responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
                 .build();

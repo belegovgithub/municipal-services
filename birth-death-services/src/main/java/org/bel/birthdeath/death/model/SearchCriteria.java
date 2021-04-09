@@ -54,4 +54,8 @@ public class SearchCriteria {
 	private String spouseName;
 	
 	private String deathcertificateno;
+	
+	private String fromDate;
+	
+	private String toDate;
 }
