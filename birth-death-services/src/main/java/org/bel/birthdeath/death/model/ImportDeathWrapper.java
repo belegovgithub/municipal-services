@@ -38,6 +38,9 @@ public class ImportDeathWrapper {
     
     @JsonProperty("serviceError")
    	private String serviceError;
+    
+    @JsonProperty("hospitals")
+   	private List<String> hospitals;
 	
     @JsonIgnore
     List<String> keyList = Arrays.asList(new String[] { 

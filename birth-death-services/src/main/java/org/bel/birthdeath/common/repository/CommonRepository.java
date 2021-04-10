@@ -294,6 +294,12 @@ public class CommonRepository {
 		
 		log.info("completed " + finalCount);
 		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),finalCount);
+		List<EgHospitalDtl> hospitaldtls = getHospitalDtls(response.getBirthCerts().get(0).getTenantid());
+		List<String> hospitals = new ArrayList<String>();
+		for(EgHospitalDtl hospitalDtl: hospitaldtls) {
+			hospitals.add(hospitalDtl.getName());
+		}
+		importBirthWrapper.setHospitals(hospitals);
 		}
 		catch (Exception e) {
 			importBirthWrapper.setServiceError("Service Error in importing");
@@ -588,6 +594,12 @@ public class CommonRepository {
 		
 		log.info("completed " + finalCount);
 		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),finalCount);
+		List<EgHospitalDtl> hospitaldtls = getHospitalDtls(response.getDeathCerts().get(0).getTenantid());
+		List<String> hospitals = new ArrayList<String>();
+		for(EgHospitalDtl hospitalDtl: hospitaldtls) {
+			hospitals.add(hospitalDtl.getName());
+		}
+		importDeathWrapper.setHospitals(hospitals);
 		}
 		catch (Exception e) {
 			importDeathWrapper.setServiceError("Service Error in importing");
@@ -853,6 +865,12 @@ public class CommonRepository {
 		
 		log.info("completed " + finalCount);
 		importBirthWrapper.finaliseStats(response.getBirthCerts().size(),finalCount);
+		List<EgHospitalDtl> hospitaldtls = getHospitalDtls(response.getBirthCerts().get(0).getTenantid());
+		List<String> hospitals = new ArrayList<String>();
+		for(EgHospitalDtl hospitalDtl: hospitaldtls) {
+			hospitals.add(hospitalDtl.getName());
+		}
+		importBirthWrapper.setHospitals(hospitals);
 		}
 		catch (Exception e) {
 			importBirthWrapper.setServiceError("Service Error in Updating");
@@ -947,6 +965,12 @@ public class CommonRepository {
 		
 		log.info("completed " + finalCount);
 		importDeathWrapper.finaliseStats(response.getDeathCerts().size(),finalCount);
+		List<EgHospitalDtl> hospitaldtls = getHospitalDtls(response.getDeathCerts().get(0).getTenantid());
+		List<String> hospitals = new ArrayList<String>();
+		for(EgHospitalDtl hospitalDtl: hospitaldtls) {
+			hospitals.add(hospitalDtl.getName());
+		}
+		importDeathWrapper.setHospitals(hospitals);
 		}
 		catch (Exception e) {
 			importDeathWrapper.setServiceError("Service Error in Updating");
