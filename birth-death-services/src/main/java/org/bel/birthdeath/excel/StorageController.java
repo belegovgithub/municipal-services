@@ -67,13 +67,19 @@ public class StorageController {
 	@Value("${egov.bnd.excelimport.flag}")
     private boolean excelImportFlag;
 	
+	@Value("${egov.bnd.excelimport.tokenflag}")
+    private boolean excelImportTokenFlag;
+	
+	@Value("${egov.bnd.excelimport.token}")
+    private String excelImportToken;
+	
 	@RequestMapping(value = { "/_birth"}, method = RequestMethod.POST)
     @PostMapping(produces = APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<ImportBirthWrapper> uploadBirth(@RequestParam(value = "file", required = false) List<MultipartFile> files,
-            @RequestParam(value = "tenantId" , required = false) String tenantId) {
-		if(excelImportFlag)	{
+            @RequestParam(value = "tenantId" , required = false) String tenantId , @RequestParam(value = "token", required = false) String token) {
+		if(excelImportFlag && (excelImportTokenFlag ? excelImportToken.equals(token) : true))	{
         String extension = "";
         Path testFile = null;
         BirthResponse importJSon = new BirthResponse();
@@ -299,7 +305,9 @@ public class StorageController {
                     	//System.out.println("Imported Row No "+row.getRowNum());
                     }
                 }catch(Exception e){
-                    e.printStackTrace();
+                	 e.printStackTrace();
+                	 throw new CustomException("INVALID_EXCEL","Excel is not valid");
+                   
                 }
                  
 				RequestInfo requestInfo = new RequestInfo();
@@ -332,8 +340,8 @@ public class StorageController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public ResponseEntity<ImportDeathWrapper> uploadDeath(@RequestParam(value = "file", required = false) List<MultipartFile> files,
-            @RequestParam(value = "tenantId" , required = false) String tenantId) {
-		if(excelImportFlag)	{
+            @RequestParam(value = "tenantId" , required = false) String tenantId, @RequestParam(value = "token", required = false) String token) {
+		if(excelImportFlag && (excelImportTokenFlag ? excelImportToken.equals(token) : true))	{
         String extension = "";
         Path testFile = null;
         DeathResponse importJSon = new DeathResponse();
@@ -579,7 +587,8 @@ public class StorageController {
                     	//System.out.println("Imported Row No "+row.getRowNum());
                     }
                 }catch(Exception e){
-                    e.printStackTrace();
+                	e.printStackTrace();
+               	 	throw new CustomException("INVALID_EXCEL","Excel is not valid");
                 }
                 RequestInfo requestInfo = new RequestInfo();
 				User userInfo = new User();

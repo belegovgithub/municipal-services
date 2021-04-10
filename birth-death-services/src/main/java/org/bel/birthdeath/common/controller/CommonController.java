@@ -38,6 +38,12 @@ public class CommonController {
 	@Value("${egov.bnd.excelimport.flag}")
     private boolean excelImportFlag;
 	
+	@Value("${egov.bnd.excelimport.tokenflag}")
+    private boolean excelImportTokenFlag;
+	
+	@Value("${egov.bnd.excelimport.token}")
+    private String excelImportToken;
+	
 	@RequestMapping(value = { "/getHospitals"}, method = RequestMethod.POST)
     public ResponseEntity<HospitalResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
                                                        @Valid @ModelAttribute SearchCriteria criteria) {
@@ -84,7 +90,7 @@ public class CommonController {
     public ResponseEntity<String>  deleteBirthImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
             @ModelAttribute SearchCriteria criteria) {
 		int deletedRecords=0;
-        if(excelImportFlag) {	
+        if(excelImportFlag && (excelImportTokenFlag ? excelImportToken.equals(criteria.getToken()) : true)) {	
         	deletedRecords = commonService.deleteBirthImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
         }
         return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
@@ -94,7 +100,7 @@ public class CommonController {
 	public ResponseEntity<String>  deleteDeathImport(@RequestBody RequestInfoWrapper requestInfoWrapper,
             @ModelAttribute SearchCriteria criteria) {
 		int deletedRecords=0;
-		if(excelImportFlag) {
+		if(excelImportFlag && (excelImportTokenFlag ? excelImportToken.equals(criteria.getToken()) : true)) {
 			deletedRecords = commonService.deleteDeathImport(criteria.getTenantId(),requestInfoWrapper.getRequestInfo());
 		}
         return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);

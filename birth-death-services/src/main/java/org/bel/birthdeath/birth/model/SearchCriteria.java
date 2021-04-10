@@ -52,4 +52,6 @@ public class SearchCriteria {
 	private String fromDate;
 	
 	private String toDate;
+	
+	private String token;
 }
