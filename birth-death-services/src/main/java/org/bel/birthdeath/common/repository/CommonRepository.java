@@ -220,7 +220,7 @@ public class CommonRepository {
 					{
 						birthValidator.removeSpaceChars(bdtl);
 						uniqueList.put(bdtl.getRegistrationno(), bdtl);
-						if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty() )
+						if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().trim().isEmpty() )
 						{
 							if(bdtl.getHospitalname().length() >500) {
 								importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
@@ -523,7 +523,7 @@ public class CommonRepository {
 					if (uniqueList.get(deathtl.getRegistrationno()) == null) {
 						deathValidator.removeSpaceChars(deathtl);
 						uniqueList.put(deathtl.getRegistrationno(), deathtl);
-						if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty()) {
+						if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().trim().isEmpty()) {
 							if (deathtl.getHospitalname().length() > 500) {
 								importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
 								uniqueList.remove(deathtl.getRegistrationno());
@@ -797,7 +797,7 @@ public class CommonRepository {
 						if (uniqueList.get(bdtl.getRegistrationno()) == null) {
 							birthValidator.removeSpaceChars(bdtl);
 							uniqueList.put(bdtl.getRegistrationno(), bdtl);
-							if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().isEmpty()) {
+							if (null != bdtl.getHospitalname() && !bdtl.getHospitalname().trim().isEmpty()) {
 								if (bdtl.getHospitalname().length() > 500) {
 									importBirthWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, bdtl);
 									uniqueList.remove(bdtl.getRegistrationno());
@@ -895,7 +895,7 @@ public class CommonRepository {
 						if (uniqueList.get(deathtl.getRegistrationno()) == null) {
 							deathValidator.removeSpaceChars(deathtl);
 							uniqueList.put(deathtl.getRegistrationno(), deathtl);
-							if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().isEmpty()) {
+							if (null != deathtl.getHospitalname() && !deathtl.getHospitalname().trim().isEmpty()) {
 								if (deathtl.getHospitalname().length() > 500) {
 									importDeathWrapper.updateMaps(BirthDeathConstants.HOSPNAME_LARGE, deathtl);
 									uniqueList.remove(deathtl.getRegistrationno());
