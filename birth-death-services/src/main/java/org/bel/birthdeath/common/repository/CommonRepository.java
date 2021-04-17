@@ -1,7 +1,10 @@
 package org.bel.birthdeath.common.repository;
 
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.contract.EncryptionDecryptionUtil;
 import org.bel.birthdeath.common.model.AuditDetails;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
+import org.bel.birthdeath.common.model.EmpDeclarationDtls;
 import org.bel.birthdeath.common.repository.builder.CommonQueryBuilder;
 import org.bel.birthdeath.common.repository.rowmapper.CommonRowMapper;
 import org.bel.birthdeath.common.services.CommonService;
@@ -38,6 +42,7 @@ import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -192,6 +197,8 @@ public class CommonRepository {
 			+ "locality = :locality, tehsil = :tehsil, district = :district, city = :city, state = :state, pinno = :pinno, country = :country, "
 			+ "lastmodifiedby = :lastmodifiedby, lastmodifiedtime = :lastmodifiedtime WHERE deathdtlid = :deathdtlid;";
 	
+	
+	private static final String empDeclInsertQry="INSERT INTO eg_emp_declaration_dtls(id, declaredby, declaredon, agreed, startdate, endddate) VALUES (?, ?, ?, ?, ?, ?); ";
 	
 	public List<EgHospitalDtl> getHospitalDtls(String tenantId) {
 		List<Object> preparedStmtList = new ArrayList<>();
@@ -1007,5 +1014,78 @@ public class CommonRepository {
 			e.printStackTrace();
 			throw new CustomException("SERVICE_ERROR","Unable to delete the records");
 		}
+	}
+
+	public EmpDeclarationDtls checkDeclaration(String uuid) {
+		EmpDeclarationDtls declarationDtls = new EmpDeclarationDtls();
+		Calendar calStart = Calendar.getInstance();
+		Calendar calEnd = Calendar.getInstance();
+		try {
+			String sql = "select CONCAT(EXTRACT(month FROM endddate),'-',EXTRACT(year FROM endddate)) from eg_emp_declaration_dtls where declaredby = ? ORDER by endddate desc limit 1;";
+			String monthyear = (String) jdbcTemplate.queryForObject(sql, new Object[] {uuid}, String.class);
+			
+			if (monthyear.equals(calStart.get(Calendar.MONTH) + "-" + calStart.get(Calendar.YEAR))) {
+				declarationDtls.setCompleted('Y');
+			}
+			else {
+				calStart.add(Calendar.MONTH, -1);
+				calStart.set(Calendar.DATE, calStart.getActualMinimum(Calendar.DATE));
+				calStart.set(Calendar.HOUR,calStart.getActualMinimum(Calendar.HOUR));
+				calStart.set(Calendar.MINUTE,calStart.getActualMinimum(Calendar.MINUTE));
+				calStart.set(Calendar.SECOND,calStart.getActualMinimum(Calendar.SECOND));
+				calStart.set(Calendar.MILLISECOND,calStart.getActualMinimum(Calendar.MILLISECOND));
+				calStart.set(Calendar.AM_PM, 0);
+				declarationDtls.setStartdate(new Timestamp(calStart.getTime().getTime()));
+				
+				calEnd.add(Calendar.MONTH, -1);
+				calEnd.set(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE));
+				calEnd.set(Calendar.HOUR,calEnd.getActualMaximum(Calendar.HOUR));
+				calEnd.set(Calendar.MINUTE,calEnd.getActualMaximum(Calendar.MINUTE));
+				calEnd.set(Calendar.SECOND,calEnd.getActualMaximum(Calendar.SECOND));
+				calEnd.set(Calendar.MILLISECOND,calEnd.getActualMaximum(Calendar.MILLISECOND));
+				calEnd.set(Calendar.AM_PM, 0);
+				declarationDtls.setEnddate(new Timestamp(calEnd.getTime().getTime()));
+				declarationDtls.setCompleted('N');
+			}
+		} catch (EmptyResultDataAccessException e) {
+			calStart.set(Calendar.MONTH, 0);
+			calStart.set(Calendar.YEAR, 2021);
+			calStart.set(Calendar.DATE, calStart.getActualMinimum(Calendar.DATE));
+			calStart.set(Calendar.HOUR,calStart.getActualMinimum(Calendar.HOUR));
+			calStart.set(Calendar.MINUTE,calStart.getActualMinimum(Calendar.MINUTE));
+			calStart.set(Calendar.SECOND,calStart.getActualMinimum(Calendar.SECOND));
+			calStart.set(Calendar.MILLISECOND,calStart.getActualMinimum(Calendar.MILLISECOND));
+			calStart.set(Calendar.AM_PM, 0);
+			declarationDtls.setStartdate(new Timestamp(calStart.getTime().getTime()));
+			
+			calEnd.add(Calendar.MONTH, -1);
+			calEnd.set(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE));
+			calEnd.set(Calendar.HOUR,calEnd.getActualMaximum(Calendar.HOUR));
+			calEnd.set(Calendar.MINUTE,calEnd.getActualMaximum(Calendar.MINUTE));
+			calEnd.set(Calendar.SECOND,calEnd.getActualMaximum(Calendar.SECOND));
+			calEnd.set(Calendar.MILLISECOND,calEnd.getActualMaximum(Calendar.MILLISECOND));
+			calEnd.set(Calendar.AM_PM, 0);
+			declarationDtls.setEnddate(new Timestamp(calEnd.getTime().getTime()));
+			declarationDtls.setCompleted('N');
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException("SERVICE_ERROR", "Unable to process");
+		}
+		return declarationDtls;
+	}
+
+	public String updateDeclaration(EmpDeclarationDtls declarationDtls) {
+		String status="Failure";
+		try {
+			jdbcTemplate.update(empDeclInsertQry, UUID.randomUUID(),declarationDtls.getDeclaredby(),new Timestamp(System.currentTimeMillis()),declarationDtls.getAgreed(),
+				new Timestamp(Long.parseLong(declarationDtls.getStartdateepoch())),new Timestamp(Long.parseLong(declarationDtls.getEnddateepoch())));
+			status="Success";
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			throw new CustomException("SERVICE_ERROR","Unable to insert the record");
+		}
+		return status;
 	}
 }

@@ -11,9 +11,11 @@ import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.contract.HospitalResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
+import org.bel.birthdeath.common.model.EmpDeclarationDtls;
 import org.bel.birthdeath.common.services.CommonService;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
 import org.bel.birthdeath.utils.ResponseInfoFactory;
+import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -105,4 +107,24 @@ public class CommonController {
 		}
         return new ResponseEntity<>("Deleted Records : "+deletedRecords , HttpStatus.OK);
     }
+	
+	@RequestMapping(value = { "/checkDeclaration" }, method = RequestMethod.POST)
+	public ResponseEntity<EmpDeclarationDtls> checkDeclaration(@RequestBody RequestInfoWrapper requestInfoWrapper) {
+		EmpDeclarationDtls declarationDtls;
+		if(null!=requestInfoWrapper.getRequestInfo().getUserInfo().getUuid())
+			declarationDtls = commonService.checkDeclaration(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid());
+		else
+			throw new CustomException("INVALID_INPUT","UUID can not be empty.");
+		return new ResponseEntity<>(declarationDtls, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = { "/updateDeclaration" }, method = RequestMethod.POST)
+	public ResponseEntity<String> updateDeclaration(@RequestBody RequestInfoWrapper requestInfoWrapper,
+			@ModelAttribute EmpDeclarationDtls declarationDtls) {
+		if(null!=requestInfoWrapper.getRequestInfo().getUserInfo().getUuid())
+			declarationDtls.setDeclaredby(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid());
+		else
+			throw new CustomException("INVALID_INPUT","UUID can not be empty.");
+		return new ResponseEntity<>(commonService.updateDeclaration(declarationDtls), HttpStatus.OK);
+	}
 }
