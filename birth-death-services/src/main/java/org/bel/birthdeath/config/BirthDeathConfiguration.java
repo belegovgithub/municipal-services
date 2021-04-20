@@ -94,4 +94,12 @@ public class BirthDeathConfiguration {
     @Value("${egov.ui.app.host}")
 	private String uiAppHost;
 
+    @Value("${egov.bnd.default.limit}")
+    private Integer defaultBndLimit;
+
+    @Value("${egov.bnd.default.offset}")
+    private Integer defaultOffset;
+
+    @Value("${egov.bnd.max.limit}")
+    private Integer maxSearchLimit;
 }

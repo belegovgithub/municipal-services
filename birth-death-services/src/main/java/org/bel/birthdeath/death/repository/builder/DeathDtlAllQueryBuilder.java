@@ -5,8 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.bel.birthdeath.config.BirthDeathConfiguration;
 import org.bel.birthdeath.death.model.SearchCriteria;
 import org.egov.common.contract.request.RequestInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class DeathDtlAllQueryBuilder {
+	
+	@Autowired
+	private BirthDeathConfiguration config;
 
 	private static String QUERY_Master_Full_Dtl = "SELECT bdtl.id deathdtlid,bfat.id bfatid,bmot.id bmotid,bpmad.id bpmadid,bpsad.id bpsadid, bsps.id bspsid," + 
 			"bdtl.tenantid tenantid, registrationno, dateofdeath, counter, gender ,  " + 
@@ -70,6 +75,12 @@ public class DeathDtlAllQueryBuilder {
     		+ "concat(COALESCE(bdtl.firstname,'') , ' ', COALESCE(bdtl.middlename,'') ,' ', COALESCE(bdtl.lastname,'')) as name "
     		+ "from eg_death_cert_request breq left join eg_death_dtls bdtl on bdtl.id=breq.deathDtlId where  "
     		+ "breq.createdby=? order by breq.createdtime DESC ";
+    
+    private final String paginationWrapper = "SELECT * FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY dateofdeath DESC , renewal_id) offset_ FROM " +
+            "({})" +
+            " result) result_offset " +
+            "WHERE offset_ > ? AND offset_ <= ?";
     
     private static void addClauseIfRequired(List<Object> values, StringBuilder queryString) {
         if (values.isEmpty())
@@ -216,7 +227,7 @@ public class DeathDtlAllQueryBuilder {
 			preparedStmtList.add("%"+criteria.getName()+"%");
 			preparedStmtList.add("%"+criteria.getName()+"%");
 		}
-		return builder.toString();
+		return addPaginationWrapper(builder.toString(),preparedStmtList,criteria);
 	}
 	
 	public String getDeathCertMasterDtl(SearchCriteria criteria, List<Object> preparedStmtList) {
@@ -235,4 +246,23 @@ public class DeathDtlAllQueryBuilder {
 		return builder.toString();
 	}
 
+	private String addPaginationWrapper(String query, List<Object> preparedStmtList, SearchCriteria criteria) {
+		int limit = config.getDefaultBndLimit();
+		int offset = config.getDefaultOffset();
+		String finalQuery = paginationWrapper.replace("{}", query);
+
+		if (criteria.getLimit() != null && criteria.getLimit() <= config.getMaxSearchLimit())
+			limit = criteria.getLimit();
+
+		if (criteria.getLimit() != null && criteria.getLimit() > config.getMaxSearchLimit())
+			limit = config.getMaxSearchLimit();
+
+		if (criteria.getOffset() != null)
+			offset = criteria.getOffset();
+
+		preparedStmtList.add(offset);
+		preparedStmtList.add(limit + offset);
+
+		return finalQuery;
+	}
 }

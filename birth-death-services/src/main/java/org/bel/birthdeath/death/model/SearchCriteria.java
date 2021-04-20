@@ -58,4 +58,8 @@ public class SearchCriteria {
 	private String fromDate;
 	
 	private String toDate;
+	
+	private Integer offset;
+
+	private Integer limit;
 }

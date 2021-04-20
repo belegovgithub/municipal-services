@@ -54,4 +54,8 @@ public class SearchCriteria {
 	private String toDate;
 	
 	private String token;
+	
+	private Integer offset;
+
+	private Integer limit;
 }
