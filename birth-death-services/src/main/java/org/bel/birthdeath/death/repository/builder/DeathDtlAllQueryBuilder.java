@@ -77,7 +77,7 @@ public class DeathDtlAllQueryBuilder {
     		+ "breq.createdby=? order by breq.createdtime DESC ";
     
     private final String paginationWrapper = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY dateofdeath DESC , renewal_id) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY dateofdeath DESC , deathdtlid) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";

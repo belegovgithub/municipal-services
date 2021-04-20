@@ -78,7 +78,7 @@ public class BirthDtlAllQueryBuilder {
     		+ "breq.createdby=? order by breq.createdtime DESC ";
     
     private final String paginationWrapper = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY dateofbirth DESC , renewal_id) offset_ FROM " +
+            "(SELECT *, DENSE_RANK() OVER (ORDER BY dateofbirth DESC , birthdtlid) offset_ FROM " +
             "({})" +
             " result) result_offset " +
             "WHERE offset_ > ? AND offset_ <= ?";
