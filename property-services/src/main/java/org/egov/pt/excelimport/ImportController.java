@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.egov.pt.models.Assessment;
 import org.egov.pt.models.Assessment.Source;
+import org.egov.pt.models.AssessmentSearchCriteria;
 import org.egov.pt.models.Demand;
 import org.egov.pt.models.DemandDetail;
 import org.egov.pt.models.Property;
@@ -39,10 +40,10 @@ import org.egov.pt.service.AssessmentService;
 import org.egov.pt.service.PropertyService;
 import org.egov.pt.util.ResponseInfoFactory;
 import org.egov.pt.web.contracts.AssessmentRequest;
+import org.egov.pt.web.contracts.DemandRequest;
 import org.egov.pt.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -52,7 +53,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 
 @Controller
@@ -69,7 +69,6 @@ public class ImportController {
 	private PropertyService propertyService;
 
 	@Autowired
-	@Qualifier("objectMapper")
 	private ObjectMapper om;
 
 	@RequestMapping(value = "/_import", method = RequestMethod.POST)
@@ -95,12 +94,13 @@ public class ImportController {
 
 		String rootDir = "D:\\project_docs\\PYTAX_DETAILS_Echhawani-20210416T045357Z-001\\PYTAX_DETAILS_Echhawani";
 		Path start = Paths.get(rootDir);
-		try (Stream<Path> stream = Files.walk(start, 2)) {
+		try (Stream<Path> stream = Files.walk(start, 1)) {
 			List<String> collect = stream.filter(Files::isRegularFile).map(String::valueOf).sorted()
 					.collect(Collectors.toList());
 			Map<String, List<Entry<String, List<ExcelColumns>>>> successMap = new HashMap<String, List<Entry<String, List<ExcelColumns>>>>();
 			Map<String, List<Entry<String, List<ExcelColumns>>>> propertyNotFoundMap = new HashMap<String, List<Entry<String, List<ExcelColumns>>>>();
-			Map<String, List<Entry<String, List<ExcelColumns>>>> invalidTaxCodeMap = new HashMap<String, List<Entry<String, List<ExcelColumns>>>>();
+			Map<String, List<String>> invalidTaxCodeMap = new HashMap<String,  List<String>>();
+			Map<String, List<String>> invalidDataMap = new HashMap<String,  List<String>>();
 			for (String filepath : collect) {
 				String ext = FilenameUtils.getExtension(filepath);
 				if (ext.equalsIgnoreCase("xlsx")) {
@@ -108,7 +108,8 @@ public class ImportController {
 					String tenantId = FilenameUtils.getBaseName(filepath).replace("CB_", "pb.").toLowerCase();
 					if (tenantIds.contains(tenantId)) {
 						Map<String, List<ExcelColumns>> excelmap = new HashMap<String, List<ExcelColumns>>();
-						Map<String, List<ExcelColumns>> excelmapErrorTaxCode = new HashMap<String, List<ExcelColumns>>();
+						List<String> excelmapErrorTaxCode = new ArrayList<String>();
+						List<String> excelmapErrorData = new ArrayList<String>();
 						try (Workbook workbook = WorkbookFactory.create(new File(filepath))) {
 							Sheet sheet = workbook.getSheetAt(0);
 							Iterator<Row> rowIterator = sheet.rowIterator();
@@ -144,7 +145,7 @@ public class ImportController {
 											break;
 										}
 									} catch (Exception e) {
-										e.printStackTrace();
+										excelmapErrorData.add("Row : " + (row.getRowNum()+1) + " Column : " + (cell.getColumnIndex()));
 									}
 									// System.out.print(getStringVal(cell));
 								}
@@ -154,7 +155,7 @@ public class ImportController {
 										excelmap.put(key, new ArrayList<ExcelColumns>());
 									excelmap.get(key).add(columns);
 								} else {
-									excelmapErrorTaxCode.put(key, new ArrayList<ExcelColumns>());
+									excelmapErrorTaxCode.add(String.valueOf(row.getRowNum()+1));
 								}
 							}
 							System.out.println("size : " + excelmap.size());
@@ -175,7 +176,7 @@ public class ImportController {
 								Set<String> ids = new HashSet<String>();
 								ids.add(entry.getKey());
 								PropertyCriteria propertyCriteria = PropertyCriteria.builder().tenantId(tenantId)
-										.oldpropertyids(ids).build();
+										.abasPropertyids(ids).build();
 								if (propertyService
 										.searchProperty(propertyCriteria, requestInfoWrapper.getRequestInfo())
 										.size() > 0) {
@@ -183,17 +184,17 @@ public class ImportController {
 											.searchProperty(propertyCriteria, requestInfoWrapper.getRequestInfo())
 											.get(0);
 									Assessment assessment = new Assessment();
-									JsonNode additionalDetails = om.createObjectNode();
+									//JsonNode additionalDetails = om.createObjectNode();
 
 									assessment.setTenantId(tenantId);
 									assessment.setPropertyId(property.getPropertyId());
 									assessment.setFinancialYear("2021-22");
-									assessment.setAssessmentDate(System.currentTimeMillis());
+									assessment.setAssessmentDate(1617215400000l);// to be verififed
 									assessment.setSource(Source.LEGACY_RECORD);
 									assessment.setChannel(property.getChannel());
 									assessment.setStatus(property.getStatus());
 
-									((ObjectNode) additionalDetails).put("RequestInfo", "tt: tt");
+									//((ObjectNode) additionalDetails).put("RequestInfo", "tt: tt");
 									Demand demand = new Demand();
 									demand.setTenantId(tenantId);
 									demand.setConsumerCode(property.getPropertyId());
@@ -209,12 +210,18 @@ public class ImportController {
 										DemandDetail detail = new DemandDetail();
 										detail.setTaxHeadMasterCode(column.getTaxHeadMasterCode());
 										detail.setTaxAmount(column.getTaxAmount());
+										detail.setCollectionAmount(new BigDecimal(0));
 										demandDetails.add(detail);
 									}
 									demand.setDemandDetails(demandDetails);
-									// ObjectNode demandNode = om.valueToTree(demands);
-									((ObjectNode) additionalDetails).putArray("Demands")
-											.add(om.valueToTree(Arrays.asList(demand)));
+									//ObjectNode demandNode = om.valueToTree(demands);
+									//((ObjectNode) additionalDetails).putArray("Demands")
+									//		.add(om.valueToTree(Arrays.asList(demand)));
+									DemandRequest demandRequest = new DemandRequest();
+									demandRequest.setDemands(Arrays.asList(demand));
+									demandRequest.setRequestInfo(requestInfoWrapper.getRequestInfo());
+									//JsonNode propertyAdditionalDetails = om.readTre
+									JsonNode additionalDetails = om.convertValue(demandRequest,JsonNode.class);
 									assessment.setAdditionalDetails(additionalDetails);
 
 									/*
@@ -228,8 +235,23 @@ public class ImportController {
 									AssessmentRequest assessmentRequest = AssessmentRequest.builder()
 											.assessment(assessment).requestInfo(requestInfoWrapper.getRequestInfo())
 											.build();
-									// Assessment assessments = null;
-									// assessments = assessmentService.createLegacyAssessments(assessmentRequest);
+									Assessment assessments = null;
+									
+									Set<String> propertyIds= new HashSet<String>();
+									propertyIds.add(property.getPropertyId());
+									AssessmentSearchCriteria criteria = AssessmentSearchCriteria.builder()
+											.tenantId(tenantId)
+											.financialYear("2021-22")
+											.propertyIds(propertyIds)
+											.build();
+									if(assessmentService.searchAssessments(criteria).size()>0) {
+										System.out.println("in update");
+										assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
+									}
+									else {
+										System.out.println("in create");
+										assessments = assessmentService.createLegacyAssessments(assessmentRequest);
+									}
 									Path path = Paths.get(rootDir, FilenameUtils.getBaseName(filepath) + ".txt");
 									Files.write(path,
 											Arrays.asList("Success : Data for creating " + entry.getKey() + "\n "
@@ -251,18 +273,36 @@ public class ImportController {
 									propertyNotFoundMap.get(tenantId).add(entry);
 								}
 							}
-						} else if (excelmapErrorTaxCode.entrySet().size() > 0) {
+						} else if (excelmapErrorTaxCode.size() > 0) {
 							Path path = Paths.get(rootDir, FilenameUtils.getBaseName(filepath) + ".txt");
-							Files.write(path, Arrays.asList("Invalid Tax code "), StandardCharsets.UTF_8,
+							Files.write(path, Arrays.asList("Failure : Invalid Tax code "), StandardCharsets.UTF_8,
 									Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
-							excelmapErrorTaxCode.entrySet().forEach(entry -> {
+							excelmapErrorTaxCode.forEach(entry -> {
 								try {
-									Files.write(path, Arrays.asList(entry.getKey()), StandardCharsets.UTF_8,
+									Files.write(path, Arrays.asList(entry), StandardCharsets.UTF_8,
 											StandardOpenOption.APPEND);
 									if (null == invalidTaxCodeMap.get(tenantId))
 										invalidTaxCodeMap.put(tenantId,
-												new ArrayList<Entry<String, List<ExcelColumns>>>());
+												new ArrayList<String>());
 									invalidTaxCodeMap.get(tenantId).add(entry);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							});
+
+						} else if (excelmapErrorData.size() > 0) {
+							Path path = Paths.get(rootDir, FilenameUtils.getBaseName(filepath) + ".txt");
+							Files.write(path, Arrays.asList("Failure : Invalid Data "), StandardCharsets.UTF_8,
+									Files.exists(path) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE);
+							excelmapErrorData.forEach(entry -> {
+								try {
+									Files.write(path, Arrays.asList(entry), StandardCharsets.UTF_8,
+											StandardOpenOption.APPEND);
+									if (null == invalidDataMap.get(tenantId))
+										invalidDataMap.put(tenantId,
+												new ArrayList<String>());
+									invalidDataMap.get(tenantId).add(entry);
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
@@ -309,7 +349,7 @@ public class ImportController {
 				}
 			});
 
-			Files.write(path, Arrays.asList("Property Not Found Report : "), StandardCharsets.UTF_8,
+			Files.write(path, Arrays.asList("Failure : Property Not Found Report : "), StandardCharsets.UTF_8,
 					StandardOpenOption.APPEND);
 			propertyNotFoundMap.entrySet().forEach(property -> {
 				try {
@@ -328,15 +368,34 @@ public class ImportController {
 				}
 			});
 
-			Files.write(path, Arrays.asList("Invalid Tax code Report : "), StandardCharsets.UTF_8,
+			Files.write(path, Arrays.asList("Failure : Invalid Tax code Report : "), StandardCharsets.UTF_8,
 					StandardOpenOption.APPEND);
 			invalidTaxCodeMap.entrySet().forEach(taxcode -> {
 				try {
 					Files.write(path, Arrays.asList(taxcode.getKey() + " : " + taxcode.getValue().size()),
 							StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-					for (Entry<String, List<ExcelColumns>> values : taxcode.getValue()) {
+					for (String values : taxcode.getValue()) {
 						try {
-							Files.write(path, Arrays.asList(values.getKey()), StandardCharsets.UTF_8,
+							Files.write(path, Arrays.asList(values), StandardCharsets.UTF_8,
+									StandardOpenOption.APPEND);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+			
+			Files.write(path, Arrays.asList("Failure : Invalid Data Report : "), StandardCharsets.UTF_8,
+					StandardOpenOption.APPEND);
+			invalidDataMap.entrySet().forEach(data -> {
+				try {
+					Files.write(path, Arrays.asList(data.getKey() + " : " + data.getValue().size()),
+							StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+					for (String values : data.getValue()) {
+						try {
+							Files.write(path, Arrays.asList(values), StandardCharsets.UTF_8,
 									StandardOpenOption.APPEND);
 						} catch (IOException e) {
 							e.printStackTrace();
