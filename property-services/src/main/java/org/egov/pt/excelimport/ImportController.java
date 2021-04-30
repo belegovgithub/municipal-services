@@ -28,8 +28,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.models.Assessment;
 import org.egov.pt.models.Assessment.Source;
+import org.egov.pt.repository.ServiceRequestRepository;
 import org.egov.pt.models.AssessmentSearchCriteria;
 import org.egov.pt.models.Demand;
 import org.egov.pt.models.DemandDetail;
@@ -41,8 +43,10 @@ import org.egov.pt.service.PropertyService;
 import org.egov.pt.util.ResponseInfoFactory;
 import org.egov.pt.web.contracts.AssessmentRequest;
 import org.egov.pt.web.contracts.DemandRequest;
+import org.egov.pt.web.contracts.DemandResponse;
 import org.egov.pt.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
+import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +71,15 @@ public class ImportController {
 
 	@Autowired
 	private PropertyService propertyService;
+	
+	@Autowired
+	private PropertyConfiguration config;
+
+	@Autowired
+	private ObjectMapper mapper;
+
+	@Autowired
+	private ServiceRequestRepository serviceRequestRepository;
 
 	@Autowired
 	private ObjectMapper om;
@@ -92,7 +105,7 @@ public class ImportController {
 		taxHeadMaps.put("Lighting And Drainage Tax", "PT_LIGHTINING_TAX");
 		taxHeadMaps.put("Education Tax", "PT_EDUCATION_TAX");
 
-		String rootDir = "D:\\project_docs\\PYTAX_DETAILS_Echhawani-20210416T045357Z-001\\PYTAX_DETAILS_Echhawani";
+		String rootDir = "D:\\PropertyTax\\PYTAX_DETAILS_Echhawani-20210429T111418Z-001\\PYTAX_DETAILS_Echhawani";
 		Path start = Paths.get(rootDir);
 		try (Stream<Path> stream = Files.walk(start, 1)) {
 			List<String> collect = stream.filter(Files::isRegularFile).map(String::valueOf).sorted()
@@ -246,7 +259,62 @@ public class ImportController {
 											.build();
 									if(assessmentService.searchAssessments(criteria).size()>0) {
 										System.out.println("in update");
-										assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
+										
+										//Search demand exists for fin year
+										StringBuilder uri = new StringBuilder(config.getEgbsHost()).append(config.getEgbsSearchDemand())
+												.append("?tenantId=").append(tenantId).append("&consumerCode=").append(property.getPropertyId())
+												.append("&periodFrom=").append(demand.getTaxPeriodFrom())
+								                .append("&periodTo=").append(demand.getTaxPeriodTo());
+										Object res;
+										try {
+											res = serviceRequestRepository.fetchResult(uri, requestInfoWrapper).orElse(null);
+										} catch (ServiceCallException e) {
+											throw e;
+										}
+										DemandResponse demandRes = mapper.convertValue(res, DemandResponse.class);
+										
+										List<Demand> existingDemands = demandRes.getDemands();
+										if(existingDemands!=null && existingDemands.size()!=0) {
+											System.out.println("existingDemands"+existingDemands);
+											Demand oldDemand = existingDemands.get(0);
+											List<DemandDetail> oldDemandDetails = new ArrayList<DemandDetail>();
+											oldDemandDetails = oldDemand.getDemandDetails();
+											List<DemandDetail> notExistsDetails = new ArrayList<DemandDetail>();
+											//Update the amount for already existing taxhead details
+											for (DemandDetail demandDetail : oldDemandDetails) {
+												List<DemandDetail> demDetail = demandDetails.stream()
+						                                .filter(dd -> dd.getTaxHeadMasterCode().equalsIgnoreCase(demandDetail.getTaxHeadMasterCode()))
+						                                .collect(Collectors.toList());
+												if(demDetail.size()!=0) {
+													demandDetail.setTaxAmount(demDetail.get(0).getTaxAmount());
+												}
+												
+											}
+											//Add new tax head if taxhead does not exists in search demand response
+											for (DemandDetail demandDetail : demandDetails) {
+												List<DemandDetail> demDetail = oldDemandDetails.stream()
+						                                .filter(dd -> dd.getTaxHeadMasterCode().equalsIgnoreCase(demandDetail.getTaxHeadMasterCode()))
+						                                .collect(Collectors.toList());
+												if(demDetail.size()==0) {
+	
+															DemandDetail detail = new DemandDetail();
+															detail.setTaxHeadMasterCode(demandDetail.getTaxHeadMasterCode());
+															detail.setTaxAmount(demandDetail.getTaxAmount());
+															detail.setCollectionAmount(new BigDecimal(0));
+															notExistsDetails.add(detail);
+														
+												}
+												
+											}
+											oldDemandDetails.addAll(notExistsDetails);
+											oldDemand.setDemandDetails(oldDemandDetails);
+											demandRequest.setDemands(Arrays.asList(oldDemand));
+											demandRequest.setRequestInfo(requestInfoWrapper.getRequestInfo());
+											JsonNode additionalDetails1 = om.convertValue(demandRequest,JsonNode.class);
+											assessment.setAdditionalDetails(additionalDetails1);
+											assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
+										}
+										
 									}
 									else {
 										System.out.println("in create");
