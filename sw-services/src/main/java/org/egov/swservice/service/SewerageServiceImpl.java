@@ -105,7 +105,7 @@ public class SewerageServiceImpl implements SewerageService {
 		// call work-flow
 		SewerageConnection conn = sewerageConnectionRequest.getSewerageConnection();
 		 
-		if(!StringUtils.isEmpty(conn.getOldConnectionNo())) {
+		if(!StringUtils.isEmpty(conn.getOldConnectionNo()) && reqType==SWConstants.CREATE_APPLICATION) {
 			enrichmentService.legacyStatusEnrichment(sewerageConnectionRequest);
 		}if (config.getIsExternalWorkFlowEnabled())
 			wfIntegrator.callWorkFlow(sewerageConnectionRequest, property);
