@@ -42,6 +42,7 @@ import org.bel.birthdeath.utils.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -80,6 +81,12 @@ public class CommonRepository {
 	
 	@Autowired
 	EncryptionDecryptionUtil encryptionDecryptionUtil;
+	
+	@Value("${egov.empdecl.year}")
+    private Integer startYear;
+
+    @Value("${egov.empdecl.month}")
+    private Integer startMonth;
     
 	
 	private static final String birthDtlDeleteQry="Delete from eg_birth_dtls where tenantid = :tenantid and registrationno = :registrationno; ";
@@ -1048,8 +1055,8 @@ public class CommonRepository {
 				declarationDtls.setCompleted('N');
 			}
 		} catch (EmptyResultDataAccessException e) {
-			calStart.set(Calendar.MONTH, 0);
-			calStart.set(Calendar.YEAR, 2021);
+			calStart.set(Calendar.MONTH, startMonth);
+			calStart.set(Calendar.YEAR, startYear);
 			calStart.set(Calendar.DATE, calStart.getActualMinimum(Calendar.DATE));
 			calStart.set(Calendar.HOUR,calStart.getActualMinimum(Calendar.HOUR));
 			calStart.set(Calendar.MINUTE,calStart.getActualMinimum(Calendar.MINUTE));
