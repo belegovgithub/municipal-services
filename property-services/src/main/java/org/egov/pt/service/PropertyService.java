@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.egov.common.contract.request.RequestInfo;
@@ -142,13 +143,13 @@ public class PropertyService {
 				}
 				
 				for (OwnerInfo info : request.getProperty().getOwners()) {
+					info.setOwnerInfoUuid(UUID.randomUUID().toString());
 					info.setStatus(Status.ACTIVE);
 				}
 				
 				List<OwnerInfo> collectedOwners = new ArrayList<OwnerInfo>();
 				collectedOwners.addAll(propertyFromSearch.getOwners());
 				collectedOwners.addAll(request.getProperty().getOwners());
-
 				request.getProperty().setOwners(util.getCopyOfOwners(collectedOwners));
 			}else 
 			request.getProperty().setOwners(util.getCopyOfOwners(propertyFromSearch.getOwners()));
