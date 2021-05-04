@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,6 +24,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.egov.common.contract.request.RequestInfo;
 import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.models.Assessment;
 import org.egov.pt.models.Assessment.Source;
@@ -38,14 +40,15 @@ import org.egov.pt.service.PropertyService;
 import org.egov.pt.util.ResponseInfoFactory;
 import org.egov.pt.web.contracts.AssessmentRequest;
 import org.egov.pt.web.contracts.DemandRequest;
+import org.egov.pt.web.contracts.DemandResponse;
 import org.egov.pt.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
+import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,6 +56,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -70,9 +75,6 @@ public class ImportControllerNew {
 	private PropertyService propertyService;
 
 	@Autowired
-	private ObjectMapper om;
-
-	@Autowired
 	private PropertyConfiguration config;
 
 	@Autowired
@@ -87,9 +89,18 @@ public class ImportControllerNew {
 	@ResponseBody
 	public ResponseEntity<ImportReportWrapper> _import(@RequestParam(value = "file", required = false) List<MultipartFile> files,
 			@RequestParam(value = "tenantId", required = false) String tenantId ,
-			@RequestBody RequestInfoWrapper requestInfoWrapper) {
+			@RequestParam(value = "RequestInfo", required = false) String req) {
 
-
+		RequestInfo requestInfo = null;
+		try {
+			requestInfo = mapper.readValue(req, RequestInfo.class);
+		} catch (JsonMappingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (JsonProcessingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		Map<String, String> taxHeadMaps = new HashMap<String, String>();
 		taxHeadMaps.put("House Tax", "PT_HOUSE_TAX");
 		taxHeadMaps.put("Water Tax", "PT_WATER_TAX");
@@ -160,7 +171,6 @@ public class ImportControllerNew {
 						}
 					}
 					System.out.println("size : " + excelmap.size());
-					System.out.println();
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
@@ -174,10 +184,10 @@ public class ImportControllerNew {
 						PropertyCriteria propertyCriteria = PropertyCriteria.builder().tenantId(tenantId)
 								.abasPropertyids(ids).build();
 						if (propertyService
-								.searchProperty(propertyCriteria, requestInfoWrapper.getRequestInfo())
+								.searchProperty(propertyCriteria, requestInfo)
 								.size() > 0) {
 							Property property = propertyService
-									.searchProperty(propertyCriteria, requestInfoWrapper.getRequestInfo())
+									.searchProperty(propertyCriteria, requestInfo)
 									.get(0);
 							Assessment assessment = new Assessment();
 							//JsonNode additionalDetails = om.createObjectNode();
@@ -212,13 +222,13 @@ public class ImportControllerNew {
 							demand.setDemandDetails(demandDetails);
 							DemandRequest demandRequest = new DemandRequest();
 							demandRequest.setDemands(Arrays.asList(demand));
-							demandRequest.setRequestInfo(requestInfoWrapper.getRequestInfo());
+							demandRequest.setRequestInfo(requestInfo);
 							//JsonNode propertyAdditionalDetails = om.readTre
-							JsonNode additionalDetails = om.convertValue(demandRequest,JsonNode.class);
+							JsonNode additionalDetails = mapper.convertValue(demandRequest,JsonNode.class);
 							assessment.setAdditionalDetails(additionalDetails);
 
 							AssessmentRequest assessmentRequest = AssessmentRequest.builder()
-									.assessment(assessment).requestInfo(requestInfoWrapper.getRequestInfo())
+									.assessment(assessment).requestInfo(requestInfo)
 									.build();
 							Assessment assessments = null;
 							
@@ -231,7 +241,7 @@ public class ImportControllerNew {
 									.build();
 							if(assessmentService.searchAssessments(criteria).size()>0) {
 								System.out.println("in update");
-								/*
+								
 								//Search demand exists for fin year
 								StringBuilder uri = new StringBuilder(config.getEgbsHost()).append(config.getEgbsSearchDemand())
 										.append("?tenantId=").append(tenantId).append("&consumerCode=").append(property.getPropertyId())
@@ -239,7 +249,7 @@ public class ImportControllerNew {
 						                .append("&periodTo=").append(demand.getTaxPeriodTo());
 								Object res;
 								try {
-									res = serviceRequestRepository.fetchResult(uri, requestInfoWrapper).orElse(null);
+									res = serviceRequestRepository.fetchResult(uri, RequestInfoWrapper.builder().requestInfo(requestInfo).build()).orElse(null);
 								} catch (ServiceCallException e) {
 									throw e;
 								}
@@ -281,16 +291,16 @@ public class ImportControllerNew {
 									oldDemandDetails.addAll(notExistsDetails);
 									oldDemand.setDemandDetails(oldDemandDetails);
 									demandRequest.setDemands(Arrays.asList(oldDemand));
-									demandRequest.setRequestInfo(requestInfoWrapper.getRequestInfo());
-									JsonNode additionalDetails1 = om.convertValue(demandRequest,JsonNode.class);
+									demandRequest.setRequestInfo(requestInfo);
+									JsonNode additionalDetails1 = mapper.convertValue(demandRequest,JsonNode.class);
 									assessment.setAdditionalDetails(additionalDetails1);
 									assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
-								}*/
+								}
 								
 							}
 							else {
 								System.out.println("in create");
-								//assessments = assessmentService.createLegacyAssessments(assessmentRequest);
+								assessments = assessmentService.createLegacyAssessments(assessmentRequest);
 							}
 							wrapper.updateMaps(ImportReportWrapper.successReport, entry.getKey());
 						} else {
