@@ -71,7 +71,7 @@ public class CalculatorConstants {
 
 	public static final String ADHOC_REBATE_REASON_KEY = "adhocExemptionReason";
 	
-	public static final String ALLOWED_RECEIPT_STATUS = "APPROVED,REMITTED";
+	public static final String ALLOWED_RECEIPT_STATUS = "APPROVED,REMITTED,NEW";
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD_WHEN_CALUCLATING_REBATE_AND_PENALTY = Collections.unmodifiableList(Arrays
 			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX));

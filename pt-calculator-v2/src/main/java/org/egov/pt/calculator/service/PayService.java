@@ -63,8 +63,10 @@ public class PayService {
 
 		if (rebate.equals(BigDecimal.ZERO)) {
 			penalty = getPenalty(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.PENANLTY_MASTER));
-			interest = getInterest(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.INTEREST_MASTER),
-					payments,taxPeriod);
+			//interest = getInterest(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.INTEREST_MASTER),
+			//		payments,taxPeriod);
+			interest = getInterestNew(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.INTEREST_MASTER),
+							payments,taxPeriod);
 		}
 
 		estimates.put(CalculatorConstants.PT_TIME_REBATE, rebate.setScale(2, 2).negate());
@@ -132,7 +134,7 @@ public class PayService {
 	 * @param assessmentYear
 	 * @return
 	 */
-	public BigDecimal getInterest(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
+	/*public BigDecimal getInterest(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
 								  List<Payment> payments, TaxPeriod taxPeriod) {
 
 		BigDecimal interestAmt = BigDecimal.ZERO;
@@ -265,9 +267,63 @@ public class PayService {
 			}
 		}
 		return interestAmt;
-	}
+	}*/
 	
 
+	/**
+	 * Returns the Amount of interest that has to be applied on the given tax amount
+	 * for the given period
+	 *
+	 * @param taxAmt
+	 * @param assessmentYear
+	 * @return
+	 */
+	public BigDecimal getInterestNew(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
+			List<Payment> payments, TaxPeriod taxPeriod) {
+
+		BigDecimal interestAmt = BigDecimal.ZERO;
+		Map<String, Object> interestMap = mDService.getApplicableMaster(assessmentYear, interestMasterList);
+		if (null == interestMap)
+			return interestAmt;
+
+		String[] time = getStartTime(assessmentYear, interestMap);
+
+		Calendar cal = Calendar.getInstance();
+		setDateToCalendar(time, cal);
+		long currentUTC = System.currentTimeMillis();
+		long currentIST = System.currentTimeMillis() + TIMEZONE_OFFSET;
+		long interestStart = cal.getTimeInMillis();
+
+		if (interestStart < currentIST) {
+
+			if (CollectionUtils.isEmpty(payments)) {
+				return calculateInterestNew(interestStart, getEODEpoch(currentUTC), taxAmt);
+			} else {
+
+				// we need consider what ever payment related finanical year which is iterating
+				// currently
+				Payment currentFinanicalPayment = null;
+				for (Payment paymentObject : payments) {
+
+					for (PaymentDetail paymentDetail : paymentObject.getPaymentDetails()) {
+
+						for (BillDetail billDetails : paymentDetail.getBill().getBillDetails()) {
+
+							if (billDetails.getFromPeriod().equals(taxPeriod.getFromDate())
+									&& billDetails.getToPeriod().equals(taxPeriod.getToDate())) {
+								currentFinanicalPayment = paymentObject;
+							}
+						}
+					}
+				}
+
+				interestAmt = calculateInterestNew(interestStart, getEODEpoch(currentUTC), 
+					utils.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment,taxPeriod));
+			}
+		}
+		return interestAmt;
+	}	
+	
 
 	/**
 	 * Apportions the amount paid to the bill account details based on the tax head codes priority
@@ -451,7 +507,7 @@ public class PayService {
 	 * @param interestMap The interest master data
 	 * @return interest calculated
 	 */
-	private BigDecimal calculateInterest(long numberOfDaysInMillies,BigDecimal applicableAmount,Map<String, Object> interestMap){
+	/*private BigDecimal calculateInterest(long numberOfDaysInMillies,BigDecimal applicableAmount,Map<String, Object> interestMap){
 
 		if(numberOfDaysInMillies<0) {
 			return new BigDecimal(0);
@@ -462,6 +518,18 @@ public class PayService {
 		if(BigDecimal.ONE.compareTo(noOfDays) <= 0) noOfDays = noOfDays.add(BigDecimal.ONE);
 		interestAmt = mDService.calculateApplicables(applicableAmount, interestMap);
 		return interestAmt.multiply(noOfDays.divide(BigDecimal.valueOf(365), 6, 5));
+	}*/
+	
+	private BigDecimal calculateInterestNew(Long interestStart, Long currentDate,  BigDecimal applicableAmount){
+
+		Calendar interestStartCal = Calendar.getInstance();
+		interestStartCal.setTimeInMillis(interestStart);
+		
+		Calendar currentDateCal = Calendar.getInstance();
+		currentDateCal.setTimeInMillis(currentDate);
+		BigDecimal rate=new BigDecimal( currentDateCal.get(Calendar.MONTH) - interestStartCal.get(Calendar.MONTH ) + 1);
+		return applicableAmount.multiply(rate.divide(CalculatorConstants.HUNDRED));
+		
 	}
 
 
