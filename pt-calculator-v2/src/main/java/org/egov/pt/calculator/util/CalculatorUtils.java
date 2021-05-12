@@ -101,6 +101,7 @@ public class CalculatorUtils {
             Map<String, Integer> map = new HashMap<>();
             map.put(CalculatorConstants.PT_TAX, 3);
             map.put(CalculatorConstants.PT_TIME_PENALTY, 1);
+            map.put(CalculatorConstants.PT_DEMANDNOTICE_CHARGE, 2);
             map.put(CalculatorConstants.PT_FIRE_CESS, 2);
             map.put(CalculatorConstants.PT_TIME_INTEREST, 0);
             map.put(CalculatorConstants.MAX_PRIORITY_VALUE, 100);
@@ -165,6 +166,7 @@ public class CalculatorUtils {
         details.add(MasterDetail.builder().name(CalculatorConstants.FIRE_CESS_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.CANCER_CESS_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.INTEREST_MASTER).build());
+        details.add(MasterDetail.builder().name(CalculatorConstants.DEMAND_NOTICE).build());
         ModuleDetail mdDtl = ModuleDetail.builder().masterDetails(details)
                 .moduleName(CalculatorConstants.PROPERTY_TAX_MODULE).build();
         MdmsCriteria mdmsCriteria = MdmsCriteria.builder().moduleDetails(Arrays.asList(mdDtl)).tenantId(tenantId)

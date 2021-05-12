@@ -46,6 +46,8 @@ public class CalculatorConstants {
 	public static final String PT_TIME_PENALTY = "PT_TIME_PENALTY";
 
 	public static final String PT_TIME_INTEREST = "PT_TIME_INTEREST";
+	
+	public static final String PT_DEMANDNOTICE_CHARGE = "PT_DEMANDNOTICE_CHARGE";
 
 	public static final String PT_ADVANCE_CARRYFORWARD = "PT_ADVANCE_CARRYFORWARD";
 
@@ -119,6 +121,8 @@ public class CalculatorConstants {
 	public static final String CANCER_CESS_MASTER = "CancerCess";
 
 	public static final String INTEREST_MASTER = "Interest";
+	
+	public static final String DEMAND_NOTICE = "DemandNotice";
 
 	public static final List<String> PROPERTY_BASED_EXEMPTION_MASTERS = Collections.unmodifiableList(Arrays.asList(
 			USAGE_MAJOR_MASTER, USAGE_MINOR_MASTER, USAGE_SUB_MINOR_MASTER, USAGE_DETAIL_MASTER, OWNER_TYPE_MASTER));

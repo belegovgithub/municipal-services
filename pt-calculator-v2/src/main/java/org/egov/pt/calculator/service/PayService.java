@@ -60,6 +60,7 @@ public class PayService {
 
 		BigDecimal penalty = BigDecimal.ZERO;
 		BigDecimal interest = BigDecimal.ZERO;
+		BigDecimal demandNotice = BigDecimal.ZERO;
 
 		if (rebate.equals(BigDecimal.ZERO)) {
 			penalty = getPenalty(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.PENANLTY_MASTER));
@@ -67,11 +68,13 @@ public class PayService {
 			//		payments,taxPeriod);
 			interest = getInterestNew(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.INTEREST_MASTER),
 							payments,taxPeriod);
+			demandNotice = getdemandNotice(taxAmt, assessmentYear, timeBasedExmeptionMasterMap.get(CalculatorConstants.DEMAND_NOTICE));
 		}
 
 		estimates.put(CalculatorConstants.PT_TIME_REBATE, rebate.setScale(2, 2).negate());
 		estimates.put(CalculatorConstants.PT_TIME_PENALTY, penalty.setScale(2, 2));
 		estimates.put(CalculatorConstants.PT_TIME_INTEREST, interest.setScale(2, 2));
+		estimates.put(CalculatorConstants.PT_DEMANDNOTICE_CHARGE, demandNotice.setScale(2, 2));
 		return estimates;
 	}
 
@@ -324,6 +327,22 @@ public class PayService {
 		return interestAmt;
 	}	
 	
+	public BigDecimal getdemandNotice(BigDecimal taxAmt, String assessmentYear, JSONArray demandNoticeMasterList) {
+
+		BigDecimal demandNoticeAmt = BigDecimal.ZERO;
+		Map<String, Object> demandNotice = mDService.getApplicableMaster(assessmentYear, demandNoticeMasterList);
+		if (null == demandNotice) return demandNoticeAmt;
+
+		String[] time = getStartTime(assessmentYear,demandNotice);
+		Calendar cal = Calendar.getInstance();
+		setDateToCalendar(time, cal);
+		Long currentIST = System.currentTimeMillis()+TIMEZONE_OFFSET;
+
+		if (cal.getTimeInMillis() < currentIST)
+			demandNoticeAmt = mDService.calculateApplicables(taxAmt, demandNotice);
+
+		return demandNoticeAmt;
+	}
 
 	/**
 	 * Apportions the amount paid to the bill account details based on the tax head codes priority

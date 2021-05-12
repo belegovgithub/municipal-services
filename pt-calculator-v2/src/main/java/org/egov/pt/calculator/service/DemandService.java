@@ -444,6 +444,7 @@ public class DemandService {
 		boolean isRebateUpdated = false;
 		boolean isPenaltyUpdated = false;
 		boolean isInterestUpdated = false;
+		boolean isDemandNoticeUpdated = false;
 		
 		List<DemandDetail> details = demand.getDemandDetails();
 
@@ -467,9 +468,9 @@ public class DemandService {
 		BigDecimal rebate = rebatePenaltyEstimates.get(PT_TIME_REBATE);
 		BigDecimal penalty = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_PENALTY);
 		BigDecimal interest = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_INTEREST);
+		BigDecimal demandNotice = rebatePenaltyEstimates.get(CalculatorConstants.PT_DEMANDNOTICE_CHARGE);
 
-
-		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail;
+		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail,latestDemandNoticeDetail;
 
 
 		BigDecimal oldRebate = BigDecimal.ZERO;
@@ -500,6 +501,14 @@ public class DemandService {
 				isPenaltyUpdated = true;
 			}
 		}
+		
+		if(demandNotice.compareTo(BigDecimal.ZERO)!=0){
+			latestDemandNoticeDetail = utils.getLatestDemandDetailByTaxHead(PT_DEMANDNOTICE_CHARGE,details);
+			if(latestDemandNoticeDetail!=null){
+				updateTaxAmount(demandNotice,latestDemandNoticeDetail);
+				isDemandNoticeUpdated = true;
+			}
+		}
 
 		
 		if (!isPenaltyUpdated && penalty.compareTo(BigDecimal.ZERO) > 0)
@@ -509,7 +518,9 @@ public class DemandService {
 			details.add(
 					DemandDetail.builder().taxAmount(interest).taxHeadMasterCode(CalculatorConstants.PT_TIME_INTEREST)
 							.demandId(demandId).tenantId(tenantId).build());
-		
+		if (!isDemandNoticeUpdated && demandNotice.compareTo(BigDecimal.ZERO) > 0)
+			details.add(DemandDetail.builder().taxAmount(demandNotice).taxHeadMasterCode(CalculatorConstants.PT_DEMANDNOTICE_CHARGE)
+					.demandId(demandId).tenantId(tenantId).build());
 		return isCurrentDemand;
 	}
 
