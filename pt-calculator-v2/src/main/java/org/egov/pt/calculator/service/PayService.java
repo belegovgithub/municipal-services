@@ -546,7 +546,12 @@ public class PayService {
 		
 		Calendar currentDateCal = Calendar.getInstance();
 		currentDateCal.setTimeInMillis(currentDate);
-		BigDecimal rate=new BigDecimal( currentDateCal.get(Calendar.MONTH) - interestStartCal.get(Calendar.MONTH ) + 1);
+        int months = 0;
+        months = (currentDateCal.get(Calendar.MONTH)+1) - ((interestStartCal.get(Calendar.MONTH) +1) );
+        if(currentDateCal.get(Calendar.DAY_OF_MONTH) < (interestStartCal.get(Calendar.DAY_OF_MONTH)) )     
+        	months--;
+        BigDecimal rate = new BigDecimal(months + 
+        		((currentDateCal.get(Calendar.YEAR) - interestStartCal.get(Calendar.YEAR)) * 12) +1);
 		return applicableAmount.multiply(rate.divide(CalculatorConstants.HUNDRED));
 		
 	}
