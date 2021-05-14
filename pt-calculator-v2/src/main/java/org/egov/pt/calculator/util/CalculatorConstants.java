@@ -347,4 +347,6 @@ public class CalculatorConstants {
 	public static final String ADHOC_PENALTY = "adhocPenalty";
 
 	public static final String MUTATION_PAYMENT_PERIOD_IN_MONTH = "mutationPaymentPeriodInMonth";
+	
+	public static long systemTimeInMillisecEnv = System.currentTimeMillis();
 }

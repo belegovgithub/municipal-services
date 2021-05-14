@@ -99,7 +99,7 @@ public class PayService {
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(assessmentYear, time, cal);
 
-		if (cal.getTimeInMillis() > System.currentTimeMillis())
+		if (cal.getTimeInMillis() > CalculatorConstants.systemTimeInMillisecEnv)
 			rebateAmt = mDService.calculateApplicables(taxAmt, rebate);
 
 		return rebateAmt;
@@ -121,7 +121,7 @@ public class PayService {
 		String[] time = getStartTime(assessmentYear,penalty);
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		Long currentIST = System.currentTimeMillis()+TIMEZONE_OFFSET;
+		Long currentIST = CalculatorConstants.systemTimeInMillisecEnv+TIMEZONE_OFFSET;
 
 		if (cal.getTimeInMillis() < currentIST)
 			penaltyAmt = mDService.calculateApplicables(taxAmt, penalty);
@@ -149,8 +149,8 @@ public class PayService {
 
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		long currentUTC = System.currentTimeMillis();
-		long currentIST = System.currentTimeMillis() + TIMEZONE_OFFSET;
+		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
+		long currentIST = CalculatorConstants.systemTimeInMillisecEnv + TIMEZONE_OFFSET;
 		long interestStart = cal.getTimeInMillis();
 		List<Payment> filteredPaymentsAfterIntersetDate = null;
 		if (!CollectionUtils.isEmpty(payments)) {
@@ -293,8 +293,8 @@ public class PayService {
 
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		long currentUTC = System.currentTimeMillis();
-		long currentIST = System.currentTimeMillis() + TIMEZONE_OFFSET;
+		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
+		long currentIST = currentUTC + TIMEZONE_OFFSET;
 		long interestStart = cal.getTimeInMillis();
 
 		if (interestStart < currentIST) {
@@ -336,7 +336,7 @@ public class PayService {
 		String[] time = getStartTime(assessmentYear,demandNotice);
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		Long currentIST = System.currentTimeMillis()+TIMEZONE_OFFSET;
+		Long currentIST = CalculatorConstants.systemTimeInMillisecEnv+TIMEZONE_OFFSET;
 
 		if (cal.getTimeInMillis() < currentIST)
 			demandNoticeAmt = mDService.calculateApplicables(taxAmt, demandNotice);

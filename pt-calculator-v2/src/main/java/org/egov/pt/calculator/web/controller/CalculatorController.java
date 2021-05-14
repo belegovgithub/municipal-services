@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.egov.pt.calculator.service.DemandService;
 import org.egov.pt.calculator.service.EstimationService;
 import org.egov.pt.calculator.service.PayService;
+import org.egov.pt.calculator.util.CalculatorConstants;
 import org.egov.pt.calculator.web.models.Calculation;
 import org.egov.pt.calculator.web.models.CalculationReq;
 import org.egov.pt.calculator.web.models.CalculationRes;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/propertytax")
@@ -76,6 +78,12 @@ public class CalculatorController {
 	public ResponseEntity<DemandResponse> updatePTDemand(@RequestBody @Valid DemandRequest request) {
 		return new ResponseEntity<>(demandService.updatePTDemands(request.getDemands(), request.getRequestInfo()),
 				HttpStatus.OK);
+	}
+	
+	@PostMapping("/_updateSytemTimeVar")
+	public ResponseEntity<Long> _updateSytemTimeVar(@RequestParam String time ) {
+		CalculatorConstants.systemTimeInMillisecEnv = Long.valueOf(time);
+		return new ResponseEntity<>(CalculatorConstants.systemTimeInMillisecEnv , HttpStatus.OK);
 	}
 
 }

@@ -215,7 +215,7 @@ public class MasterDataService {
 				if (assessmentYear.split("-")[0].compareTo(objFinYear) >= 0 && maxYearFromTheList.compareTo(objFinYear) <= 0) {
 					maxYearFromTheList = objFinYear;
 					Long startTime = getStartDayInMillis(objStartDay);
-					Long currentTime = System.currentTimeMillis();
+					Long currentTime = CalculatorConstants.systemTimeInMillisecEnv;
 					if(startTime < currentTime && maxStartTime < startTime){
 						objToBeReturned = objMap;
 						maxStartTime = startTime;

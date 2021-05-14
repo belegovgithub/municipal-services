@@ -431,7 +431,7 @@ public class DemandService {
 				&& demand.getTaxPeriodTo().compareTo(t.getToDate()) <= 0)
 		.findAny().orElse(null);
 		
-		if(!(taxPeriod.getFromDate()<= System.currentTimeMillis() && taxPeriod.getToDate() >= System.currentTimeMillis()))
+		if(!(taxPeriod.getFromDate()<= CalculatorConstants.systemTimeInMillisecEnv && taxPeriod.getToDate() >= CalculatorConstants.systemTimeInMillisecEnv))
 			isCurrentDemand = true;
 		/*
 		 * method to get the latest collected time from the receipt service
