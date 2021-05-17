@@ -202,7 +202,7 @@ public class EnrichmentService {
 	 * @param sewerageConnectionRequest
 	 */
 	public void legacyStatusEnrichment(SewerageConnectionRequest sewerageConnectionRequest) {
-		if (sewerageConnectionRequest.getSewerageConnection().getApplicationStatus().equals("CONNECTION_ACTIVATED")  ) {
+		if (sewerageConnectionRequest.getSewerageConnection().getApplicationStatus().equals(SWConstants.STATUS_APPROVED)  ) {
 			setConnectionNO(sewerageConnectionRequest);
 		}
 	}

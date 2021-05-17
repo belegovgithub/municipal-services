@@ -168,6 +168,9 @@ public class SWConfiguration {
 	
 	@Value("${modify.sw.workflow.name}")
 	private String modifySWBusinessServiceName;
+	
+	@Value("${legacy.sw.workflow.name}")
+	private String legacySWBusinessServiceName;
 
 	@Value("${egov.msg.download.receipt.link}")
 	private String receiptDownloadLink;

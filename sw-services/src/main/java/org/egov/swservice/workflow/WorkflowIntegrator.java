@@ -64,6 +64,10 @@ public class WorkflowIntegrator {
 		if(servicesUtil.isModifyConnectionRequest(sewerageConnectionRequest)){
 			wfBusinessServiceName = config.getModifySWBusinessServiceName();
 		}
+		callWorkFlow(sewerageConnectionRequest, property,wfBusinessServiceName);
+	}
+	
+	public void callWorkFlow(SewerageConnectionRequest sewerageConnectionRequest, Property property, String wfBusinessServiceName) {
 		SewerageConnection connection = sewerageConnectionRequest.getSewerageConnection();
 		ProcessInstance processInstance = ProcessInstance.builder()
 				.businessId(sewerageConnectionRequest.getSewerageConnection().getApplicationNo())
