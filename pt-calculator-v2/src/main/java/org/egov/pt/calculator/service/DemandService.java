@@ -663,7 +663,10 @@ public class DemandService {
 	}
 	
 	public DemandResponse createPTDemands(List<Demand> demands, RequestInfo requestInfo) {
+		for(Demand demand : demands){
+			roundOffDecimalForDemand(demand, new RequestInfoWrapper(requestInfo));
 
+		}
 		DemandRequest demandReq = DemandRequest.builder().demands(demands).requestInfo(requestInfo).build();
 		String url = new StringBuilder().append(configs.getBillingServiceHost())
 				.append(configs.getDemandCreateEndPoint()).toString();
@@ -679,6 +682,10 @@ public class DemandService {
 	}
 
 	public DemandResponse updatePTDemands(List<Demand> demands, RequestInfo requestInfo) {
+		for(Demand demand : demands){
+			roundOffDecimalForDemand(demand, new RequestInfoWrapper(requestInfo));
+
+		}
 		DemandRequest demandReq = DemandRequest.builder().demands(demands).requestInfo(requestInfo).build();
 		String url = new StringBuilder().append(configs.getBillingServiceHost())
 				.append(configs.getDemandUpdateEndPoint()).toString();
