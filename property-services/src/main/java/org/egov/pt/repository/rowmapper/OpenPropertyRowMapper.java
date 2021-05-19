@@ -97,13 +97,17 @@ public class OpenPropertyRowMapper implements ResultSetExtractor<List<Property>>
 				if (owner.getUuid().equals(uuid))
 					return;
 			}
-
+		Boolean sameAsPeropertyAddress = rs.getBoolean("sameAsPeropertyAddress");
+		if(rs.wasNull()) {
+			sameAsPeropertyAddress = null;
+			}
 		OwnerInfo owner = OwnerInfo.builder()
 				.status(Status.fromValue(rs.getString("ownstatus")))
 				.institutionId(rs.getString("owninstitutionid"))
 				.ownerInfoUuid(rs.getString("ownerInfoUuid"))
 				.tenantId(rs.getString("owntenantid"))
 				.ownerType(rs.getString("ownerType"))
+				.sameAsPeropertyAddress(sameAsPeropertyAddress)
 				.uuid(uuid)
 				.build();
 		

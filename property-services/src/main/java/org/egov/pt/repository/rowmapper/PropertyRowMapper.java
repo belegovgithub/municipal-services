@@ -254,6 +254,10 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 		if(rs.wasNull()) {
 			isPrimaryOwner = null;
 			}
+		Boolean sameAsPeropertyAddress = rs.getBoolean("sameAsPeropertyAddress");
+		if(rs.wasNull()) {
+			sameAsPeropertyAddress = null;
+			}
 		
 		OwnerInfo owner = OwnerInfo.builder()
 				.relationship(Relationship.fromValue(rs.getString("relationship")))
@@ -264,6 +268,7 @@ public class PropertyRowMapper implements ResultSetExtractor<List<Property>> {
 				.tenantId(rs.getString("owntenantid"))
 				.ownerType(rs.getString("ownerType"))
 				.isPrimaryOwner(isPrimaryOwner)
+				.sameAsPeropertyAddress(sameAsPeropertyAddress)
 				.uuid(uuid)
 				.build();
 		

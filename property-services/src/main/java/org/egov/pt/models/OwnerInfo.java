@@ -62,6 +62,9 @@ public class OwnerInfo extends User {
 
 	@JsonProperty("relationship")
 	private Relationship relationship;
+	
+	@JsonProperty("sameAsPeropertyAddress")
+	private Boolean sameAsPeropertyAddress;
 
 	public OwnerInfo addDocumentsItem(Document documentsItem) {
 		if (this.documents == null) {
@@ -121,7 +124,7 @@ public class OwnerInfo extends User {
 					 String createdBy, Long createdDate, String lastModifiedBy, Long lastModifiedDate, String tenantId,
 					 String ownerInfoUuid, String mobileNumber2, String gender2, String fatherOrHusbandName2,
 					 String correspondenceAddress2, Boolean isPrimaryOwner, Double ownerShipPercentage, String ownerType,
-					 String institutionId, Status status, List<Document> documents, Relationship relationship) {
+					 String institutionId, Status status, List<Document> documents, Relationship relationship,Boolean sameAsPeropertyAddress) {
 		super(id, uuid, userName, password, salutation, name, gender, mobileNumber, emailId, altContactNumber, pan,
 				aadhaarNumber, permanentAddress, permanentCity, permanentPincode, correspondenceCity,
 				correspondencePincode, correspondenceAddress, active, dob, pwdExpiryDate, locale, type, signature,
@@ -139,6 +142,7 @@ public class OwnerInfo extends User {
 		this.status = status;
 		this.documents = documents;
 		this.relationship = relationship;
+		this.sameAsPeropertyAddress = sameAsPeropertyAddress;
 	}
 
 
@@ -164,6 +168,7 @@ public class OwnerInfo extends User {
 		this.status = ownerInfo.getStatus();
 		this.documents = copyDocuments(ownerInfo.getDocuments());
 		this.relationship = ownerInfo.getRelationship();
+		this.sameAsPeropertyAddress = ownerInfo.getSameAsPeropertyAddress();
 	}
 
 	private List<Document> copyDocuments(List<Document> documents) {
