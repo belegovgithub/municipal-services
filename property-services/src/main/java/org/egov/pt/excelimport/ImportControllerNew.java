@@ -107,6 +107,11 @@ public class ImportControllerNew {
 		taxHeadMaps.put("Conservancy and Scavening Tax", "PT_CONSERVANCY_TAX");
 		taxHeadMaps.put("Lighting And Drainage Tax", "PT_LIGHTINING_TAX");
 		taxHeadMaps.put("Education Tax", "PT_EDUCATION_TAX");
+		taxHeadMaps.put("Consolidated Property Tax", "PT_CONSOLIDATED_PROPERTY_TAX");
+		taxHeadMaps.put("Sanitary Cess", "PT_SANITARY_CESS");
+		taxHeadMaps.put("Education Cess", "PT_EDUCATION_CESS");
+		taxHeadMaps.put("Additional water tax", "PT_ADDL_WATER_TAX");
+		taxHeadMaps.put("Drainage Tax", "PT_DRAINAGE_TAX");
 		
 		ImportReportWrapper wrapper = new ImportReportWrapper();
 		String extension = "";
@@ -317,7 +322,7 @@ public class ImportControllerNew {
 	}
 
 	private String getStringVal(Cell cell) {
-		return cell.getCellType() == CellType.NUMERIC ? String.valueOf((long) cell.getNumericCellValue())
+		return cell.getCellType() == CellType.NUMERIC ? String.valueOf((float) cell.getNumericCellValue())
 				: cell.getStringCellValue();
 	}
 }
