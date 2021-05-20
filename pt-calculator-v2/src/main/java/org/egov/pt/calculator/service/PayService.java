@@ -431,7 +431,7 @@ public class PayService {
 
 							applicableAmount = utils
 									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
-							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(currentUTC), applicableAmount);
 						} else {
 							Payment paymentPrev = filteredPaymentsAfterIntersetDate.get(i - 1);
 							applicableAmount = utils
