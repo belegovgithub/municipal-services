@@ -385,7 +385,7 @@ public class PayService {
 							.getTaxAmtFromPaymentForApplicablesGeneration(lastPaymentBeforeIntersetStart, taxPeriod);
 				}
 				BigDecimal applicableAmount;
-				BigDecimal interestCalculated;
+				BigDecimal interestCalculated = BigDecimal.ZERO;
 				int numberOfPeriods = filteredPaymentsAfterIntersetDate.size() + 1;
 				Payment payment;
 
@@ -395,10 +395,8 @@ public class PayService {
 					interestAmt = interestAmt.add(interestCalculated);
 				} else {
 
-					// we need consider what ever payment related finanical year which is iterating
-					// currently
 					Payment currentFinanicalPayment = null;
-					for (Payment paymentObject : filteredPaymentsAfterIntersetDate) {
+					/*for (Payment paymentObject : filteredPaymentsAfterIntersetDate) {
 
 						for (PaymentDetail paymentDetail : paymentObject.getPaymentDetails()) {
 
@@ -412,8 +410,7 @@ public class PayService {
 							}
 
 						}
-
-					}
+					}*/
 
 					for (int i = 0; i < numberOfPeriods; i++) {
 
@@ -432,15 +429,13 @@ public class PayService {
 								currentFinanicalPayment = payment;
 							}
 
-							// we need to pass current iterating financial year payment for getting
-							// applicable amount.
 							applicableAmount = utils
-									.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment, taxPeriod);
+									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
 							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
 						} else {
-
+							Payment paymentPrev = filteredPaymentsAfterIntersetDate.get(i - 1);
 							applicableAmount = utils
-									.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment, taxPeriod);
+									.getTaxAmtFromPaymentForApplicablesGeneration(paymentPrev, taxPeriod);
 							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
 						}
 						interestAmt = interestAmt.add(interestCalculated);
