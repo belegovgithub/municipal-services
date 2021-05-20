@@ -281,7 +281,7 @@ public class PayService {
 	 * @param assessmentYear
 	 * @return
 	 */
-	public BigDecimal getInterestNew(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
+	/*public BigDecimal getInterestNew(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
 			List<Payment> payments, TaxPeriod taxPeriod) {
 
 		BigDecimal interestAmt = BigDecimal.ZERO;
@@ -322,6 +322,130 @@ public class PayService {
 
 				interestAmt = calculateInterestNew(interestStart, getEODEpoch(currentUTC), 
 					utils.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment,taxPeriod));
+			}
+		}
+		return interestAmt;
+	}	
+	*/
+	public BigDecimal getInterestNew(BigDecimal taxAmt, String assessmentYear, JSONArray interestMasterList,
+			List<Payment> payments, TaxPeriod taxPeriod) {
+
+		BigDecimal interestAmt = BigDecimal.ZERO;
+		Map<String, Object> interestMap = mDService.getApplicableMaster(assessmentYear, interestMasterList);
+		if (null == interestMap)
+			return interestAmt;
+
+		String[] time = getStartTime(assessmentYear, interestMap);
+
+		Calendar cal = Calendar.getInstance();
+		setDateToCalendar(time, cal);
+		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
+		long currentIST = currentUTC + TIMEZONE_OFFSET;
+		long interestStart = cal.getTimeInMillis();
+
+		List<Payment> filteredPaymentsAfterIntersetDate = null;
+		if (!CollectionUtils.isEmpty(payments)) {
+			filteredPaymentsAfterIntersetDate = payments.stream()
+					.filter(payment -> payment.getTransactionDate() >= interestStart).collect(Collectors.toList());
+
+		}
+		
+		if (interestStart < currentIST) {
+
+			if (CollectionUtils.isEmpty(payments)) {
+				return calculateInterestNew(interestStart, getEODEpoch(currentUTC), taxAmt);
+			} else {
+
+				Integer indexOfLastPaymentBeforeIntersetStart = null;
+				Payment lastPaymentBeforeIntersetStart = null;
+
+				for (int i = 0; i < payments.size(); i++) {
+
+					if (payments.get(i).getTransactionDate() >= interestStart) {
+
+						indexOfLastPaymentBeforeIntersetStart = i - 1;
+						break;
+					} else {
+
+						indexOfLastPaymentBeforeIntersetStart = i;
+					}
+
+				}
+
+				if (indexOfLastPaymentBeforeIntersetStart != null && indexOfLastPaymentBeforeIntersetStart >= 0) {
+					lastPaymentBeforeIntersetStart = payments.get(indexOfLastPaymentBeforeIntersetStart);
+				}
+
+				Boolean isTaxPeriodPresent = utils.isTaxPeriodAvaialble(lastPaymentBeforeIntersetStart, taxPeriod);
+
+				BigDecimal firstApplicableAmount = taxAmt;
+
+				if (lastPaymentBeforeIntersetStart != null && isTaxPeriodPresent) {
+					firstApplicableAmount = utils
+							.getTaxAmtFromPaymentForApplicablesGeneration(lastPaymentBeforeIntersetStart, taxPeriod);
+				}
+				BigDecimal applicableAmount;
+				BigDecimal interestCalculated;
+				int numberOfPeriods = filteredPaymentsAfterIntersetDate.size() + 1;
+				Payment payment;
+
+				if (CollectionUtils.isEmpty(filteredPaymentsAfterIntersetDate)) {
+					applicableAmount = firstApplicableAmount;
+					interestCalculated = calculateInterestNew(interestStart, getEODEpoch(currentUTC), applicableAmount);
+					interestAmt = interestAmt.add(interestCalculated);
+				} else {
+
+					// we need consider what ever payment related finanical year which is iterating
+					// currently
+					Payment currentFinanicalPayment = null;
+					for (Payment paymentObject : filteredPaymentsAfterIntersetDate) {
+
+						for (PaymentDetail paymentDetail : paymentObject.getPaymentDetails()) {
+
+							for (BillDetail billDetails : paymentDetail.getBill().getBillDetails()) {
+
+								if (billDetails.getFromPeriod().equals(taxPeriod.getFromDate())
+										&& billDetails.getToPeriod().equals(taxPeriod.getToDate())) {
+									currentFinanicalPayment = paymentObject;
+
+								}
+							}
+
+						}
+
+					}
+
+					for (int i = 0; i < numberOfPeriods; i++) {
+
+						if (i != numberOfPeriods - 1)
+							payment = filteredPaymentsAfterIntersetDate.get(i);
+						else
+							payment = filteredPaymentsAfterIntersetDate.get(i - 1);
+
+						if (i == 0) {
+
+							applicableAmount = firstApplicableAmount;
+
+							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+						} else if (i == numberOfPeriods - 1) {
+							if (currentFinanicalPayment == null) {
+								currentFinanicalPayment = payment;
+							}
+
+							// we need to pass current iterating financial year payment for getting
+							// applicable amount.
+							applicableAmount = utils
+									.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment, taxPeriod);
+							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+						} else {
+
+							applicableAmount = utils
+									.getTaxAmtFromPaymentForApplicablesGeneration(currentFinanicalPayment, taxPeriod);
+							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+						}
+						interestAmt = interestAmt.add(interestCalculated);
+					}
+				}
 			}
 		}
 		return interestAmt;
