@@ -45,6 +45,7 @@ import org.egov.pt.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -82,6 +83,12 @@ public class ImportControllerNew {
 
 	@Autowired
 	private ServiceRequestRepository serviceRequestRepository;
+	
+	@Value("${egov.ptdemand.excelimport.tokenflag}")
+    private boolean excelImportTokenFlag;
+	
+	@Value("${egov.ptdemand.excelimport.token}")
+    private String excelImportToken;
 
 	@RequestMapping(value = { "/_import" }, method = RequestMethod.POST)
 	@PostMapping(produces = APPLICATION_JSON_UTF8_VALUE)
@@ -89,7 +96,9 @@ public class ImportControllerNew {
 	@ResponseBody
 	public ResponseEntity<ImportReportWrapper> _import(@RequestParam(value = "file", required = false) List<MultipartFile> files,
 			@RequestParam(value = "tenantId", required = false) String tenantId ,
-			@RequestParam(value = "RequestInfo", required = false) String req) {
+			@RequestParam(value = "RequestInfo", required = false) String req, 
+			@RequestParam(value = "token", required = false) String token) {
+		if(excelImportTokenFlag ? excelImportToken.equals(token) : true)	{
 
 		RequestInfo requestInfo = null;
 		try {
@@ -319,6 +328,8 @@ public class ImportControllerNew {
 			throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
 		}
 		return new ResponseEntity<>(wrapper, HttpStatus.OK);
+		}
+		return null;
 	}
 
 	private String getStringVal(Cell cell) {
