@@ -40,6 +40,16 @@ public class CalculatorConstants {
 	public static final String PT_UNIT_USAGE_EXEMPTION = "PT_UNIT_USAGE_EXEMPTION";
 
 	public static final String PT_OWNER_EXEMPTION = "PT_OWNER_EXEMPTION";
+	
+	public static final String PT_CONSOLIDATED_PROPERTY_TAX ="PT_CONSOLIDATED_PROPERTY_TAX";
+	
+	public static final String PT_SANITARY_CESS ="PT_SANITARY_CESS";
+	
+	public static final String PT_EDUCATION_CESS ="PT_EDUCATION_CESS";
+	
+	public static final String PT_ADDL_WATER_TAX  ="PT_ADDL_WATER_TAX";
+	
+	public static final String PT_DRAINAGE_TAX="PT_DRAINAGE_TAX";
 
 	public static final String PT_TIME_REBATE = "PT_TIME_REBATE";
 
@@ -82,7 +92,8 @@ public class CalculatorConstants {
 			.asList(PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION ));
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD = Collections.unmodifiableList(Arrays
-			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX,PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION ));
+			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX,PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION
+			,PT_CONSOLIDATED_PROPERTY_TAX ,PT_SANITARY_CESS , PT_EDUCATION_CESS , PT_ADDL_WATER_TAX , PT_DRAINAGE_TAX));
 	/*
 	 * these lists has to be updated with every new additional taxes which will be applied on the principle tax(PT_TAX)  
 	 */

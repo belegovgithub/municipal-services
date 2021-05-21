@@ -469,7 +469,7 @@ public class DemandService {
 		BigDecimal penalty = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_PENALTY);
 		BigDecimal interest = rebatePenaltyEstimates.get(CalculatorConstants.PT_TIME_INTEREST);
 		BigDecimal demandNotice = rebatePenaltyEstimates.get(CalculatorConstants.PT_DEMANDNOTICE_CHARGE);
-		log.info("rebate "+rebate+" , penalty "+penalty+" , interest "+interest+" , demandNotice "+demandNotice);
+		log.info(demand.getConsumerCode() +" : rebate "+rebate+" , penalty "+penalty+" , interest "+interest+" , demandNotice "+demandNotice);
 		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail,latestDemandNoticeDetail;
 
 

@@ -1,5 +1,7 @@
 package org.egov.pt.calculator.web.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -84,6 +87,14 @@ public class CalculatorController {
 	public ResponseEntity<Long> _updateSytemTimeVar(@RequestParam String time ) {
 		CalculatorConstants.systemTimeInMillisecEnv = Long.valueOf(time);
 		return new ResponseEntity<>(CalculatorConstants.systemTimeInMillisecEnv , HttpStatus.OK);
+	}
+	
+	@GetMapping("/_getSytemTimeVar")
+	public ResponseEntity<String> _getSytemTimeVar() {
+		String date="";
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+		date = sdf.format(new Date(CalculatorConstants.systemTimeInMillisecEnv));
+		return new ResponseEntity<>(date , HttpStatus.OK);
 	}
 
 }
