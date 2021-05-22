@@ -1,25 +1,29 @@
 package org.egov.pt.calculator.service;
 
+import static org.egov.pt.calculator.util.CalculatorConstants.TIMEZONE_OFFSET;
+import static org.egov.pt.calculator.util.CalculatorUtils.getEODEpoch;
+
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.egov.pt.calculator.util.CalculatorConstants;
 import org.egov.pt.calculator.util.CalculatorUtils;
 import org.egov.pt.calculator.web.models.TaxHeadEstimate;
 import org.egov.pt.calculator.web.models.collections.Payment;
-import org.egov.pt.calculator.web.models.collections.PaymentDetail;
-import org.egov.pt.calculator.web.models.demand.*;
+import org.egov.pt.calculator.web.models.demand.BillAccountDetail;
+import org.egov.pt.calculator.web.models.demand.TaxPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import jdk.internal.org.jline.utils.Log;
 import net.minidev.json.JSONArray;
-
-import static org.egov.pt.calculator.util.CalculatorConstants.TIMEZONE_OFFSET;
-import static org.egov.pt.calculator.util.CalculatorUtils.getEODEpoch;
 
 /**
  * Deals with the functionality that are performed 
