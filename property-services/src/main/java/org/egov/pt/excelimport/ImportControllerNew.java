@@ -112,6 +112,7 @@ public class ImportControllerNew {
 		taxHeadMaps.put("Education Cess", "PT_EDUCATION_CESS");
 		taxHeadMaps.put("Additional water tax", "PT_ADDL_WATER_TAX");
 		taxHeadMaps.put("Drainage Tax", "PT_DRAINAGE_TAX");
+		taxHeadMaps.put("Lighting Tax", "PT_LIGHTING_TAX");
 		
 		ImportReportWrapper wrapper = new ImportReportWrapper();
 		String extension = "";
