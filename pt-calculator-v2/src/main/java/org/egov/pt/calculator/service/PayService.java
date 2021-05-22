@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import jdk.internal.org.jline.utils.Log;
 import net.minidev.json.JSONArray;
 
 import static org.egov.pt.calculator.util.CalculatorConstants.TIMEZONE_OFFSET;
@@ -462,6 +463,8 @@ public class PayService {
         
         int monthstotal = months + 
         		((currentDateCal.get(Calendar.YEAR) - interestStartCal.get(Calendar.YEAR)) * 12) ;
+        System.out.println(applicableAmount+" , monthstotal - "+monthstotal+" , months - "
+        		+months+ " , interestStart - " +interestStart+" , interestend - "+interestend);
 		return applicableAmount.multiply(BigDecimal.valueOf(monthstotal).divide(CalculatorConstants.HUNDRED));
 		
 	}
