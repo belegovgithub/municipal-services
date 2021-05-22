@@ -347,9 +347,9 @@ public class PayService {
 		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
 		long currentIST = currentUTC + TIMEZONE_OFFSET;
 		long interestStart = cal.getTimeInMillis();
-		Calendar logicalCal = Calendar.getInstance();;
+		Calendar logicalCal = Calendar.getInstance();
 		setDateToCalendarLogical(time, logicalCal);
-		long logicalInterestStart = logicalCal.getTimeInMillis();
+		long logicalInterestStart = logicalCal.getTimeInMillis() + TIMEZONE_OFFSET;
 		List<Payment> filteredPaymentsAfterIntersetDate = null;
 		if (!CollectionUtils.isEmpty(payments)) {
 			filteredPaymentsAfterIntersetDate = payments.stream()
