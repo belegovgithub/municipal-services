@@ -342,7 +342,9 @@ public class PayService {
 		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
 		long currentIST = currentUTC + TIMEZONE_OFFSET;
 		long interestStart = cal.getTimeInMillis();
-
+		Calendar logicalCal = Calendar.getInstance();;
+		setDateToCalendarLogical(time, logicalCal);
+		long logicalInterestStart = logicalCal.getTimeInMillis();
 		List<Payment> filteredPaymentsAfterIntersetDate = null;
 		if (!CollectionUtils.isEmpty(payments)) {
 			filteredPaymentsAfterIntersetDate = payments.stream()
@@ -353,7 +355,7 @@ public class PayService {
 		if (interestStart < currentIST) {
 
 			if (CollectionUtils.isEmpty(payments)) {
-				return calculateInterestNew(interestStart, getEODEpoch(currentUTC), taxAmt);
+				return calculateInterestNew(logicalInterestStart, getEODEpoch(currentUTC), taxAmt);
 			} else {
 
 				Integer indexOfLastPaymentBeforeIntersetStart = null;
@@ -391,7 +393,7 @@ public class PayService {
 
 				if (CollectionUtils.isEmpty(filteredPaymentsAfterIntersetDate)) {
 					applicableAmount = firstApplicableAmount;
-					interestCalculated = calculateInterestNew(interestStart, getEODEpoch(currentUTC), applicableAmount);
+					interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(currentUTC), applicableAmount);
 					interestAmt = interestAmt.add(interestCalculated);
 				} else {
 
@@ -423,7 +425,7 @@ public class PayService {
 
 							applicableAmount = firstApplicableAmount;
 
-							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+							interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
 						} else if (i == numberOfPeriods - 1) {
 							if (currentFinanicalPayment == null) {
 								currentFinanicalPayment = payment;
@@ -431,12 +433,12 @@ public class PayService {
 
 							applicableAmount = utils
 									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
-							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(currentUTC), applicableAmount);
+							interestCalculated = calculateInterestNew(getEODEpoch(payment.getTransactionDate()), getEODEpoch(currentUTC), applicableAmount);
 						} else {
 							Payment paymentPrev = filteredPaymentsAfterIntersetDate.get(i - 1);
 							applicableAmount = utils
-									.getTaxAmtFromPaymentForApplicablesGeneration(paymentPrev, taxPeriod);
-							interestCalculated = calculateInterestNew(interestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
+							interestCalculated = calculateInterestNew(getEODEpoch(paymentPrev.getTransactionDate()), getEODEpoch(payment.getTransactionDate()), applicableAmount);
 						}
 						interestAmt = interestAmt.add(interestCalculated);
 					}
@@ -445,6 +447,24 @@ public class PayService {
 		}
 		return interestAmt;
 	}	
+	
+	private BigDecimal calculateInterestNew(Long interestStart, Long interestend,  BigDecimal applicableAmount){
+
+		Calendar interestStartCal = Calendar.getInstance();
+		interestStartCal.setTimeInMillis(interestStart);
+		
+		Calendar currentDateCal = Calendar.getInstance();
+		currentDateCal.setTimeInMillis(interestend);
+        int months = 0;
+        months = (currentDateCal.get(Calendar.MONTH)+1) - ((interestStartCal.get(Calendar.MONTH) +1) );
+        //if(currentDateCal.get(Calendar.DAY_OF_MONTH) < (interestStartCal.get(Calendar.DAY_OF_MONTH)) )     
+        	//months--;
+        
+        int monthstotal = months + 
+        		((currentDateCal.get(Calendar.YEAR) - interestStartCal.get(Calendar.YEAR)) * 12) ;
+		return applicableAmount.multiply(BigDecimal.valueOf(monthstotal).divide(CalculatorConstants.HUNDRED));
+		
+	}
 	
 	public BigDecimal getdemandNotice(BigDecimal taxAmt, String assessmentYear, JSONArray demandNoticeMasterList) {
 
@@ -558,6 +578,18 @@ public class PayService {
 		Integer year = Integer.valueOf(time[2]);
 		cal.set(year, month, day);
 	}
+	
+	private void setDateToCalendarLogical(String[] time, Calendar cal) {
+
+		cal.clear();
+		TimeZone timeZone = TimeZone.getTimeZone("Asia/Kolkata");
+		cal.setTimeZone(timeZone);
+		Integer day = Integer.valueOf(time[0]);
+		Integer month = Integer.valueOf(time[1])-2;
+		// One is subtracted because calender reads january as 0
+		Integer year = Integer.valueOf(time[2]);
+		cal.set(year, month, day);
+	}
 
 	/**
 	 * Decimal is ceiled for all the tax heads
@@ -656,9 +688,9 @@ public class PayService {
 		if(BigDecimal.ONE.compareTo(noOfDays) <= 0) noOfDays = noOfDays.add(BigDecimal.ONE);
 		interestAmt = mDService.calculateApplicables(applicableAmount, interestMap);
 		return interestAmt.multiply(noOfDays.divide(BigDecimal.valueOf(365), 6, 5));
-	}*/
+	}
 	
-	private BigDecimal calculateInterestNew(Long interestStart, Long currentDate,  BigDecimal applicableAmount){
+	private BigDecimal calculateInterestNew2(Long interestStart, Long currentDate,  BigDecimal applicableAmount){
 
 		Calendar interestStartCal = Calendar.getInstance();
 		interestStartCal.setTimeInMillis(interestStart);
@@ -673,7 +705,7 @@ public class PayService {
         		((currentDateCal.get(Calendar.YEAR) - interestStartCal.get(Calendar.YEAR)) * 12) +1);
 		return applicableAmount.multiply(rate.divide(CalculatorConstants.HUNDRED));
 		
-	}
+	}*/
 
 
 
