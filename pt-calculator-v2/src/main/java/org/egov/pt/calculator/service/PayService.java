@@ -20,6 +20,7 @@ import org.egov.pt.calculator.web.models.collections.Payment;
 import org.egov.pt.calculator.web.models.demand.BillAccountDetail;
 import org.egov.pt.calculator.web.models.demand.TaxPeriod;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -43,6 +44,9 @@ public class PayService {
 
 	@Autowired
 	private MasterDataService mDService;
+	
+	@Value("${ptcalc.pttestingmode}")
+	private boolean pttestingmode;
 	
 	/**
 	 * Updates the incoming demand with latest rebate, penalty and interest values if applicable
@@ -104,7 +108,7 @@ public class PayService {
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(assessmentYear, time, cal);
 
-		if (cal.getTimeInMillis() > CalculatorConstants.systemTimeInMillisecEnv)
+		if (cal.getTimeInMillis() > (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis()))
 			rebateAmt = mDService.calculateApplicables(taxAmt, rebate);
 
 		return rebateAmt;
@@ -126,7 +130,7 @@ public class PayService {
 		String[] time = getStartTime(assessmentYear,penalty);
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		Long currentIST = CalculatorConstants.systemTimeInMillisecEnv+TIMEZONE_OFFSET;
+		Long currentIST = (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis())+TIMEZONE_OFFSET;
 
 		if (cal.getTimeInMillis() < currentIST)
 			penaltyAmt = mDService.calculateApplicables(taxAmt, penalty);
@@ -344,7 +348,7 @@ public class PayService {
 
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		long currentUTC = CalculatorConstants.systemTimeInMillisecEnv;
+		long currentUTC = (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis());
 		long currentIST = currentUTC + TIMEZONE_OFFSET;
 		long interestStart = cal.getTimeInMillis();
 		Calendar logicalCal = Calendar.getInstance();
@@ -482,7 +486,7 @@ public class PayService {
 		String[] time = getStartTime(assessmentYear,demandNotice);
 		Calendar cal = Calendar.getInstance();
 		setDateToCalendar(time, cal);
-		Long currentIST = CalculatorConstants.systemTimeInMillisecEnv+TIMEZONE_OFFSET;
+		Long currentIST = (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis())+TIMEZONE_OFFSET;
 
 		if (cal.getTimeInMillis() < currentIST)
 			demandNoticeAmt = mDService.calculateApplicables(taxAmt, demandNotice);

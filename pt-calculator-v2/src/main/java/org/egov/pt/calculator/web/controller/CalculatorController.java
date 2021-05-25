@@ -83,7 +83,7 @@ public class CalculatorController {
 				HttpStatus.OK);
 	}
 	
-	@PostMapping("/_updateSytemTimeVar")
+	@GetMapping("/_updateSytemTimeVar")
 	public ResponseEntity<Long> _updateSytemTimeVar(@RequestParam String time ) {
 		CalculatorConstants.systemTimeInMillisecEnv = Long.valueOf(time);
 		return new ResponseEntity<>(CalculatorConstants.systemTimeInMillisecEnv , HttpStatus.OK);

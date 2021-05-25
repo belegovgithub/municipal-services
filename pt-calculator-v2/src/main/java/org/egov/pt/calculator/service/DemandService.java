@@ -21,6 +21,7 @@ import org.egov.pt.calculator.web.models.property.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -72,6 +73,12 @@ public class DemandService {
 
 	@Autowired
     private PaymentService paymentService;
+	
+	@Value("${ptcalc.pttestingmode}")
+	private boolean pttestingmode;
+	
+	@Value("${ptcalc.assesmentyear.start}")
+	private String assesmentStartYear;
 
 	/**
 	 * Generates and persists the demand to billing service for the given property
@@ -431,7 +438,12 @@ public class DemandService {
 				&& demand.getTaxPeriodTo().compareTo(t.getToDate()) <= 0)
 		.findAny().orElse(null);
 		
-		if(!(taxPeriod.getFromDate()<= CalculatorConstants.systemTimeInMillisecEnv && taxPeriod.getToDate() >= CalculatorConstants.systemTimeInMillisecEnv))
+		////  calculations not applied for < 2021-22
+		if(taxPeriod.getFinancialYear().split("-")[0].compareTo(assesmentStartYear) <= 0)
+			return isCurrentDemand;
+		
+		
+		if(!(taxPeriod.getFromDate()<= (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis()) && taxPeriod.getToDate() >= (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis())))
 			isCurrentDemand = true;
 		/*
 		 * method to get the latest collected time from the receipt service

@@ -24,6 +24,7 @@ import org.egov.pt.calculator.web.models.demand.TaxPeriodResponse;
 import org.egov.pt.calculator.web.models.property.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,6 +47,9 @@ public class MasterDataService {
 
 	@Autowired
 	private Configurations config;
+	
+	@Value("${ptcalc.pttestingmode}")
+	private boolean pttestingmode;
 	
 	/**
 	 * Fetches Financial Year from Mdms Api
@@ -215,7 +219,7 @@ public class MasterDataService {
 				if (assessmentYear.split("-")[0].compareTo(objFinYear) >= 0 && maxYearFromTheList.compareTo(objFinYear) <= 0) {
 					maxYearFromTheList = objFinYear;
 					Long startTime = getStartDayInMillis(objStartDay);
-					Long currentTime = CalculatorConstants.systemTimeInMillisecEnv;
+					Long currentTime = (pttestingmode ? CalculatorConstants.systemTimeInMillisecEnv : System.currentTimeMillis());
 					if(startTime < currentTime && maxStartTime < startTime){
 						objToBeReturned = objMap;
 						maxStartTime = startTime;
