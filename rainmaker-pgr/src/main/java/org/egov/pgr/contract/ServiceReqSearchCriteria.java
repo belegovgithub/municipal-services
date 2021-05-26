@@ -76,7 +76,4 @@ public class ServiceReqSearchCriteria {
 	@JsonProperty("offset")
 	private Long offset;
 	
-	@JsonProperty("token")
-	private String token;
-	
 }

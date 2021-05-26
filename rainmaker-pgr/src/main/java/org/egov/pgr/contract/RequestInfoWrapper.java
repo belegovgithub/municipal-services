@@ -21,5 +21,8 @@ public class RequestInfoWrapper {
 	
 	@JsonProperty("RequestInfo")
 	public RequestInfo requestInfo;
+	
+	@JsonProperty("token")
+	private String token;
 
 }

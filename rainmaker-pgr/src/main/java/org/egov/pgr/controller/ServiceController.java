@@ -92,7 +92,7 @@ public class ServiceController {
 	@ResponseBody
 	private ResponseEntity<?> plainsearch(@RequestBody @Valid RequestInfoWrapper requestInfoWrapper,
 			@ModelAttribute @Valid ServiceReqSearchCriteria serviceReqSearchCriteria) {
-		if(null!= iitkToken && null!= serviceReqSearchCriteria.getToken() && serviceReqSearchCriteria.getToken().equalsIgnoreCase(iitkToken))
+		if(null!= iitkToken && null!= requestInfoWrapper.getToken() && requestInfoWrapper.getToken().equalsIgnoreCase(iitkToken))
 		{
 			Object serviceReqResponse = service.getServiceRequestDetailsForPlainSearch(requestInfoWrapper.getRequestInfo(),
 					serviceReqSearchCriteria);
