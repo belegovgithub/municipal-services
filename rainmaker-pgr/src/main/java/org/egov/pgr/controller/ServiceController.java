@@ -9,6 +9,7 @@ import org.egov.pgr.contract.ServiceResponse;
 import org.egov.pgr.service.GrievanceService;
 import org.egov.pgr.validator.PGRRequestValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,9 @@ public class ServiceController {
 
 	@Autowired
 	private PGRRequestValidator pgrRequestValidator;
+	
+	@Value("${bel.iitk.token}")
+	private String iitkToken;
 	
 	/**Dharamshala0
 	 * enpoint to create service requests
@@ -88,9 +92,16 @@ public class ServiceController {
 	@ResponseBody
 	private ResponseEntity<?> plainsearch(@RequestBody @Valid RequestInfoWrapper requestInfoWrapper,
 			@ModelAttribute @Valid ServiceReqSearchCriteria serviceReqSearchCriteria) {
-		Object serviceReqResponse = service.getServiceRequestDetailsForPlainSearch(requestInfoWrapper.getRequestInfo(),
-				serviceReqSearchCriteria);
-		return new ResponseEntity<>(serviceReqResponse, HttpStatus.OK);
+		if(null!= iitkToken && null!= serviceReqSearchCriteria.getToken() && serviceReqSearchCriteria.getToken().equalsIgnoreCase(iitkToken))
+		{
+			Object serviceReqResponse = service.getServiceRequestDetailsForPlainSearch(requestInfoWrapper.getRequestInfo(),
+					serviceReqSearchCriteria);
+			return new ResponseEntity<>(serviceReqResponse, HttpStatus.OK);
+		}
+		else
+		{
+			return new ResponseEntity<>(new ServiceResponse(), HttpStatus.UNAUTHORIZED);
+		}
 	}
 
 	 /**
