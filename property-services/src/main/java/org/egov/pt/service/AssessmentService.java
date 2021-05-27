@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -246,6 +247,7 @@ public class AssessmentService {
 	
 	public Assessment createLegacyAssessments(AssessmentRequest request) {
 		Property property = utils.getPropertyForAssessment(request);
+		request.getAssessment().setAssessmentDate(new Date().getTime() - 60000);
 		validator.validateAssessmentCreate(request, property);
 		List<AssessmentRequest> legacyAssessments = new ArrayList<>();
 		Assessment actualAssessment = request.getAssessment();
