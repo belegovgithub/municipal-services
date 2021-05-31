@@ -445,13 +445,17 @@ public class PayService {
 							if(getMonthsDiff(payment.getTransactionDate() , currentUTC)>0)
 								interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(currentUTC), applicableAmount);
 							else
-								interestCalculated = calculateInterestNew(getEODEpoch(payment.getTransactionDate()), getEODEpoch(currentUTC), applicableAmount);
+								interestCalculated = BigDecimal.ZERO;
 						} else {
 							Payment paymentPrev = filteredPaymentsAfterIntersetDate.get(i - 1);
 							applicableAmount = utils
-									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
-							interestCalculated = calculateInterestNew(getEODEpoch(paymentPrev.getTransactionDate()), getEODEpoch(payment.getTransactionDate()), applicableAmount);
+									.getTaxAmtFromPaymentForApplicablesGeneration(paymentPrev, taxPeriod);
+							if(getMonthsDiff( paymentPrev.getTransactionDate() ,payment.getTransactionDate())>0)
+								interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(payment.getTransactionDate()), applicableAmount);
+							else
+								interestCalculated=BigDecimal.ZERO;
 						}
+						System.out.println((i+1)+" : "+interestCalculated);
 						interestAmt = interestAmt.add(interestCalculated);
 					}
 				}
