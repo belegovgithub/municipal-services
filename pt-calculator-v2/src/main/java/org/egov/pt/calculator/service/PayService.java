@@ -442,7 +442,10 @@ public class PayService {
 
 							applicableAmount = utils
 									.getTaxAmtFromPaymentForApplicablesGeneration(payment, taxPeriod);
-							interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(currentUTC), applicableAmount);
+							if(getMonthsDiff(payment.getTransactionDate() , currentUTC)>0)
+								interestCalculated = calculateInterestNew(logicalInterestStart, getEODEpoch(currentUTC), applicableAmount);
+							else
+								interestCalculated = calculateInterestNew(getEODEpoch(payment.getTransactionDate()), getEODEpoch(currentUTC), applicableAmount);
 						} else {
 							Payment paymentPrev = filteredPaymentsAfterIntersetDate.get(i - 1);
 							applicableAmount = utils
@@ -458,7 +461,10 @@ public class PayService {
 	}	
 	
 	private BigDecimal calculateInterestNew(Long interestStart, Long interestend,  BigDecimal applicableAmount){
-
+		return applicableAmount.multiply(BigDecimal.valueOf(getMonthsDiff(interestStart, interestend)).divide(CalculatorConstants.HUNDRED));
+	}
+	
+	private int getMonthsDiff(Long interestStart, Long interestend) {
 		Calendar interestStartCal = Calendar.getInstance();
 		interestStartCal.setTimeInMillis(interestStart);
 		
@@ -471,10 +477,7 @@ public class PayService {
         
         int monthstotal = months + 
         		((currentDateCal.get(Calendar.YEAR) - interestStartCal.get(Calendar.YEAR)) * 12) ;
-        System.out.println(applicableAmount+" , monthstotal - "+monthstotal+" , months - "
-        		+months+ " , interestStart - " +interestStart+" , interestend - "+interestend);
-		return applicableAmount.multiply(BigDecimal.valueOf(monthstotal).divide(CalculatorConstants.HUNDRED));
-		
+        return monthstotal;
 	}
 	
 	public BigDecimal getdemandNotice(BigDecimal taxAmt, String assessmentYear, JSONArray demandNoticeMasterList) {
