@@ -17,7 +17,12 @@ import org.egov.pt.calculator.web.models.demand.*;
 import org.egov.pt.calculator.web.models.property.OwnerInfo;
 import org.egov.pt.calculator.web.models.property.Property;
 import org.egov.pt.calculator.web.models.property.PropertyDetail;
+import org.egov.pt.calculator.web.models.property.PropertyResponse;
 import org.egov.pt.calculator.web.models.property.RequestInfoWrapper;
+import org.egov.pt.calculator.web.models.property.Unit;
+import org.egov.pt.calculator.web.models.propertyV2.PropertyResponseV2;
+import org.egov.pt.calculator.web.models.propertyV2.PropertyV2;
+import org.egov.pt.calculator.web.models.propertyV2.UnitV2;
 import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +84,12 @@ public class DemandService {
 	
 	@Value("${ptcalc.assesmentyear.start}")
 	private String assesmentStartYear;
+	
+	@Value("${egov.pt.registry.host}")
+    String ptRegistryHost;
+	
+	@Value("${egov.pt.registry.search}")
+	private String ptSearchEndpoint;
 
 	/**
 	 * Generates and persists the demand to billing service for the given property
@@ -216,7 +227,6 @@ public class DemandService {
 	 * @return
 	 */
 	public DemandResponse updateDemands(GetBillCriteria getBillCriteria, RequestInfoWrapper requestInfoWrapper) {
-		
 		if(getBillCriteria.getAmountExpected() == null) getBillCriteria.setAmountExpected(BigDecimal.ZERO);
 		validator.validateGetBillCriteria(getBillCriteria);
 		RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
@@ -459,11 +469,10 @@ public class DemandService {
 		boolean isDemandNoticeUpdated = false;
 		
 		List<DemandDetail> details = demand.getDemandDetails();
-
+		BigDecimal arvvalue = getArvValue(tenantId, demand.getConsumerCode(), requestInfoWrapper);
 		BigDecimal taxAmt = utils.getTaxAmtFromDemandForApplicablesGeneration(demand);
 		BigDecimal collectedPtTax = BigDecimal.ZERO;
 		BigDecimal totalCollectedAmount = BigDecimal.ZERO;
-
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
 			totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
@@ -473,7 +482,7 @@ public class DemandService {
 
 
 		Map<String, BigDecimal> rebatePenaltyEstimates = payService.applyPenaltyRebateAndInterest(taxAmt,collectedPtTax,
-                taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap,payments,taxPeriod);
+                taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap,payments,taxPeriod,arvvalue);
 		
 		if(null == rebatePenaltyEstimates) return isCurrentDemand;
 		
@@ -711,5 +720,34 @@ public class DemandService {
 		}
 		return res;
 	}
+	
+	private BigDecimal getArvValue(String tenantId, String propertyId,RequestInfoWrapper requestInfoWrapper){
+
+		BigDecimal arvValue = BigDecimal.ZERO;
+
+        StringBuilder url = new StringBuilder(ptRegistryHost);
+        url.append(ptSearchEndpoint);
+        url.append("?tenantId=");
+        url.append(tenantId);
+        url.append("&");
+        url.append("propertyIds=");
+        url.append(propertyId);
+
+        PropertyResponseV2 propertyResponse = mapper.convertValue(repository.fetchResult(url, requestInfoWrapper), PropertyResponseV2.class);
+
+        if(CollectionUtils.isEmpty(propertyResponse.getProperties()))
+            throw new CustomException("INVALID_REQUEST", "The propertyId: "+propertyId+" is not found in the system");
+        PropertyV2 property = propertyResponse.getProperties().get(0);
+        List<UnitV2> units = property.getUnits();
+        if(units!=null) {
+        for (UnitV2 unitV2 : units) {
+        	arvValue = arvValue.add(unitV2.getArv());
+
+		}
+        }
+        return arvValue;
+
+    }
+	
 
 }

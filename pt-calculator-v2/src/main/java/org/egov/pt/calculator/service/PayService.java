@@ -57,14 +57,14 @@ public class PayService {
 	 * @return
 	 */
 	public Map<String, BigDecimal> applyPenaltyRebateAndInterest(BigDecimal taxAmt,BigDecimal collectedPtTax,
-			 String assessmentYear, Map<String, JSONArray> timeBasedExmeptionMasterMap,List<Payment> payments,TaxPeriod taxPeriod) {
+			 String assessmentYear, Map<String, JSONArray> timeBasedExmeptionMasterMap,List<Payment> payments,TaxPeriod taxPeriod,BigDecimal arvValue) {
 
 		if (BigDecimal.ZERO.compareTo(taxAmt) >= 0)
 			return null;
 
 		Map<String, BigDecimal> estimates = new HashMap<>();
 
-		BigDecimal rebate = getRebate(taxAmt, assessmentYear,
+		BigDecimal rebate = getRebate(arvValue, assessmentYear,
 				timeBasedExmeptionMasterMap.get(CalculatorConstants.REBATE_MASTER));
 
 		BigDecimal penalty = BigDecimal.ZERO;
