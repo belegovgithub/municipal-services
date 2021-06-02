@@ -136,6 +136,9 @@ public class Configurations {
 	
 	@Value("${pt.mutation.minpayable.amount}")
 	private BigDecimal ptMutationMinPayable;
+
+	@Value("${egov.bill.fetchbill.endpoint}")
+	private String fetchBillEndpoint;
 	
 
 

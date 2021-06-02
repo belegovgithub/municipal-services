@@ -699,6 +699,15 @@ public class DemandService {
 		} catch (HttpClientErrorException e) {
 			throw new ServiceCallException(e.getResponseBodyAsString());
 		}
+		String tenantId = demands.get(0).getTenantId();
+    	String consumerCode = demands.get(0).getConsumerCode();
+    	String businessService = demands.get(0).getBusinessService();
+    	GenerateBillCriteria billCriteria = GenerateBillCriteria.builder().
+    			tenantId(tenantId).
+    			consumerCode(consumerCode).
+    			businessService(businessService)
+    			.build();
+    	generateBill(requestInfo,billCriteria);
 		return res;
 	}
 
@@ -748,6 +757,25 @@ public class DemandService {
         return arvValue;
 
     }
+	
+	 private BillResponse generateBill(RequestInfo requestInfo,GenerateBillCriteria billCriteria){
+
+	        String uri = utils.getBillGenerateURI();
+	        uri = uri.replace("{1}",billCriteria.getTenantId());
+	        uri = uri.replace("{2}",billCriteria.getConsumerCode());
+	        uri = uri.replace("{3}",billCriteria.getBusinessService());
+
+	        Object result = repository.fetchResult(new StringBuilder(uri),RequestInfoWrapper.builder()
+	                                                             .requestInfo(requestInfo).build());
+	        BillResponse response;
+	         try{
+	              response = mapper.convertValue(result,BillResponse.class);
+	         }
+	         catch (IllegalArgumentException e){
+	            throw new CustomException("PARSING ERROR","Unable to parse response of generate bill");
+	         }
+	         return response;
+	    }
 	
 
 }

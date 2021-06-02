@@ -798,5 +798,22 @@ public class CalculatorUtils {
         }
         return isTaxPeriodPresent;
     }
+    
+    public String getBillGenerateURI(){
+        StringBuilder url = new StringBuilder(configurations.getBillingServiceHost());
+        url.append(configurations.getFetchBillEndpoint());
+        url.append("?");
+        url.append("tenantId=");
+        url.append("{1}");
+        url.append("&");
+        url.append("consumerCode=");
+        url.append("{2}");
+        url.append("&");
+        url.append("businessService=");
+        url.append("{3}");
+
+        return url.toString();
+    }
+
 
 }
