@@ -166,7 +166,7 @@ public class PropertyService {
 
 		util.mergeAdditionalDetails(request, propertyFromSearch);
 
-		if(config.getIsWorkflowEnabled() && ! "LEGACY_RECORD".equals(request.getProperty().getSource().toString())) {
+		if(config.getIsWorkflowEnabled()) {
 
 			State state = wfService.updateWorkflow(request, CreationReason.UPDATE);
 
