@@ -274,6 +274,7 @@ public class DemandService {
 
 		String tenantId = getBillCriteria.getTenantId();
 
+		Boolean isFullPayment = getBillCriteria.getIsFullPayment();
 		List<TaxPeriod> taxPeriods = mstrDataService.getTaxPeriodList(requestInfoWrapper.getRequestInfo(), tenantId);
 
 		for (String consumerCode : getBillCriteria.getConsumerCodes()) {
@@ -287,7 +288,7 @@ public class DemandService {
 					throw new CustomException(CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR,
 							CalculatorConstants.EG_PT_INVALID_DEMAND_ERROR_MSG);
 
-				applytimeBasedApplicables(demand, requestInfoWrapper, timeBasedExmeptionMasterMap,taxPeriods);
+				applytimeBasedApplicables(demand, requestInfoWrapper, timeBasedExmeptionMasterMap,taxPeriods,isFullPayment);
 
 				roundOffDecimalForDemand(demand, requestInfoWrapper);
 
@@ -434,10 +435,11 @@ public class DemandService {
 	 * If applied already then the demand details will be updated
 	 * 
 	 * @param demand
+	 * @param isFullPayment 
 	 * @return
 	 */
 	private boolean applytimeBasedApplicables(Demand demand,RequestInfoWrapper requestInfoWrapper,
-			Map<String, JSONArray> timeBasedExmeptionMasterMap,List<TaxPeriod> taxPeriods) {
+			Map<String, JSONArray> timeBasedExmeptionMasterMap,List<TaxPeriod> taxPeriods, Boolean isFullPayment) {
 
 		boolean isCurrentDemand = false;
 		String tenantId = demand.getTenantId();
@@ -492,7 +494,7 @@ public class DemandService {
 		BigDecimal demandNotice = rebatePenaltyEstimates.get(CalculatorConstants.PT_DEMANDNOTICE_CHARGE);
 		log.info(demand.getId() +" -- "+ demand.getConsumerCode() +" : rebate "+rebate+" , penalty "+penalty+" , interest "+interest+" , demandNotice "+demandNotice);
 		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail,latestDemandNoticeDetail;
-
+System.out.println("rebate::::"+rebate);
 
 		BigDecimal oldRebate = BigDecimal.ZERO;
 		for(DemandDetail demandDetail : details) {
@@ -500,7 +502,19 @@ public class DemandService {
 				oldRebate = oldRebate.add(demandDetail.getTaxAmount());
 			}
 		}
+		
+		  if(isFullPayment==null)  
+			  rebate = BigDecimal.ZERO;  
+		  else if(!isFullPayment && oldRebate.compareTo(BigDecimal.ZERO)!=0)
+			  rebate = oldRebate.negate();
+		 
+		
 		if(rebate.compareTo(oldRebate)!=0){
+			if(isFullPayment!=null && !isFullPayment)
+				details.add(DemandDetail.builder().taxAmount(rebate)
+						.taxHeadMasterCode(PT_TIME_REBATE).demandId(demandId).tenantId(tenantId)
+						.build());
+			else
 				details.add(DemandDetail.builder().taxAmount(rebate.subtract(oldRebate))
 						.taxHeadMasterCode(PT_TIME_REBATE).demandId(demandId).tenantId(tenantId)
 						.build());

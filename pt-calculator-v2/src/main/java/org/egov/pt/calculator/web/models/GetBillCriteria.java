@@ -38,4 +38,7 @@ public class GetBillCriteria {
 
 	private Long toDate;
 	
+	@Default
+	private Boolean isFullPayment = null;
+	
 }
