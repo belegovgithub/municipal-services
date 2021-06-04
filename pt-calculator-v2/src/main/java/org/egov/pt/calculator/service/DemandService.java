@@ -507,7 +507,9 @@ System.out.println("rebate::::"+rebate);
 			  rebate = BigDecimal.ZERO;  
 		  else if(!isFullPayment && oldRebate.compareTo(BigDecimal.ZERO)!=0)
 			  rebate = oldRebate.negate();
-		 
+		  else if(!isFullPayment)
+			  rebate=BigDecimal.ZERO;
+		  
 		
 		if(rebate.compareTo(oldRebate)!=0){
 			if(isFullPayment!=null && !isFullPayment)
