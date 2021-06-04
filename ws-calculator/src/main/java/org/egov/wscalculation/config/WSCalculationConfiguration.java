@@ -192,6 +192,10 @@ public class WSCalculationConfiguration {
     	
     	@Value("${persister.update.ws.failedBill.topic}")
     	private String updatewsFailedBillTopic;
+    	
+    	@Value("${persister.demand.based.newmodify.letter.topic.single}")
+    	private String newModifiedConnBillTopic;
+    	
     
     	@Value("${notification.url}")
     	private String notificationUrl;

@@ -284,6 +284,12 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
 		return calculations;
 	}
+	
+	public List<Calculation> demandGeneration(CalculationReq request, Map<String, Object> masterMap) {
+		List<Calculation> calculations = getCalculations(request, masterMap);
+		//demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
+		return calculations;
+	}
 
 	/**
 	 * 
@@ -469,6 +475,24 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			return;
 		tenantIds.forEach(tenantId -> {
 			demandService.generateDemandForTenantId(tenantId, requestInfo,null,true);
+		});
+	}
+	
+
+	/**
+	 * Generate Demand Based on Time (Monthly, Quarterly, Yearly)
+	 */
+	public void generateDemandForNewModifiedConn(RequestInfo requestInfo) {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime date = LocalDateTime.now();
+		log.info("Time schedule start for water demand generation on : " + date.format(dateTimeFormatter));
+		List<String> tenantIds = wSCalculationDao.getTenantId();
+		if (tenantIds.isEmpty())
+			return;
+		tenantIds.clear();
+		tenantIds.add("pb.kamptee");
+		tenantIds.forEach(tenantId -> {
+			demandService.generateDemand ( requestInfo,  tenantId );
 		});
 	}
 	

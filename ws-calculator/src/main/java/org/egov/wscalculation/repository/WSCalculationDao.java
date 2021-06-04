@@ -1,6 +1,7 @@
 package org.egov.wscalculation.repository;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.egov.wscalculation.web.models.BillFailureNotificationObj;
@@ -29,5 +30,8 @@ public interface WSCalculationDao {
 	List<String> getTenantId();
 	
 	int isBillingPeriodExists(String connectionNo, String billingPeriod);
+ 
+
+	List<String> getConnectionsNoList(String tenantId, String connectionType, Calendar activationDate);
 
 }

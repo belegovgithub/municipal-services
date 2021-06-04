@@ -19,7 +19,9 @@ import org.egov.wscalculation.service.MasterDataService;
 import org.egov.wscalculation.service.WSCalculationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -167,6 +169,26 @@ public class DemandGenerationConsumer {
 		
 		
 	}
+	
+	@KafkaListener(topics = { "${persister.demand.based.newmodify.letter.topic.single}" })
+	public void listen(final HashMap<String, Object> request, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {	
+		try {
+			log.info("Generating Demand for Criteria : " + mapper.writeValueAsString(request));
+			CalculationReq calcReq = mapper.convertValue(request, CalculationReq.class);	
+			Map<String, Object> masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
+			// processing single
+			generateDemandForNewModifyConnection(calcReq, masterMap,config.getDeadLetterTopicSingle());
+		} catch (final Exception e) {
+			StringBuilder builder = new StringBuilder();
+			try {
+				builder.append("Error while generating Demand in DEAD letter for Criteria: ")
+						.append(mapper.writeValueAsString(request));
+			} catch (JsonProcessingException e1) {
+				log.error("KAFKA_PROCESS_ERROR", e1);
+			}
+			log.error(builder.toString(), e);
+		}
+	}
 
 	/**
 	 * Generate demand in bulk on given criteria
@@ -185,6 +207,32 @@ public class DemandGenerationConsumer {
 				wsCalulationWorkflowValidator.applicationValidation(request.getRequestInfo(),criteria.getTenantId(),criteria.getConnectionNo(),genratedemand);
 			}
 			wSCalculationServiceImpl.bulkDemandGeneration(request, masterMap);
+			String connectionNoStrings = request.getCalculationCriteria().stream()
+					.map(criteria -> criteria.getConnectionNo()).collect(Collectors.toSet()).toString();
+			StringBuilder str = new StringBuilder("Demand generated Successfully. For records : ")
+					.append(connectionNoStrings);
+			log.info(str.toString());
+		} catch(CustomException cex) {
+			request.setReason(cex.getMessage());
+			log.error("Demand generation error: ", cex);
+			producer.push(errorTopic, request);
+		}
+		
+		catch (Exception ex) {		
+			request.setReason(ex.getMessage());			
+			log.error("Demand generation error: ", ex);
+			producer.push(errorTopic, request);
+		}
+
+	}
+	
+	private void generateDemandForNewModifyConnection(CalculationReq request, Map<String, Object> masterMap, String errorTopic) {
+		try {
+			for(CalculationCriteria criteria : request.getCalculationCriteria()){
+				Boolean genratedemand = true;
+				wsCalulationWorkflowValidator.applicationValidation(request.getRequestInfo(),criteria.getTenantId(),criteria.getConnectionNo(),genratedemand);
+			}
+			wSCalculationServiceImpl.demandGeneration(request, masterMap);
 			String connectionNoStrings = request.getCalculationCriteria().stream()
 					.map(criteria -> criteria.getConnectionNo()).collect(Collectors.toSet()).toString();
 			StringBuilder str = new StringBuilder("Demand generated Successfully. For records : ")

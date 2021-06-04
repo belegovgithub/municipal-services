@@ -1,6 +1,7 @@
 package org.egov.wscalculation.repository;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -133,6 +134,14 @@ public class WSCalculationDaoImpl implements WSCalculationDao {
 	public List<String> getConnectionsNoList(String tenantId, String connectionType) {
 		List<Object> preparedStatement = new ArrayList<>();
 		String query = queryBuilder.getConnectionNumberList(tenantId, connectionType, preparedStatement);
+		log.info("water " + connectionType + " connection list : " + query);
+		return jdbcTemplate.query(query, preparedStatement.toArray(), demandSchedulerRowMapper);
+	}
+	 
+	@Override
+	public List<String> getConnectionsNoList(String tenantId, String connectionType,Calendar activationDate) {
+		List<Object> preparedStatement = new ArrayList<>();
+		String query = queryBuilder.getConnectionNumberList(tenantId, connectionType, preparedStatement,activationDate);
 		log.info("water " + connectionType + " connection list : " + query);
 		return jdbcTemplate.query(query, preparedStatement.toArray(), demandSchedulerRowMapper);
 	}

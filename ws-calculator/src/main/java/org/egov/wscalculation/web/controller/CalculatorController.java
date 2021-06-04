@@ -110,6 +110,14 @@ public class CalculatorController {
  
 	}
 	
+	@PostMapping("/_jobscheduler_new_updated_conn")
+	public void jobschedulerNewUpdated(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper ) {
+		
+ 		log.info("Water billing job automated schedular started ");
+		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo());
+ 
+	}
+	
 	@PostMapping("/_jobscheduler_manual")
 	public void _jobscheduler_manual(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
 			@RequestParam String   tenantId,

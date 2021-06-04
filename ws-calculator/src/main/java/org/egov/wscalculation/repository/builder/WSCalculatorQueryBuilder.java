@@ -1,9 +1,11 @@
 package org.egov.wscalculation.repository.builder;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
 import org.egov.wscalculation.config.WSCalculationConfiguration;
+import org.egov.wscalculation.service.EstimationService;
 import org.egov.wscalculation.web.models.MeterReadingSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,9 @@ public class WSCalculatorQueryBuilder {
 	private static final String connectionNoListQuery = "SELECT distinct(conn.connectionno) FROM eg_ws_connection conn INNER JOIN eg_ws_service ws ON conn.id = ws.connection_id";
 
 	private static final String distinctTenantIdsCriteria = "SELECT distinct(tenantid) FROM eg_ws_connection ws where id in (select connection_id from eg_ws_service where connectiontype ='Non Metered' )";
-			 
+
+	private static final String connectionNoBasedOnActivationListQuery = "SELECT distinct(conn.connectionno) FROM eg_ws_connection conn INNER JOIN eg_ws_service ws ON conn.id = ws.connection_id";
+
 	
 	private static final String failedDemandQuery = "SELECT * FROM eg_ws_failed_bill WHERE status = 'BILL_FAILED'";
 
@@ -186,6 +190,24 @@ public class WSCalculatorQueryBuilder {
 		
 	}
 	
+	@Autowired
+	EstimationService estimationService;
+	public String getConnectionNumberList(String tenantId, String connectionType, List<Object> preparedStatement, Calendar activationDate) {
+		StringBuilder query = new StringBuilder( getConnectionNumberList (tenantId, connectionType,   preparedStatement));
+		if(activationDate!=null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" ws.connectionexecutiondate >= ? ");
+			estimationService.setTimeToBeginningOfDay(activationDate);
+			preparedStatement.add(activationDate.getTimeInMillis());
+			addClauseIfRequired(preparedStatement, query);
+			estimationService.setTimeToEndofDay(activationDate);
+			query.append(" ws.connectionexecutiondate <= ? ");
+			preparedStatement.add(activationDate.getTimeInMillis());
+		}
+		
+		return query.toString();
+		
+	}
 	public String isBillingPeriodExists(String connectionNo, String billingPeriod, List<Object> preparedStatement) {
 		StringBuilder query = new StringBuilder(noOfConnectionSearchQuery);
 		query.append(" connectionNo = ? ");
