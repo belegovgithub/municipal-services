@@ -122,11 +122,12 @@ public class AssessmentRepository {
 			for(Demand demand : response.getDemands()) {
 				for(DemandDetail demandDetail : demand.getDemandDetails()) {
 					if(null!=demandDetail.getCollectionAmount() &&
-							demandDetail.getCollectionAmount().equals(BigDecimal.ZERO)) {
+							demandDetail.getCollectionAmount().compareTo(BigDecimal.ZERO) >0) {
 						demandDetails.add(demandDetail);
 					}
 				}
 			}
+			log.info("demandDetails.size() : "+demandDetails.size());
 			if(demandDetails.size()>0) {
 				jdbcTemplate.batchUpdate(DEMANDDTL_LEGACY_INSERT_QUERY, new BatchPreparedStatementSetter() {
 					@Override

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.pt.config.PropertyConfiguration;
@@ -275,11 +276,11 @@ public class AssessmentService {
 			}
 		}
 
-		DemandResponse response = mapper.convertValue(calculationService.saveDemands(demands, request.getRequestInfo()),
-				DemandResponse.class);
-		
 		publishLegacyAssessmentRequests(legacyAssessments, props.getCreateAssessmentTopic());
-		log.info("DemandResponseObj :"+response);
+		Optional<Object> optional = calculationService.saveDemands(demands, request.getRequestInfo());
+		log.info("DemandResponseObj :"+optional);
+		
+		DemandResponse response = mapper.convertValue(optional.get(),DemandResponse.class);
 		repository.saveDemandDtlForLegacy(response);
 		return actualAssessment;
 	}
