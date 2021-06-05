@@ -30,6 +30,7 @@ import org.egov.pt.validator.AssessmentValidator;
 import org.egov.pt.validator.DemandValidator;
 import org.egov.pt.web.contracts.AssessmentRequest;
 import org.egov.pt.web.contracts.DemandRequest;
+import org.egov.pt.web.contracts.DemandResponse;
 import org.egov.tracer.model.CustomException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -274,9 +275,12 @@ public class AssessmentService {
 			}
 		}
 
-		calculationService.saveDemands(demands, request.getRequestInfo());
+		DemandResponse response = mapper.convertValue(calculationService.saveDemands(demands, request.getRequestInfo()),
+				DemandResponse.class);
+		
 		publishLegacyAssessmentRequests(legacyAssessments, props.getCreateAssessmentTopic());
-
+		log.info("DemandResponseObj :"+response);
+		repository.saveDemandDtlForLegacy(response);
 		return actualAssessment;
 	}
 
