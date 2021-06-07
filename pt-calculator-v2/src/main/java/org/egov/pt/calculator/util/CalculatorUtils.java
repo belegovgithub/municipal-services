@@ -340,11 +340,15 @@ public class CalculatorUtils {
      */
     public BigDecimal getTaxAmtFromDemandForApplicablesGeneration(Demand demand) {
         BigDecimal taxAmt = BigDecimal.ZERO;
+        BigDecimal collectionAmt = BigDecimal.ZERO;
         for (DemandDetail detail : demand.getDemandDetails()) {
             if (CalculatorConstants.TAXES_TO_BE_CONSIDERD.contains(detail.getTaxHeadMasterCode()))
-                taxAmt = taxAmt.add(detail.getTaxAmount());
+            {    
+            	taxAmt = taxAmt.add(detail.getTaxAmount());
+            	collectionAmt = collectionAmt.add(repository.getDemandDtlForLegacy(detail.getId()));
+            }
         }
-        return taxAmt;
+        return taxAmt.subtract(collectionAmt);
     }
 
     /**

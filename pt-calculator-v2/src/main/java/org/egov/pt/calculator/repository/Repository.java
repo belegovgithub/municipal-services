@@ -1,6 +1,7 @@
 package org.egov.pt.calculator.repository;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.egov.tracer.model.CustomException;
 import org.egov.tracer.model.ServiceCallException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -24,6 +26,9 @@ public class Repository {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@Autowired
+    private JdbcTemplate jdbcTemplate;
 	
 	@Autowired
 	@Qualifier("secondaryMapper")
@@ -57,5 +62,16 @@ public class Repository {
 			log.error("Exception while fetching from searcher: ", e);
 		}
 		return response;
+	}
+
+	public BigDecimal getDemandDtlForLegacy(String id) {
+		try {
+			String sql = "SELECT collectionamount FROM egbs_demanddetail_v1_legacy where demanddtlid = ?;";
+			return (BigDecimal) jdbcTemplate.queryForObject(sql, new Object[] {id}, BigDecimal.class);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return BigDecimal.ZERO;
 	}
 }
