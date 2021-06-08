@@ -162,7 +162,10 @@ public class ImportControllerNew {
 							try {
 								switch (cell.getColumnIndex() + 1) {
 								case 1:
-									key = getStringVal(cell);
+									if(tenantId.equalsIgnoreCase("pb.jalandhar"))
+										key = String.valueOf((int) cell.getNumericCellValue());								
+									else
+										key = getStringVal(cell);
 									break;
 								case 2:
 									String taxheadcode = getStringVal(cell);
