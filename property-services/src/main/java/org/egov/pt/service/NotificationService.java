@@ -103,7 +103,7 @@ public class NotificationService {
 
 		//String state = getStateFromWf(wf, configs.getIsWorkflowEnabled());
 		String completeMsgs = notifUtil.getLocalizationMessages(property.getTenantId(), propertyRequest.getRequestInfo());
-		String localisedState = getLocalisedState(wf.getState().getState(), completeMsgs);
+		String localisedState = state != WF_NO_WORKFLOW ? getLocalisedState(wf.getState().getState(), completeMsgs) : "";
 		switch (state) {
 
 		case WF_NO_WORKFLOW:
