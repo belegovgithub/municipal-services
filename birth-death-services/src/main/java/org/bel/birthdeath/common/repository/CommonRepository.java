@@ -1023,15 +1023,17 @@ public class CommonRepository {
 		}
 	}
 
-	public EmpDeclarationDtls checkDeclaration(String uuid) {
+	public EmpDeclarationDtls checkDeclaration(String tenantId) {
 		EmpDeclarationDtls declarationDtls = new EmpDeclarationDtls();
 		Calendar calStart = Calendar.getInstance();
 		Calendar calEnd = Calendar.getInstance();
+		Calendar calCompare = Calendar.getInstance();
+		calCompare.add(Calendar.MONTH, -1);
 		try {
-			String sql = "select CONCAT(EXTRACT(month FROM endddate),'-',EXTRACT(year FROM endddate)) from eg_emp_declaration_dtls where declaredby = ? ORDER by endddate desc limit 1;";
-			String monthyear = (String) jdbcTemplate.queryForObject(sql, new Object[] {uuid}, String.class);
+			String sql = "select CONCAT(EXTRACT(month FROM endddate),'-',EXTRACT(year FROM endddate)) from eg_emp_declaration_dtls where us.tenantid = ? ORDER by endddate desc limit 1;";
+			String monthyear = (String) jdbcTemplate.queryForObject(sql, new Object[] {tenantId}, String.class);
 			
-			if (monthyear.equals(calStart.get(Calendar.MONTH) + "-" + calStart.get(Calendar.YEAR))) {
+			if (monthyear.equals((calCompare.get(Calendar.MONTH)+1) + "-" + calCompare.get(Calendar.YEAR))) {
 				declarationDtls.setCompleted('Y');
 			}
 			else {

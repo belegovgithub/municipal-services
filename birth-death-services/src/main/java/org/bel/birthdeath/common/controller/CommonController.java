@@ -11,6 +11,7 @@ import org.bel.birthdeath.common.contract.DeathResponse;
 import org.bel.birthdeath.common.contract.HospitalResponse;
 import org.bel.birthdeath.common.contract.RequestInfoWrapper;
 import org.bel.birthdeath.common.model.EgHospitalDtl;
+import org.bel.birthdeath.common.model.EmpDeclUtilResponse;
 import org.bel.birthdeath.common.model.EmpDeclarationDtls;
 import org.bel.birthdeath.common.services.CommonService;
 import org.bel.birthdeath.death.model.ImportDeathWrapper;
@@ -112,7 +113,7 @@ public class CommonController {
 	public ResponseEntity<EmpDeclarationDtls> checkDeclaration(@RequestBody RequestInfoWrapper requestInfoWrapper) {
 		EmpDeclarationDtls declarationDtls;
 		if(null!=requestInfoWrapper.getRequestInfo().getUserInfo().getUuid())
-			declarationDtls = commonService.checkDeclaration(requestInfoWrapper.getRequestInfo().getUserInfo().getUuid());
+			declarationDtls = commonService.checkDeclaration(requestInfoWrapper.getRequestInfo().getUserInfo().getTenantId());
 		else
 			throw new CustomException("INVALID_INPUT","UUID can not be empty.");
 		return new ResponseEntity<>(declarationDtls, HttpStatus.OK);
@@ -126,5 +127,15 @@ public class CommonController {
 		else
 			throw new CustomException("INVALID_INPUT","UUID can not be empty.");
 		return new ResponseEntity<>(commonService.updateDeclaration(declarationDtls), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = { "/getYears" }, method = RequestMethod.POST)
+	public ResponseEntity<EmpDeclUtilResponse> getYears() {
+		return new ResponseEntity<>(commonService.getYears(), HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = { "/getMonths" }, method = RequestMethod.POST)
+	public ResponseEntity<EmpDeclUtilResponse> getMonths() {
+		return new ResponseEntity<>(commonService.getMonths(), HttpStatus.OK);
 	}
 }
