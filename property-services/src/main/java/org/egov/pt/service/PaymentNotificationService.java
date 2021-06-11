@@ -410,7 +410,6 @@ public class PaymentNotificationService {
         link = link.replace("$receiptNumber", valMap.get("receiptNumber"));
         link = link.replace("$businessService",PT_BUSINESSSERVICE);
         link = link.replace("$mobile", mobileNumber);
-		System.out.println("link:::"+link);
 
         link = util.getShortenedUrl(link);
         return  link;
@@ -483,7 +482,6 @@ public class PaymentNotificationService {
 			templateId = customizedMessage.split(PTConstants.MESSAGE_SEPERATOR,2)[0];
 			customizedMessage = customizedMessage.split(PTConstants.MESSAGE_SEPERATOR,2)[1];
 		}
-		System.out.println("customizedMessage:::"+customizedMessage);
         List<SMSRequest> smsRequests = new ArrayList<>();
         for(String mobileNumber : mobileNumbers){
             if(mobileNumber!=null)
@@ -585,11 +583,11 @@ public class PaymentNotificationService {
 
     private String getPaymentLink(Map<String,String> valMap){
         StringBuilder builder = new StringBuilder(propertyConfiguration.getUiAppHost());
-        builder.append(propertyConfiguration.getPayLink());
+        builder.append(propertyConfiguration.getPayLinkSMS());
         String url = builder.toString();
-        url = url.replace("$consumerCode", valMap.get("propertyId"));
+        url = url.replace("$consumercode", valMap.get("propertyId"));
         url = url.replace("$tenantId", valMap.get("tenantId"));
-        url = url.replace("$businessService",PT_BUSINESSSERVICE);
+        url = url.replace("$businessservice",PT_BUSINESSSERVICE);
 
         url = util.getShortenedUrl(url);
         return url;
