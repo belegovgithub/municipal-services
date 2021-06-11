@@ -266,10 +266,11 @@ public class NotificationUtil {
     	
         HashMap<String,String> body = new HashMap<>();
         body.put("url",url);
+        System.out.println("shortened url:::"+url);
         StringBuilder builder = new StringBuilder(config.getUrlShortnerHost());
         builder.append(config.getUrlShortnerEndpoint());
         String res = restTemplate.postForObject(builder.toString(), body, String.class);
-
+System.out.println("res::"+res);
         if(StringUtils.isEmpty(res)){
             log.error("URL_SHORTENING_ERROR","Unable to shorten url: "+url); ;
             return url;
