@@ -1030,7 +1030,7 @@ public class CommonRepository {
 		Calendar calCompare = Calendar.getInstance();
 		calCompare.add(Calendar.MONTH, -1);
 		try {
-			String sql = "select CONCAT(EXTRACT(month FROM endddate),'-',EXTRACT(year FROM endddate)) from eg_emp_declaration_dtls emp"
+			String sql = "select CONCAT(EXTRACT(month FROM endddate),'-',EXTRACT(year FROM endddate)) from eg_emp_declaration_dtls emp "
 					+ "left join eg_user us on us.uuid=emp.declaredby where us.tenantid = ? ORDER by endddate desc limit 1;";
 			String monthyear = (String) jdbcTemplate.queryForObject(sql, new Object[] {tenantId}, String.class);
 			
