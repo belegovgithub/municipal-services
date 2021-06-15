@@ -175,6 +175,9 @@ public class ImportControllerNew {
 								case 3:
 									columns.setTaxAmount(new BigDecimal(getStringVal(cell)));
 									break;
+								case 4:
+									columns.setCollectedAmount(new BigDecimal(getStringVal(cell)));
+									break;
 								}
 							} catch (Exception e) {
 								wrapper.updateMaps(ImportReportWrapper.issueFoundReport,(row.getRowNum() + 1) +  "- " + (cell.getColumnIndex()));
@@ -234,7 +237,7 @@ public class ImportControllerNew {
 								DemandDetail detail = new DemandDetail();
 								detail.setTaxHeadMasterCode(column.getTaxHeadMasterCode());
 								detail.setTaxAmount(column.getTaxAmount());
-								detail.setCollectionAmount(new BigDecimal(0));
+								detail.setCollectionAmount(column.getCollectedAmount());
 								demandDetails.add(detail);
 							}
 							demand.setDemandDetails(demandDetails);
@@ -287,6 +290,7 @@ public class ImportControllerNew {
 				                                .collect(Collectors.toList());
 										if(demDetail.size()!=0) {
 											demandDetail.setTaxAmount(demDetail.get(0).getTaxAmount());
+											demandDetail.setCollectionAmount(demDetail.get(0).getCollectionAmount());
 										}
 										
 									}
@@ -300,7 +304,7 @@ public class ImportControllerNew {
 													DemandDetail detail = new DemandDetail();
 													detail.setTaxHeadMasterCode(demandDetail.getTaxHeadMasterCode());
 													detail.setTaxAmount(demandDetail.getTaxAmount());
-													detail.setCollectionAmount(new BigDecimal(0));
+													detail.setCollectionAmount(demandDetail.getCollectionAmount());
 													notExistsDetails.add(detail);
 												
 										}

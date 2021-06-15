@@ -29,5 +29,8 @@ public class ExcelColumns   {
         private String taxHeadMasterCode;
 
         private BigDecimal taxAmount;
+        
+        @Default
+        private BigDecimal collectedAmount = BigDecimal.ZERO;
 
 }
