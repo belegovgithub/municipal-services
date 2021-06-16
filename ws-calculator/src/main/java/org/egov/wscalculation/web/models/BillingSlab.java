@@ -5,7 +5,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.ToString;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ToString
 public class BillingSlab {
 	private String id;
 	private String buildingType = null;

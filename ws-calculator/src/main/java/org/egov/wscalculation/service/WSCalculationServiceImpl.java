@@ -154,8 +154,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			Map<String, Object> masterMap = mDataService.loadMasterData(calculationReq.getRequestInfo(), tenantId);
 			for (CalculationCriteria criteria : request.getCalculationCriteria()) {
 
-				BillingSlab billingSlab = estimationService.getEstimationMapForApplicationNo(criteria,
-						request.getRequestInfo(), masterMap);
+				BillingSlab billingSlab = estimationService.getEstimationMapForApplicationNo(criteria,request.getRequestInfo(), masterMap);
 				double billAmountForBillingPeriod = 0;
 				double fianlBillAmount = 0;
 				double monthsToCharge = 0;
@@ -167,7 +166,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 					if (criteria.getWaterConnection().getMotorInfo() != null)
 						motorChargePayable = criteria.getWaterConnection().getMotorInfo().equalsIgnoreCase(
 								WSCalculationConstant.WC_MOTOR_CONN) ? billingSlab.getMotorCharge() : 0;
-					billEstimation.setMotorChargePayable(motorChargePayable);
+								
+					System.out.println("Billing slab =="+billingSlab.toString());			
+					//billEstimation.setMotorChargePayable(motorChargePayable);
 					billEstimation.setBillingSlab(billingSlab);
 
 					Map<String, Object> billingPeriod = new HashMap<>();
@@ -209,8 +210,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 					case (WSCalculationConstant.Monthly_Billing_Period):
 
 						// billAmountForBillingPeriod = billingSlab.getMinimumCharge();
-						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable
-								+ billingSlab.getMaintenanceCharge();
+						motorChargePayable = motorChargePayable/12.0;
+					    billEstimation.setMotorChargePayable(motorChargePayable);
+						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable+ billingSlab.getMaintenanceCharge();
 
 						break;
 					case (WSCalculationConstant.Quaterly_Billing_Period):
@@ -219,6 +221,8 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 						billingCycleEndDate = (Long) startAndEndDate.get("endingDay");
 						monthsToCharge = getBillMonthsToCharge(startAndEndDate);
 						billAmountForBillingPeriod = (billAmountForBillingPeriod / 3.0) * monthsToCharge;
+						motorChargePayable = (motorChargePayable/12.0) *monthsToCharge;
+					    billEstimation.setMotorChargePayable(motorChargePayable);
 						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable
 								+ billingSlab.getMaintenanceCharge();
 						billEstimation.setMonthsToCharge(monthsToCharge);
@@ -230,6 +234,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 						billingCycleEndDate = (Long) startAndEndDate.get("endingDay");
 						monthsToCharge = getBillMonthsToCharge(startAndEndDate);
 						billAmountForBillingPeriod = (billAmountForBillingPeriod / 12.0) * monthsToCharge;
+						motorChargePayable = (motorChargePayable/12.0) *monthsToCharge;
+					    billEstimation.setMotorChargePayable(motorChargePayable);
+					    
 						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable
 								+ billingSlab.getMaintenanceCharge();
 						billEstimation.setMonthsToCharge(monthsToCharge);
@@ -241,6 +248,10 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 						billingCycleEndDate = (Long) startAndEndDate.get("endingDay");
 						monthsToCharge = getBillMonthsToCharge(startAndEndDate);
 						billAmountForBillingPeriod = (billAmountForBillingPeriod / 6.0) * monthsToCharge;
+						
+						motorChargePayable = (motorChargePayable/12.0) *monthsToCharge;
+					    billEstimation.setMotorChargePayable(motorChargePayable);
+					    
 						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable
 								+ billingSlab.getMaintenanceCharge();
 						billEstimation.setMonthsToCharge(monthsToCharge);
@@ -253,6 +264,10 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 						billingCycleEndDate = (Long) startAndEndDate.get("endingDay");
 						monthsToCharge = getBillMonthsToCharge(startAndEndDate);
 						billAmountForBillingPeriod = (billAmountForBillingPeriod / 12.0) * monthsToCharge;
+						
+						motorChargePayable = (motorChargePayable/12.0) *monthsToCharge;
+					    billEstimation.setMotorChargePayable(motorChargePayable);
+					    
 						fianlBillAmount = billAmountForBillingPeriod + motorChargePayable
 								+ billingSlab.getMaintenanceCharge();
 						billEstimation.setMonthsToCharge(monthsToCharge);
@@ -275,8 +290,11 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 
 			Map<String, String> errorMap = new HashMap<>();
 			errorMap.put("FEE_SLAB_NOT_FOUND", "Fee slab master data not found!!");
-
+			if (!errorMap.isEmpty())
+				throw new CustomException(errorMap);
 		}
+		
+		
 
 		return billEstimation;
 	}

@@ -161,25 +161,20 @@ public class EstimationService {
 			throw new CustomException("INVALID_BILLING_SLAB",
 					"More than one billing slab found");
 		billingSlabIds.add(billingSlabs.get(0).getId());
-		log.debug(" Billing Slab Id For Water Charge Calculation **********--->  " + billingSlabIds.toString());
 		
-	
 		
-		int index = Integer.parseInt(billingSlabIds.get(0));
-		
-	    Object obj = wsBillingSlab.get(index-1);	   	    
-	    BillingSlab bl = mapper.convertValue(obj, BillingSlab.class);	    
+  
+//		int index = Integer.parseInt(billingSlabIds.get(0));
+//	    Object obj = wsBillingSlab.get(index-1);	   	    
+//	    BillingSlab bl = mapper.convertValue(obj, BillingSlab.class);  
 	  
-	    if(bl.getSlabs().size() >1) {
-	    	
-	    	JSONArray calculationAttr = (JSONArray) masterData.get(WSCalculationConstant.CALCULATION_ATTRIBUTE_CONST);
-	    	
+	 BillingSlab bl = mapper.convertValue(billingSlabs.get(0), BillingSlab.class);  
+	    if(bl.getSlabs().size() >1) {	    	
+	    	JSONArray calculationAttr = (JSONArray) masterData.get(WSCalculationConstant.CALCULATION_ATTRIBUTE_CONST);	    	
 	    	JSONObject requiredBillingSlab = null;    	
-	    	for(int i=0;i<calculationAttr.size();i++) {
-	    		
+	    	for(int i=0;i<calculationAttr.size();i++) {	    		
 	    		JSONObject eachJsonObj = mapper.convertValue(calculationAttr.get(i), JSONObject.class);
-	    		if((eachJsonObj.get("active") .equals(true)) && eachJsonObj.get("name").equals(criteria.getWaterConnection().getConnectionType())) {
-	    			
+	    		if((eachJsonObj.get("active") .equals(true)) && eachJsonObj.get("name").equals(criteria.getWaterConnection().getConnectionType())) {	    			
 	    			requiredBillingSlab = eachJsonObj;
 	    			break;
 	    		}
@@ -191,6 +186,20 @@ public class EstimationService {
 			String attribute = (String) requiredBillingSlab.get("attribute");
 			List<Slab> slabs = bl.getSlabs();			
 			switch(attribute) {
+			
+			case WSCalculationConstant.noOfTapsConst :
+				int noOfTapsNeeded = criteria.getWaterConnection().getNoOfTaps();
+				Optional<Slab> reqTapsSlab = slabs.stream().filter(each -> each.getFrom() < noOfTapsNeeded && noOfTapsNeeded <= each.getTo()).findFirst();
+				if(reqTapsSlab.isPresent()) {					
+					List<Slab> matchingSlab = new ArrayList<Slab>();
+					matchingSlab.add(reqTapsSlab.get());
+					bl.setSlabs(matchingSlab);					
+				}
+				else {					
+					return null;
+					
+				}	
+				break;
 			case WSCalculationConstant.propAreaConst :				
 				Property property =null;
 				try {
@@ -213,7 +222,7 @@ public class EstimationService {
 			case WSCalculationConstant.pipeSizeConst :				
 				double pipeNeeded  = criteria.getWaterConnection().getPipeSize();
 				Optional<Slab> req = slabs.stream().filter(each -> each.getFrom() < pipeNeeded && pipeNeeded < each.getTo()).findFirst();
-				if(req.isPresent()) {		
+				if(req.isPresent()) {	
 					
 					List<Slab> matchingSlab = new ArrayList<Slab>();
 					matchingSlab.add(req.get());
@@ -243,14 +252,13 @@ public class EstimationService {
 					throw new CustomException("PARSING_ERROR", "Billing Slab can not be parsed!");
 				}
 				break;
-				
-				
-				
+			
 
 			}
 			
 	    }
 
+	  
 		return bl;
 	}
 	
@@ -325,8 +333,7 @@ public class EstimationService {
 			throw new CustomException("INVALID_BILLING_SLAB",
 					"More than one billing slab found");
 		billingSlabIds.add(billingSlabs.get(0).getId());
-		log.debug(" Billing Slab Id For Water Charge Calculation --->  " + billingSlabIds.toString());
-
+		
 		// WaterCharge Calculation
 		 Double  totalUOM = getUnitOfMeasurement(waterConnection, calculationAttribute, criteria,property);
 		
@@ -535,9 +542,8 @@ public class EstimationService {
 				log.info("INVALID USECASE "+ filterName);
 				break;
 			}
-		}
-		
-		
+		}		
+
 		return billingSlabs;
 	}
 	
