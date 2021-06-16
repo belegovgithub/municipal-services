@@ -135,7 +135,7 @@ public class PropertyService {
 		if (CreationReason.CREATE.equals(request.getProperty().getCreationReason())) {
 			userService.createUser(request);
 		} else {
-			if ("LEGACY_RECORD".equals(request.getProperty().getSource().toString())) {
+			/*if ("LEGACY_RECORD".equals(request.getProperty().getSource().toString())) {
 				userService.createUser(request);
 
 				for (OwnerInfo info : propertyFromSearch.getOwners()) {
@@ -151,7 +151,7 @@ public class PropertyService {
 				collectedOwners.addAll(propertyFromSearch.getOwners());
 				collectedOwners.addAll(request.getProperty().getOwners());
 				request.getProperty().setOwners(util.getCopyOfOwners(collectedOwners));
-			}else 
+			}else */
 			request.getProperty().setOwners(util.getCopyOfOwners(propertyFromSearch.getOwners()));
 		}
 
