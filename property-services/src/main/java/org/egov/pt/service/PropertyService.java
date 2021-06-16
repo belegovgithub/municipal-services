@@ -143,7 +143,7 @@ public class PropertyService {
 				}
 				
 				for (OwnerInfo info : request.getProperty().getOwners()) {
-					info.setOwnerInfoUuid(UUID.randomUUID().toString());
+					//info.setOwnerInfoUuid(UUID.randomUUID().toString());
 					info.setStatus(Status.ACTIVE);
 				}
 				
