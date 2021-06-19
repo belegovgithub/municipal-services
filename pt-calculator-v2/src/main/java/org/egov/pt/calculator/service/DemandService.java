@@ -757,7 +757,8 @@ public class DemandService {
         List<UnitV2> units = property.getUnits();
         if(units!=null) {
         for (UnitV2 unitV2 : units) {
-        	arvValue = arvValue.add(unitV2.getArv());
+        	if(unitV2.getArv()!=null)
+        	 arvValue = arvValue.add(unitV2.getArv());
 
 		}
         }
