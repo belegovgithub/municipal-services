@@ -583,6 +583,7 @@ public class PropertyValidator {
 				&& CollectionUtils.isEmpty(criteria.getAbasPropertyids())
 				&& CollectionUtils.isEmpty(criteria.getOwnerIds()) 
 				&& CollectionUtils.isEmpty(criteria.getUuids())
+				&& null == criteria.getOldpropertyid()
 				&& null == criteria.getMobileNumber()
 				&& null == criteria.getName();
 		

@@ -123,6 +123,7 @@ public class PropertyQueryBuilder {
 					&& CollectionUtils.isEmpty(criteria.getOldpropertyids())
 					&& CollectionUtils.isEmpty(criteria.getAbasPropertyids())
 					&& CollectionUtils.isEmpty(criteria.getUuids())
+					&& null == criteria.getOldpropertyid()
 					&& null == criteria.getMobileNumber()
 					&& null == criteria.getName();
 		
@@ -243,6 +244,14 @@ public class PropertyQueryBuilder {
 				builder.append(AND_QUERY);
 			builder.append("property.tenantid=?");
 			preparedStmtList.add(criteria.getTenantId());
+			appendAndQuery= true;
+		}
+		if(criteria.getOldpropertyid()!=null)
+		{
+			if(appendAndQuery)
+				builder.append(AND_QUERY);
+			builder.append("property.oldpropertyid=?");
+			preparedStmtList.add(criteria.getOldpropertyid());
 			appendAndQuery= true;
 		}
 

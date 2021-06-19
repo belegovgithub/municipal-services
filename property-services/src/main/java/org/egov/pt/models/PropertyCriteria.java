@@ -53,6 +53,8 @@ public class PropertyCriteria {
 	
 	private Set<String> abasPropertyids;
 	
+	private String oldpropertyid;
+	
 	
 	
 }
