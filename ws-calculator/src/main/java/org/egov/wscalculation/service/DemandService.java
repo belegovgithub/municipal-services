@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import org.egov.wscalculation.web.models.TaxPeriod;
 import org.egov.wscalculation.web.models.WaterConnection;
 import org.egov.wscalculation.web.models.WaterConnectionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -66,6 +68,9 @@ public class DemandService {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Value("${app.timezone}")
+	private String timeZone;
+	
 	@Autowired
 	private PayService payService;
 
@@ -684,42 +689,29 @@ public class DemandService {
 			Map<String, Object> billingMasterData = calculatorUtils.loadBillingFrequencyMasterData(requestInfo, tenantId);
 			if(billingMasterData!=null) {
 				if(checkDate) {
-					generateDemandForULB(billingMasterData, requestInfo, tenantId);	
+					long startDay = ((Long.parseLong(billingMasterData.get(WSCalculationConstant.Demand_Generate_Date_String).toString())) / 86400000);
+					boolean isMaching = isCurrentDateIsMatching((String) billingMasterData.get(WSCalculationConstant.Billing_Cycle_String), startDay);
+					if(isMaching) {
+						generateDemandForULB(  billingMasterData, requestInfo, tenantId, null);
+					} 
 				}else {
 					generateDemandForULB(billingMasterData, requestInfo, tenantId,connectionNos);	
 				}
-					
 			}
-			
 		}catch (Exception e) {
 			log.info("Error in generating demand for tenant  :"+ tenantId);
 		}
 		
 	}
 
-	/**
-	 * 
-	 * @param master Master MDMS Data
-	 * @param requestInfo Request Info
-	 * @param tenantId Tenant Id
-	 */
-	public void generateDemandForULB(Map<String, Object> master, RequestInfo requestInfo, String tenantId ) {
-		long startDay = ((Long.parseLong(master.get(WSCalculationConstant.Demand_Generate_Date_String).toString())) / 86400000);
-		log.info("GENERATING DEMAND FOR TENANT :"+ tenantId);
-		boolean isMaching = isCurrentDateIsMatching((String) master.get(WSCalculationConstant.Billing_Cycle_String), startDay);
-		log.info("date Matching"+ isMaching);
-		isMaching =true;
-		if(isMaching) {
-			generateDemandForULB(  master, requestInfo, tenantId, null);
-		}
-	}
+ 
 	
 	
 	public void generateDemandForULB(Map<String, Object> master, RequestInfo requestInfo, String tenantId, List<String> connectionnos) {
 		List<String> connectionNos =new ArrayList<String>();
 		if(CollectionUtils.isEmpty(connectionnos)) {
 			connectionNos = waterCalculatorDao.getConnectionsNoList(tenantId,
-					WSCalculationConstant.nonMeterdConnection);
+					WSCalculationConstant.nonMeterdConnection,null);
 		}else {
 			connectionNos.addAll(connectionnos);
 		}
@@ -732,9 +724,33 @@ public class DemandService {
 			calculationCriteriaList.add(calculationCriteria);
 			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)
 					.requestInfo(requestInfo).isconnectionCalculation(true).build();
-			wsCalculationProducer.push(configs.getCreateDemand(), calculationReq);
-			// log.info("Prepared Statement" + calculationRes.toString());
+			//wsCalculationProducer.push(configs.getCreateDemand(), calculationReq);
+			 log.info("Prepared Statement" + calculationReq.toString());
 
+		}
+		 
+	}
+	
+	
+	public void generateDemandForForActivatedConn(  RequestInfo requestInfo, String tenantId ) {
+		Calendar dateObject = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		dateObject.add(Calendar.DATE, -1);
+		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
+					WSCalculationConstant.nonMeterdConnection,dateObject );
+		connectionNos.clear();
+		connectionNos.add("WS-BARE-2021-001499"); 	
+		//Assessment Year 
+		String assessmentYear = estimationService.getAssessmentYear(LocalDateTime.now().minusDays(1));
+		for (String connectionNo : connectionNos) {
+			CalculationCriteria calculationCriteria = CalculationCriteria.builder().tenantId(tenantId)
+					.assessmentYear(assessmentYear).connectionNo(connectionNo).build();
+			List<CalculationCriteria> calculationCriteriaList = new ArrayList<>();
+			calculationCriteriaList.add(calculationCriteria);
+			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)
+					.requestInfo(requestInfo).isconnectionCalculation(true).build();
+			wsCalculationProducer.push(configs.getNewModifiedConnBillTopic(), calculationReq);
+			log.info("Prepared Statement" + calculationReq.toString());
+		
 		}
 		 
 	}

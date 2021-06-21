@@ -128,6 +128,22 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		double monthsToCharge = difference.getMonths() + 1;
 		return monthsToCharge;
 	}
+	
+	
+	public void generateDemandForNewModifiedConn(RequestInfo requestInfo) {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime date = LocalDateTime.now();
+		log.info("Time schedule start for water demand generation on : " + date.format(dateTimeFormatter));
+		//demandService.generateDemand ( requestInfo,  "pb.bareilly" );
+		List<String> tenantIds = wSCalculationDao.getTenantId();
+		if (tenantIds.isEmpty())
+			return;
+		tenantIds.clear();
+		tenantIds.add("pb.bareilly");
+		tenantIds.forEach(tenantId -> {
+			demandService.generateDemandForForActivatedConn ( requestInfo,  tenantId );
+		});
+	}
 
 	public BillEstimation getBillEstimate(CalculationReq request) {
 		String tenantId = request.getCalculationCriteria().get(0).getTenantId();
@@ -310,7 +326,48 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
 		return calculations;
 	}
+	
+	public List<Calculation>demandGeneration(CalculationReq request, Map<String, Object> masterMap) {
+		log.info("going to  demandGeneration get calculations");
+		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
+		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
+			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),
+					masterMap);
+			
+			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
+					.get(WSCalculationConstant.Billing_Period_Master);
+			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
+			Map<String, Object> billingPeriod =(Map<String, Object>) masterMap.get(WSCalculationConstant.BILLING_PERIOD);
+			billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
+			Long billingCycleStartdDate = (Long) billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
+			Long billingCycleEndDate = (Long) billingPeriod.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
+			//Get the difference between End date and activation date and based on that define the amount.
+			LocalDate billingPeriodStart = LocalDate.ofEpochDay(billingCycleStartdDate / 86400000L);		
+			LocalDate activationDate = LocalDate.now().minusDays(1);
+			int totalMonth = getBillingMonthsToCharge(billingPeriodStart, billingCycleEndDate);
+			int balanceMonth = getBillingMonthsToCharge(activationDate, billingCycleEndDate);
+			if(estimationMap.get("estimates")!=null) {
+				List<TaxHeadEstimate> taxHeadEstimates=estimationMap.get("estimates");
+				for (TaxHeadEstimate taxHeadEstimate : taxHeadEstimates) {
+					if(taxHeadEstimate.getTaxHeadCode().equals(WSCalculationConstant.WS_CHARGE)) {
+						taxHeadEstimate.getEstimateAmount().multiply(new BigDecimal(balanceMonth)).divide(new BigDecimal(totalMonth));
+					}
+				}
+			}
+			Calculation calculation = getCalculation(request.getRequestInfo(), criteria, estimationMap, masterMap,
+					true);
+			calculations.add(calculation);
+		}
+		//demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
+		return calculations;
+	}
 
+	public int getBillingMonthsToCharge(LocalDate fromDate , Long billingCycleEndDate) {
+		    LocalDate billingPeriodEndDate = LocalDate.ofEpochDay(billingCycleEndDate / 86400000L);		    
+		    Period difference = Period.between(fromDate, billingPeriodEndDate);
+		    return difference.getMonths()+1; 
+	}
+	
 	/**
 	 * 
 	 * @param request - Calculation Request Object
@@ -415,7 +472,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	 * @param masterMap master data
 	 * @return all calculations including water charge and taxhead on that
 	 */
-	List<Calculation> getCalculations(CalculationReq request, Map<String, Object> masterMap) {
+	public List<Calculation> getCalculations(CalculationReq request, Map<String, Object> masterMap) {
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
 		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
 			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),

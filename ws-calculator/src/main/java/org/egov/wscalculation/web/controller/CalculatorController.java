@@ -79,7 +79,7 @@ public class CalculatorController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	
+
 	
 	@PostMapping("/_calculate")
 	public ResponseEntity<CalculationRes> calculate(@RequestBody @Valid CalculationReq calculationReq) {
@@ -117,6 +117,14 @@ public class CalculatorController {
 			) {
  
 			wSCalculationService.generateDemandBasedOnTimePeriod_manual(requestInfoWrapper.getRequestInfo(),tenantId,connectionnos);
+	}
+	
+	@PostMapping("/_jobscheduler_new_updated_conn")
+	public void jobschedulerNewUpdated(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper ) {
+		
+ 		log.info("Water billing job automated schedular started ");
+		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo());
+ 
 	}
 	
 	@PostMapping("/_jobscheduler_checkFailedBill")
