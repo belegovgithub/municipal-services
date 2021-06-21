@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -122,6 +124,10 @@ public class ImportControllerNewArrears {
 		taxHeadMaps.put("Additional water tax", "PT_ADDL_WATER_TAX");
 		taxHeadMaps.put("Drainage Tax", "PT_DRAINAGE_TAX");
 		taxHeadMaps.put("Lighting Tax", "PT_LIGHTING_TAX");
+		taxHeadMaps.put("Advance", "PT_ADVANCE_CARRYFORWARD");
+		taxHeadMaps.put("Interest", "PT_TIME_INTEREST");
+		taxHeadMaps.put("Demand Notice Charge", "PT_DEMANDNOTICE_CHARGE");
+		taxHeadMaps.put("Scavenging", "PT_SCAVENGING_TAX");
 		
 		ImportReportWrapper wrapper = new ImportReportWrapper();
 		String extension = "";
@@ -145,6 +151,7 @@ public class ImportControllerNewArrears {
 					Sheet sheet = workbook.getSheetAt(0);
 					Iterator<Row> rowIterator = sheet.rowIterator();
 					Row firstRow = sheet.getRow(0);
+					FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
 					Map<Integer,String> taxheads = new HashMap<>();
 					for (int i = 1; i < firstRow.getPhysicalNumberOfCells(); i++) {
@@ -173,20 +180,24 @@ public class ImportControllerNewArrears {
 							ExcelColumns columns = new ExcelColumns();
 
 							Cell cell = cellIterator.next();
+							CellValue cellValue = evaluator.evaluate(cell);
 							Integer index = cell.getColumnIndex();
 
 							try {
 								if(index==0) {
 									if(tenantId.equalsIgnoreCase("pb.jalandhar"))
-										key = String.valueOf((int) cell.getNumericCellValue());								
+										key = String.valueOf((int) cellValue.getNumberValue());								
 									else
-										key = getStringVal(cell);
+										key = getStringVal(cellValue);
 								}
 								else {
 									System.out.println(taxheads.get(index));
 									if (taxheads.get(index) != null) {
 										columns.setTaxHeadMasterCode(taxheads.get(index));
-										columns.setTaxAmount(new BigDecimal(getStringVal(cell)));
+										
+										columns.setTaxAmount(new BigDecimal(getStringVal(cellValue)));
+										if(taxheads.get(index).contains("ADVANCE")) 
+											columns.setTaxAmount(columns.getTaxAmount().negate());
 										columns.setCollectedAmount(BigDecimal.ZERO);
 									}
 								}
@@ -202,7 +213,6 @@ public class ImportControllerNewArrears {
 						}
 
 					}
-					System.out.println("size : " + excelmap);
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
@@ -226,8 +236,8 @@ public class ImportControllerNewArrears {
 
 							assessment.setTenantId(tenantId);
 							assessment.setPropertyId(property.getPropertyId());
-							assessment.setFinancialYear("2021-22");
-							assessment.setAssessmentDate(1617215400000l);// to be verififed
+							assessment.setFinancialYear("2020-21");
+							assessment.setAssessmentDate(1585679400000l);// to be verififed
 							assessment.setSource(Source.LEGACY_RECORD);
 							assessment.setChannel(property.getChannel());
 							assessment.setStatus(property.getStatus());
@@ -238,8 +248,8 @@ public class ImportControllerNewArrears {
 							demand.setConsumerCode(property.getPropertyId());
 							demand.setConsumerType(property.getPropertyType());
 							demand.setBusinessService("PT");
-							demand.setTaxPeriodFrom(1617215400000l);// to be verified
-							demand.setTaxPeriodTo(1648751399000l);// to be verified
+							demand.setTaxPeriodFrom(1585679400000l);// to be verified
+							demand.setTaxPeriodTo(1617215399000l);// to be verified
 							User payer = new User();
 							payer.setUuid(property.getOwners().get(0).getUuid());// to be verified
 							demand.setPayer(payer);
@@ -269,7 +279,7 @@ public class ImportControllerNewArrears {
 							propertyIds.add(property.getPropertyId());
 							AssessmentSearchCriteria criteria = AssessmentSearchCriteria.builder()
 									.tenantId(tenantId)
-									.financialYear("2021-22")
+									.financialYear("2020-21")
 									.propertyIds(propertyIds)
 									.build();
 							if(assessmentService.searchAssessments(criteria).size()>0) {
@@ -352,8 +362,8 @@ public class ImportControllerNewArrears {
 		return null;
 	}
 
-	private String getStringVal(Cell cell) {
-		return cell.getCellType() == CellType.NUMERIC ? String.valueOf((float) cell.getNumericCellValue())
-				: cell.getStringCellValue();
+	private String getStringVal(CellValue cell) {
+		return cell.getCellType() == CellType.NUMERIC ? String.valueOf((float) cell.getNumberValue())
+				: cell.getStringValue();
 	}
 }
