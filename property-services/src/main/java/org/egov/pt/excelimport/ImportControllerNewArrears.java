@@ -152,7 +152,7 @@ public class ImportControllerNewArrears {
 					Iterator<Row> rowIterator = sheet.rowIterator();
 					Row firstRow = sheet.getRow(0);
 					FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-
+					List<String> duplicatePropertyIds = new ArrayList<>();
 					Map<Integer,String> taxheads = new HashMap<>();
 					for (int i = 1; i < firstRow.getPhysicalNumberOfCells(); i++) {
 						Cell header_cell = firstRow.getCell(i);
@@ -160,7 +160,7 @@ public class ImportControllerNewArrears {
 						if (taxHeadMaps.get(header) != null)
 							taxheads.put(i, taxHeadMaps.get(header));
 						else {
-							wrapper.updateMaps(ImportReportWrapper.taxCodeNotFoundReport, header);
+							wrapper.updateMaps(ImportReportWrapper.taxCodeNotFoundForTaxHeadReport, header);
 						}
 
 					}
@@ -189,6 +189,13 @@ public class ImportControllerNewArrears {
 										key = String.valueOf((int) cellValue.getNumberValue());								
 									else
 										key = getStringVal(cellValue);
+									if(excelmap.get(key)!=null || duplicatePropertyIds.contains(key))
+									{
+										duplicatePropertyIds.add(key);
+										wrapper.updateMaps(ImportReportWrapper.duplicateRecords, key);
+										excelmap.remove(key);
+										break;
+									}
 								}
 								else {
 									System.out.println(taxheads.get(index));
@@ -217,6 +224,7 @@ public class ImportControllerNewArrears {
 					e.printStackTrace();
 					throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
 				}
+
 				if (excelmap.entrySet().size() > 0) {
 
 					for (Entry<String, List<ExcelColumns>> entry : excelmap.entrySet()) {

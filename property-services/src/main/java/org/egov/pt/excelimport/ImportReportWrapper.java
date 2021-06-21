@@ -21,11 +21,15 @@ public class ImportReportWrapper {
 	final static String successReport = "Successful : ";
 	final static String propertyNotFoundReport = "Property not found : ";
 	final static String taxCodeNotFoundReport = "Tax Head code not found row : ";
-	final static String issueFoundReport = "Issue in row-column : ";
+	final static String issueFoundReport = "Issue in row-column : ";	
+	final static String taxCodeNotFoundForTaxHeadReport = "Tax Head code not found : ";
+	final static String duplicateRecords = "Duplicate records found :  ";
+
+
 
 	@JsonIgnore
 	List<String> keyList = Arrays
-			.asList(new String[] { successReport, propertyNotFoundReport, taxCodeNotFoundReport, issueFoundReport });
+			.asList(new String[] { successReport, propertyNotFoundReport, taxCodeNotFoundReport, issueFoundReport, taxCodeNotFoundForTaxHeadReport, duplicateRecords });
 
 	@JsonProperty("statsMap")
 	private Map<String, Integer> statsMap;
