@@ -316,6 +316,10 @@ public class WaterServicesUtil {
 		} 
 		return false;
 	}
+	
+	public boolean isDeactivateConnectionRequest(WaterConnectionRequest waterConnectionRequest) {
+		return  waterConnectionRequest.getWaterConnection().getApplicationType().equalsIgnoreCase("DEACTIVATE_WATER_CONNECTION") ||  waterConnectionRequest.getWaterConnection().getApplicationType().equalsIgnoreCase("FREEZE_WATER_CONNECTION");
+	}
 
 
 	public StringBuilder getcollectionURL() {

@@ -214,5 +214,19 @@ public class WorkflowService {
 			}
 		});
 	}
+	
+	public void validateInProgressWFForDeactivate(List<WaterConnection> waterConnectionList, RequestInfo requestInfo,
+			String tenantId) {
+		Set<String> applicationNos = waterConnectionList.stream().map(WaterConnection::getApplicationNo)
+				.collect(Collectors.toSet());
+		List<ProcessInstance> processInstanceList = getProcessInstance(requestInfo, applicationNos, tenantId,
+				config.getDeactivateWSBusinessServiceName());
+		processInstanceList.forEach(processInstance -> {
+			if (!processInstance.getState().getIsTerminateState()) {
+				throw new CustomException("WS_APP_EXIST_IN_WF",
+						"Application already exist in WorkFlow. Cannot modify connection.");
+			}
+		});
+	}
 
 }

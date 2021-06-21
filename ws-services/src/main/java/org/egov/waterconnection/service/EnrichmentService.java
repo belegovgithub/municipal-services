@@ -80,7 +80,8 @@ public class EnrichmentService {
 		waterConnectionRequest.getWaterConnection().setAdditionalDetails(additionalDetail);
 	    //Setting ApplicationType
 	  	waterConnectionRequest.getWaterConnection().setApplicationType(
-	  			reqType == WCConstants.MODIFY_CONNECTION ? WCConstants.MODIFY_WATER_CONNECTION :  WCConstants.NEW_WATER_CONNECTION);
+	  		//	reqType == WCConstants.MODIFY_CONNECTION ? WCConstants.MODIFY_WATER_CONNECTION :  WCConstants.NEW_WATER_CONNECTION);
+	  			reqType == WCConstants.MODIFY_CONNECTION ? WCConstants.MODIFY_WATER_CONNECTION : reqType == WCConstants.DEACTIVATE_CONNECTION ? WCConstants.DEACTIVATE_WATER_CONNECTION : WCConstants.NEW_WATER_CONNECTION);
 		setApplicationIdGenIds(waterConnectionRequest);
 		setStatusForCreate(waterConnectionRequest);
 		if(reqType == WCConstants.CREATE_APPLICATION) {

@@ -60,7 +60,12 @@ public class WorkflowIntegrator {
 		String wfBusinessServiceName = config.getBusinessServiceValue();
 		if(wsUtil.isModifyConnectionRequest(waterConnectionRequest)) {
 			wfBusinessServiceName = config.getModifyWSBusinessServiceName();
-		} 
+		}
+		if(wsUtil.isDeactivateConnectionRequest(waterConnectionRequest))
+		{
+			 
+			wfBusinessServiceName = config.getDeactivateWSBusinessServiceName();
+		}
 		callWorkFlow(waterConnectionRequest, property, wfBusinessServiceName);
 	}
 	

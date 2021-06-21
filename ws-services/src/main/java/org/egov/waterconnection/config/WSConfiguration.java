@@ -208,4 +208,7 @@ public class WSConfiguration {
 	
 	@Value("${egov.url.shortner.host}")
 	private String shortnerHost;
+	
+	@Value("${deactivate.ws.workflow.name}")
+	private String deactivateWSBusinessServiceName;
 }
