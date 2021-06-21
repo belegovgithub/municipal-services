@@ -199,36 +199,49 @@ public class MasterDataService {
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> enrichBillingPeriod(CalculationCriteria criteria, ArrayList<?> mdmsResponse,
 			Map<String, Object> masterMap) {
-		log.info("Billing Frequency Map {}", mdmsResponse.toString());
+		log.info("==Billing Frequency Map {}", mdmsResponse.toString());
+		
+		log.info("criteria==>", criteria.getWaterConnection().toString());
+		
 		Map<String, Object> master = new HashMap<>();
 		for (Object o : mdmsResponse) {
+			System.out.println("con type="+criteria.getWaterConnection().getConnectionType());
+			System.out.println("con type="+(((Map<String, Object>) o).get(WSCalculationConstant.ConnectionType).toString()));
 			if ((((Map<String, Object>) o).get(WSCalculationConstant.ConnectionType).toString())
 					.equalsIgnoreCase(criteria.getWaterConnection().getConnectionType())) {
 				master = (Map<String, Object>) o;
 				break;
 			}
 		}
+				
 		Map<String, Object> billingPeriod = new HashMap<>();
+		billingPeriod.put(WSCalculationConstant.Billing_Cycle_String, master.get("billingCycle"));
 		if (master.get(WSCalculationConstant.ConnectionType).toString()
 				.equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {
 			billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, criteria.getFrom());
 			billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES, criteria.getTo());
+			
 		} else {
 			if (WSCalculationConstant.Monthly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
 				estimationService.getMonthStartAndEndDate(billingPeriod);
+				 
 			} else if (WSCalculationConstant.Quaterly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
 				estimationService.getQuarterStartAndEndDate(billingPeriod);
+				 
 			} else if (WSCalculationConstant.Yearly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
 				estimationService.getYearStartAndEndDate(billingPeriod);
+				 
 			} else if (WSCalculationConstant.Half_Yearly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
 				estimationService.getHalfYearStartAndEndDate(billingPeriod);
+				 
 			} else if (WSCalculationConstant.Bi_Monthly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
 				estimationService.getBiMonthStartAndEndDate(billingPeriod);
+				
 			}else {
 				LocalDateTime demandEndDate = LocalDateTime.now();
 				demandEndDate = setCurrentDateValueToStartingOfDay(demandEndDate);
@@ -238,6 +251,7 @@ public class MasterDataService {
 						Timestamp.valueOf(demandEndDate).getTime() - endDaysMillis);
 				billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES,
 						Timestamp.valueOf(demandEndDate).getTime());
+				 
 			}
 		}
 		log.info("Demand Expiry Date : {}", master.get(WSCalculationConstant.Demand_Expiry_Date_String));
@@ -246,6 +260,7 @@ public class MasterDataService {
 		Long demandExpiryDateMillis = expiryDate.longValue();
 		billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String, demandExpiryDateMillis);
 		masterMap.put(WSCalculationConstant.BILLING_PERIOD, billingPeriod);
+		System.out.println("Returning="+masterMap.get(WSCalculationConstant.BILLING_PERIOD));
 		return masterMap;
 	}
 	/**
@@ -408,6 +423,7 @@ public class MasterDataService {
 	public Map<String, Object> loadBillingFrequencyMasterData(RequestInfo requestInfo, String tenantId, Map<String, Object> masterMap) {
 		MdmsCriteriaReq mdmsCriteriaReq = calculatorUtils.getBillingFrequency(requestInfo, tenantId);
 		Object res = repository.fetchResult(calculatorUtils.getMdmsSearchUrl(), mdmsCriteriaReq);
+		System.out.println("Billing frzy response="+res);
 		if (res == null) {
 			throw new CustomException("MDMS_ERROR_FOR_BILLING_FREQUENCY", "Failed to fetch the billing frequency");
 		}

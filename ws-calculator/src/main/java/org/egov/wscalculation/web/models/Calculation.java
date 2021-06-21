@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Calculation
@@ -22,6 +23,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @JsonPropertyOrder({ "tenantId", "totalAmount", "charge", "taxAmount", "fee", "exemption", "rebate", "exemption", "penalty" })
+@ToString
 public class Calculation {
 
 	@JsonProperty("applicationNo")

@@ -2,7 +2,10 @@ package org.egov.wscalculation.web.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.ToString;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
+@ToString
 public class Slab {
 	private double from;
 	private double to;

@@ -2,6 +2,7 @@ package org.egov.wscalculation.web.controller;
 
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -69,21 +70,18 @@ public class CalculatorController {
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 	
-	@PostMapping("/_estimateBillForConnection")
-	public ResponseEntity<BillEstimateResponse>estimateBillForConnection(@RequestBody @Valid CalculationReq calculationReq) {	
-		BillEstimation billEstmationResult = wSCalculationServiceImpl.getBillEstimate(calculationReq);	
-		BillEstimateResponse response = BillEstimateResponse.builder().billEstimation(billEstmationResult)
-				.responseInfo(
-						responseInfoFactory.createResponseInfoFromRequestInfo(calculationReq.getRequestInfo(), true))
-				.build();
-		return new ResponseEntity<>(response, HttpStatus.OK);
-	}
-	
+
 	
 	
 	@PostMapping("/_calculate")
 	public ResponseEntity<CalculationRes> calculate(@RequestBody @Valid CalculationReq calculationReq) {
-		List<Calculation> calculations = wSCalculationService.getCalculation(calculationReq);
+		
+		
+	//	List<Calculation> calculations = wSCalculationService.getCalculation(calculationReq);
+		Map<String,Object>calculationsResult = wSCalculationService.getCalculation(calculationReq);
+		List<Calculation> calculations = wSCalculationServiceImpl.getCalculationObj(calculationsResult);
+		
+		
 		CalculationRes response = CalculationRes.builder().calculation(calculations)
 				.responseInfo(
 						responseInfoFactory.createResponseInfoFromRequestInfo(calculationReq.getRequestInfo(), true))
@@ -117,6 +115,27 @@ public class CalculatorController {
 		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo());
  
 	}
+	
+	@PostMapping("/_estimateBillForConnection")
+	public ResponseEntity<BillEstimateResponse>estimateBillForConnection(@RequestBody @Valid CalculationReq calculationReq) {	
+		BillEstimation billEstmationResult = wSCalculationService.getBillEstimate(calculationReq);	
+		BillEstimateResponse response = BillEstimateResponse.builder().billEstimation(billEstmationResult)
+				.responseInfo(
+						responseInfoFactory.createResponseInfoFromRequestInfo(calculationReq.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	
+//	@PostMapping("/_jobscheduler_new_updated_conn")
+//	public void jobschedulerNewUpdated(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,@RequestParam String   tenantId,
+//			@RequestParam(required = false) List<String>  connectionnos ) {
+//		
+// 		log.info("Water billing job automated schedular started ");
+//		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo(),tenantId,connectionnos.get(0));
+// 
+//	}
+	
 	
 	@PostMapping("/_jobscheduler_manual")
 	public void _jobscheduler_manual(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,

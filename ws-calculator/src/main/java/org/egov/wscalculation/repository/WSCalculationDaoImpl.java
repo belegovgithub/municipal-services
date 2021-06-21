@@ -140,10 +140,14 @@ public class WSCalculationDaoImpl implements WSCalculationDao {
 	 
 	@Override
 	public List<String> getConnectionsNoList(String tenantId, String connectionType,Calendar activationDate) {
-		List<Object> preparedStatement = new ArrayList<>();
-		String query = queryBuilder.getConnectionNumberList(tenantId, connectionType, preparedStatement,activationDate);
-		log.info("water " + connectionType + " connection list : " + query);
-		return jdbcTemplate.query(query, preparedStatement.toArray(), demandSchedulerRowMapper);
+//		List<Object> preparedStatement = new ArrayList<>();
+//		String query = queryBuilder.getConnectionNumberList(tenantId, connectionType, preparedStatement,activationDate);
+//		log.info("water " + connectionType + " connection list : " + query);
+//		return jdbcTemplate.query(query, preparedStatement.toArray(), demandSchedulerRowMapper);
+		System.out.println("remove later");
+		List<String>dummy = new ArrayList<String>();
+		dummy.add("WS-BARE-2021-001499");
+		return dummy;
 	}
 	
 	@Override

@@ -123,6 +123,7 @@ public class DemandService {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> financialYearMaster =  (Map<String, Object>) masterMap
 				.get(WSCalculationConstant.BILLING_PERIOD);
+		System.out.println("financialYearMaster===="+financialYearMaster.toString());
 		Long fromDate = (Long) financialYearMaster.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
 		Long toDate = (Long) financialYearMaster.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
 		
@@ -741,6 +742,10 @@ public class DemandService {
 		}
 		 
 	}
+	
+	
+	
+	
 	
 	public void generateDemandForULB(Map<String, Object> master, RequestInfo requestInfo, String tenantId, List<String> connectionnos) {
 		List<String> connectionNos =new ArrayList<String>();

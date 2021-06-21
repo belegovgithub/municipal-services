@@ -7,6 +7,7 @@ import java.util.Set;
 import org.egov.wscalculation.config.WSCalculationConfiguration;
 import org.egov.wscalculation.service.EstimationService;
 import org.egov.wscalculation.web.models.MeterReadingSearchCriteria;
+import org.egov.wscalculation.web.models.WaterConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -39,6 +40,15 @@ public class WSCalculatorQueryBuilder {
 
 	
 	private static final String failedDemandQuery = "SELECT * FROM eg_ws_failed_bill WHERE status = 'BILL_FAILED'";
+	
+	private static final String getConnectionBasedOnConnectionNo= "SELECT * FROM eg_ws_connection where id = ?";
+	
+	
+//	public WaterConnection getWaterConection(String connectionNo,String tenantId) {
+//		System.out.println(connectionNo+":"+tenantId);
+//		
+//		return null;
+//	}
 
 
 	public String getDistinctTenantIds() {
