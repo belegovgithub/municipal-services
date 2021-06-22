@@ -250,13 +250,13 @@ public class DemandGenerationConsumer {
 			}
 			
 			log.info("Calling Demand generation==");
-			//List<Calculation> result  = wSCalculationServiceImpl.demandGeneration(request, masterMap);
-			Map<String,Object>calculationResult = wSCalculationServiceImpl.demandGeneration(request, masterMap);
-			List<Calculation>result = wSCalculationServiceImpl.getCalculationObj(calculationResult);
+			List<Calculation> result  = wSCalculationServiceImpl.demandGeneration(request, masterMap);
+//			Map<String,Object>calculationResult = wSCalculationServiceImpl.demandGeneration(request, masterMap);
+//			List<Calculation>result = wSCalculationServiceImpl.getCalculationObj(calculationResult);
 			List<Calculation>finalResult = new ArrayList<Calculation>();
-			if(calculationResult != null) {
+			if(result != null) {
 				
-				BillEstimation billEstimation = estimationService.getWaterChargeForEstimate(request,masterMap, calculationResult); // Get bill for specific period
+				BillEstimation billEstimation = estimationService.getWaterChargeForEstimate(request,masterMap, result); // Get bill for specific period
 				Calculation obj = result.get(0);
 				obj.setTotalAmount(new BigDecimal(billEstimation.getPayableBillAmount()));
 				obj.setTaxAmount(new BigDecimal(billEstimation.getPayableBillAmount()));

@@ -121,8 +121,32 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	/**
 	 * Get CalculationReq and Calculate the Tax Head on Water Charge And Estimation Charge
 	 */
-	public Map<String,Object> getCalculation(CalculationReq request) {
+	public List<Calculation> getCalculation(CalculationReq request) {
 				
+		List<Calculation>calculations = new ArrayList<Calculation>();
+
+		Map<String, Object> masterMap;
+		if (request.getIsconnectionCalculation()) {
+			//Calculate and create demand for connection
+			masterMap = masterDataService.loadMasterData(request.getRequestInfo(),
+					request.getCalculationCriteria().get(0).getTenantId());
+			calculations = getCalculations(request, masterMap);
+			
+		} else {
+			//Calculate and create demand for application
+			masterMap = masterDataService.loadExemptionMaster(request.getRequestInfo(),
+					request.getCalculationCriteria().get(0).getTenantId());
+			calculations = getFeeCalculation(request, masterMap);
+		}
+				
+		//List<Calculation> calculations = getCalculationObj(calculationResult);		
+		demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, request.getIsconnectionCalculation());
+		unsetWaterConnection(calculations);
+		return calculations;
+	}
+	
+	public Map<String,Object> getCalculation_1(CalculationReq request) {
+		
 		Map<String,Object>calculationResult = new HashMap<String, Object>();	
 
 		Map<String, Object> masterMap;
@@ -130,13 +154,13 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			//Calculate and create demand for connection
 			masterMap = masterDataService.loadMasterData(request.getRequestInfo(),
 					request.getCalculationCriteria().get(0).getTenantId());
-			calculationResult = getCalculations(request, masterMap);
+			calculationResult = getCalculations_1(request, masterMap);
 			
 		} else {
 			//Calculate and create demand for application
 			masterMap = masterDataService.loadExemptionMaster(request.getRequestInfo(),
 					request.getCalculationCriteria().get(0).getTenantId());
-			calculationResult = getFeeCalculation(request, masterMap);
+			calculationResult = getFeeCalculation_1(request, masterMap);
 		}
 				
 		List<Calculation> calculations = getCalculationObj(calculationResult);		
@@ -156,7 +180,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	
 
 	
-	public BillEstimation getBillEstimate_1(CalculationReq request) {
+	public BillEstimation getBillEstimate_1Old(CalculationReq request) {
 		String tenantId = request.getCalculationCriteria().get(0).getTenantId();
 		BillEstimation billEstimation = new BillEstimation();
 		
@@ -305,23 +329,33 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	 * @return List of calculation.
 	 */
 	public List<Calculation> bulkDemandGeneration(CalculationReq request, Map<String, Object> masterMap) {
-		//List<Calculation> calculations = getCalculations(request, masterMap);
-		Map<String,Object> calculationsRestult = getCalculations(request, masterMap);
-		List<Calculation> calculations = getCalculationObj(calculationsRestult);
+		List<Calculation> calculations = getCalculations(request, masterMap);
+//		Map<String,Object> calculationsRestult = getCalculations(request, masterMap);
+//		List<Calculation> calculations = getCalculationObj(calculationsRestult);
 	
 		demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
 		return calculations;
 	}
 	
-	public Map<String,Object> demandGeneration(CalculationReq request, Map<String, Object> masterMap) {
+	public Map<String,Object> demandGeneration_1(CalculationReq request, Map<String, Object> masterMap) {
 		log.info("going to  demandGeneration get calculations");
 		//List<Calculation> calculations = getCalculations(request, masterMap);
-		Map<String,Object> calculationsRestult = getCalculations(request, masterMap); // Calculation gives for the whole billing period
+		Map<String,Object> calculationsRestult = getCalculations_1(request, masterMap); // Calculation gives for the whole billing period
 	
 		//demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
 		return calculationsRestult;
 	}
 
+	
+	public List<Calculation> demandGeneration(CalculationReq request, Map<String, Object> masterMap) {
+		log.info("going to  demandGeneration get calculations");
+		List<Calculation> calculations = getCalculations(request, masterMap);
+	
+		//demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
+		return calculations;
+	}
+
+	
 	/**
 	 * 
 	 * @param request - Calculation Request Object
@@ -331,7 +365,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		Map<String, Object> masterData = masterDataService.loadExemptionMaster(request.getRequestInfo(),
 				request.getCalculationCriteria().get(0).getTenantId());
 		//List<Calculation> calculations = getFeeCalculation(request, masterData);
-		Map<String,Object>calculationsResult = getFeeCalculation(request, masterData);
+		Map<String,Object>calculationsResult = getFeeCalculation_1(request, masterData);
 		List<Calculation> calculations = getCalculationObj(calculationsResult);
 		unsetWaterConnection(calculations);
 		return calculations;
@@ -444,7 +478,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	 */
 	
 	//To Remove
-	List<Calculation> getCalculations_1(CalculationReq request, Map<String, Object> masterMap) {
+	List<Calculation> getCalculations(CalculationReq request, Map<String, Object> masterMap) {
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
 		
 		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
@@ -461,7 +495,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	
 	
 	
-	Map<String,Object> getCalculations(CalculationReq request, Map<String, Object> masterMap) {
+	Map<String,Object> getCalculations_1(CalculationReq request, Map<String, Object> masterMap) {
 		
 		Map<String,Object>calculationResult = new HashMap<String, Object>();		
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());		
@@ -573,13 +607,31 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		Map<String, Object> masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
 		mDataService.loadBillingFrequencyMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId(), masterMap);
 		BillEstimation billEstimation = new BillEstimation();
-		Map<String,Object> result  = demandGeneration(calcReq, masterMap);	
-		if(result != null) {
-			
+		List<Calculation> result  = demandGeneration(calcReq, masterMap);	
+		if(result != null) {			
 			billEstimation = estimationService.getWaterChargeForEstimate(calcReq,masterMap, result);
-			System.out.println("Filtered slab="+result.get("filteredBillingSlab"));
-			//BillingSlab filteredBillingSlab = estimationService.getFilteredBillingSlab(calcReq,result);
-			System.out.println("Result=="+billEstimation.toString());
+		
+		}
+		else {
+			
+			Map<String, String> errorMap = new HashMap<>();
+			errorMap.put("FEE_SLAB_NOT_FOUND", "Fee slab master data not found!!");
+		
+		}
+			
+		
+		return billEstimation;
+	}
+	
+	public BillEstimation getBillEstimate_1(CalculationReq calcReq) {
+		
+		Map<String, Object> masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
+		mDataService.loadBillingFrequencyMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId(), masterMap);
+		BillEstimation billEstimation = new BillEstimation();
+		Map<String,Object> result  = demandGeneration_1(calcReq, masterMap);	
+		if(result != null) {			
+			billEstimation = estimationService.getWaterChargeForEstimate_1(calcReq,masterMap, result);
+		
 		}
 		else {
 			
@@ -590,7 +642,6 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			
 		return billEstimation;
 	}
-	
 	
 	
 	/**
@@ -609,7 +660,21 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	 * @param masterMap - Master MDMS Data
 	 * @return list of calculation based on estimation criteria
 	 */
-	 Map<String,Object> getFeeCalculation(CalculationReq request, Map<String, Object> masterMap) {
+	List<Calculation> getFeeCalculation(CalculationReq request, Map<String, Object> masterMap) {
+		 
+		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
+		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
+			Map<String, Object> estimationMap = estimationService.getFeeEstimation(criteria, request.getRequestInfo(),
+					masterMap);
+			masterDataService.enrichBillingPeriodForFee(masterMap);
+			System.out.println("getFeeCalculation enrighchment");
+			Calculation calculation = getCalculation(request.getRequestInfo(), criteria, estimationMap, masterMap, false);
+			calculations.add(calculation);
+		}
+		return calculations;
+	}
+	
+	 Map<String,Object> getFeeCalculation_1(CalculationReq request, Map<String, Object> masterMap) {
 			Map<String,Object>calculationResult = new HashMap<String, Object>(); 
 		 
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());

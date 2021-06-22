@@ -182,6 +182,9 @@ public class EstimationService {
 		
 				
 		BillingSlab billingSlab = (BillingSlab) restult.get("BillingSlab");
+		
+		
+		
 		Double totalUOM = (Double) restult.get("TotalUOM");
 		String caluclationAttrubute = (String) restult.get("CalculationAttribute");
 		billingSlabIds.add(billingSlab.getId());
@@ -202,7 +205,7 @@ public class EstimationService {
 	}
 	
 	
-	public BillEstimation getWaterChargeForEstimate(CalculationReq request,Map<String, Object> masterMap,Map<String,Object> calculationInput) {
+public BillEstimation getWaterChargeForEstimate_1(CalculationReq request,Map<String, Object> masterMap,Map<String,Object> calculationInput) {
 		
 		BillingSlab billingSlab = (BillingSlab) calculationInput.get("billingSlab");
 		
@@ -277,6 +280,102 @@ public class EstimationService {
 		billEstimation.setPayableBillAmount(finalBillAmount);
 		billEstimation.setBillingSlab(billingSlab);
 	
+		
+		return billEstimation;
+		
+	}
+	
+	public BillEstimation getWaterChargeForEstimate(CalculationReq request,Map<String, Object> masterMap,List<Calculation> calculationInput) {
+		
+		Calculation cl = calculationInput.get(0);
+		String billingSlabId = cl.getBillingSlabIds().get(0);
+		
+		
+	
+		ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap.get(WSCalculationConstant.Billing_Period_Master);
+		mDataService.enrichBillingPeriod(request.getCalculationCriteria().get(0), billingFrequencyMap, masterMap);
+		System.out.println("master map="+masterMap.get(WSCalculationConstant.BILLING_PERIOD));	
+		
+		Object billingPeriod =  masterMap.get(WSCalculationConstant.BILLING_PERIOD);		
+		JSONObject billingPeriodObj = mapper.convertValue(billingPeriod, JSONObject.class);
+		
+	//	List<Calculation>calculationList = wsCalculationServiceImpl.getCalculationObj(calculationInput);
+		Calculation calc = calculationInput.get(0);
+		String billingCycle = (String) billingPeriodObj.get("billingCycle");
+		
+		LocalDate toDay = LocalDate.now();	
+		double monthsToCharge = 0.0;
+		long billingCycleEndDate = (long) billingPeriodObj.get("endingDay");
+		double billAmountForBillingPeriod=0;
+	    double finalBillAmount = 0;
+	    //LocalDate billingPeriodEndDate;
+	    LocalDate billingPeriodEndDate = LocalDate.ofEpochDay(billingCycleEndDate / 86400000L);	
+	    
+	    System.out.println("Charging period="+toDay+":"+billingPeriodEndDate);
+	    Period difference ;
+	    BillEstimation billEstimation = new BillEstimation();
+	    billEstimation.setBillingCycleEndDate(billingCycleEndDate);
+		switch(billingCycle) {
+		case(WSCalculationConstant.Monthly_Billing_Period) :
+	    	  difference = Period.between(toDay, billingPeriodEndDate);
+	    	  monthsToCharge = difference.getMonths()+1; 
+	    	 finalBillAmount = ((calc.getTotalAmount().doubleValue())/12.0)*monthsToCharge;
+	    	 billEstimation.setMonthsToCharge(monthsToCharge);    	 
+	    	 
+		  break;
+		case(WSCalculationConstant.Quaterly_Billing_Period) :			
+		    
+  	  		difference = Period.between(toDay, billingPeriodEndDate);
+  	  		monthsToCharge = difference.getMonths()+1; 		  
+		    finalBillAmount = ((calc.getTotalAmount().doubleValue())/12.0)*monthsToCharge;
+		    billEstimation.setMonthsToCharge(monthsToCharge);			
+		   break;
+		case(WSCalculationConstant.Yearly_Billing_Period) :
+			
+  	  		difference = Period.between(toDay, billingPeriodEndDate);
+  	  		monthsToCharge = difference.getMonths()+1; 		 
+		    finalBillAmount = ((calc.getTotalAmount().doubleValue())/12.0)*monthsToCharge;
+		    billEstimation.setMonthsToCharge(monthsToCharge);
+		   break;
+		   
+		case(WSCalculationConstant.Half_Yearly_Billing_Period) :							
+  	  		difference = Period.between(toDay, billingPeriodEndDate);
+  	  		monthsToCharge = difference.getMonths()+1; 		  
+		    finalBillAmount = ((calc.getTotalAmount().doubleValue())/12.0)*monthsToCharge;				
+		    billEstimation.setMonthsToCharge(monthsToCharge);		
+		    break;
+		   
+		case(WSCalculationConstant.Bi_Monthly_Billing_Period) :
+			
+				difference = Period.between(toDay, billingPeriodEndDate);
+	  	   		monthsToCharge = difference.getMonths()+1; 
+			   // billAmountForBillingPeriod = (billAmountForBillingPeriod/12.0)*monthsToCharge;
+			    finalBillAmount = ((calc.getTotalAmount().doubleValue())/12.0)*monthsToCharge;					
+			    billEstimation.setMonthsToCharge(monthsToCharge);
+		
+		   break;
+		  default :
+			  Map<String, String> errorMap = new HashMap<>();
+				errorMap.put("FEE_SLAB_NOT_FOUND", "Fee slab master data not found!!");
+		 
+		}
+		billEstimation.setBillAmount(billAmountForBillingPeriod);
+		billEstimation.setPayableBillAmount(finalBillAmount);
+		
+		
+		if(request.getCalculationCriteria().get(0).getWaterConnection().getConnectionNo() == null) {
+			ArrayList<?> billingSlabMap = (ArrayList<?>) masterMap.get(WSCalculationConstant.WC_BILLING_SLAB_MASTER);
+			BillingSlab billingSlab = null;
+			for(Object each:billingSlabMap) {
+				JSONObject billingSlabObj = mapper.convertValue(each, JSONObject.class);		
+				if(billingSlabObj.get("id").equals(billingSlabId)) {
+					billingSlab = mapper.convertValue(billingSlabObj, BillingSlab.class);
+					billEstimation.setBillingSlab(billingSlab);
+					break;
+				}
+					
+			}	
+		}
 		
 		return billEstimation;
 		

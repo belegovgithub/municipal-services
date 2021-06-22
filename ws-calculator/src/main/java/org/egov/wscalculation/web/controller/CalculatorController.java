@@ -77,9 +77,9 @@ public class CalculatorController {
 	public ResponseEntity<CalculationRes> calculate(@RequestBody @Valid CalculationReq calculationReq) {
 		
 		
-	//	List<Calculation> calculations = wSCalculationService.getCalculation(calculationReq);
-		Map<String,Object>calculationsResult = wSCalculationService.getCalculation(calculationReq);
-		List<Calculation> calculations = wSCalculationServiceImpl.getCalculationObj(calculationsResult);
+		List<Calculation> calculations = wSCalculationService.getCalculation(calculationReq);
+//		Map<String,Object>calculationsResult = wSCalculationService.getCalculation(calculationReq);
+//		List<Calculation> calculations = wSCalculationServiceImpl.getCalculationObj(calculationsResult);
 		
 		
 		CalculationRes response = CalculationRes.builder().calculation(calculations)

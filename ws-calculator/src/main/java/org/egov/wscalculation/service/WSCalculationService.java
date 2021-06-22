@@ -10,7 +10,7 @@ import org.egov.wscalculation.web.models.CalculationReq;
 
 public interface WSCalculationService {
 
-	Map<String,Object> getCalculation(CalculationReq calculationReq);
+	List<Calculation> getCalculation(CalculationReq calculationReq);
 
 	void jobScheduler();
 
