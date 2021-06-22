@@ -11,6 +11,7 @@ import java.util.List;
 import org.egov.pt.models.Document;
 import org.egov.pt.models.OwnerInfo;
 import org.egov.pt.models.Property;
+import org.egov.pt.models.workflow.ProcessInstance;
 import org.egov.pt.util.PTConstants;
 import org.egov.tracer.model.CustomException;
 import org.javers.core.Javers;
@@ -155,6 +156,7 @@ public class DiffService {
 		default:
 			if (javers == null)
 				javers = JaversBuilder.javers()
+						.registerIgnoredClass(ProcessInstance.class)
 						.registerValue(BigDecimal.class, new BigDecimalComparatorWithFixedEquals()).build();
 			javersLocal = javers;
 		}
