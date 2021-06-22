@@ -122,7 +122,7 @@ public class StorageController {
                         Iterator<Cell> cellIterator = row.cellIterator();
                         EgBirthDtl birthDtl =  new EgBirthDtl();
                         birthDtl.setTenantid(tenantId);
-                    	birthDtl.setCounter(0);
+                    	birthDtl.setCounter(1);
                     	birthDtl.setExcelrowindex((row.getRowNum()+1));
                     	birthCerts.add(birthDtl);
                     	
@@ -387,7 +387,7 @@ public class StorageController {
                         Iterator<Cell> cellIterator = row.cellIterator();
                         EgDeathDtl deathDtl =  new EgDeathDtl();
                         deathDtl.setTenantid(tenantId);
-                    	deathDtl.setCounter(0);
+                    	deathDtl.setCounter(1);
                     	deathDtl.setExcelrowindex((row.getRowNum()+1));
                     	deathCerts.add(deathDtl);
                     	
