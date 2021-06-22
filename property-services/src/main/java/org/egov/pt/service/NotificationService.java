@@ -99,7 +99,7 @@ public class NotificationService {
 		String msg = null;
 		
 		Boolean isCreate =  CreationReason.CREATE.equals(property.getCreationReason());
-		String state =( wf!=null && wf.getId() != null) ? getStateFromWf(wf, configs.getIsWorkflowEnabled()) : WF_NO_WORKFLOW;
+		String state =( wf!=null) ? getStateFromWf(wf, configs.getIsWorkflowEnabled()) : WF_NO_WORKFLOW;
 
 		//String state = getStateFromWf(wf, configs.getIsWorkflowEnabled());
 		String completeMsgs = notifUtil.getLocalizationMessages(property.getTenantId(), propertyRequest.getRequestInfo());
