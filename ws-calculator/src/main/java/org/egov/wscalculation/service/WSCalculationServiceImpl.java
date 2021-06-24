@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -417,8 +418,18 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		
 		Map<String, Object> masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
 		mDataService.loadBillingFrequencyMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId(), masterMap);
+		//Set bill start date
+		
+		
+		ZoneId zoneId = ZoneId.systemDefault();
+		calcReq.setBillStartDate(LocalDateTime.now().atZone(zoneId).toEpochSecond());
+        
+		
+		
 		BillEstimation billEstimation = new BillEstimation();
-		List<Calculation> result  = demandGeneration(calcReq, masterMap);	
+	//	List<Calculation> result  = demandGeneration(calcReq, masterMap);
+		
+		List<Calculation> result = getCalculations(calcReq, masterMap);
 		if(result != null) {			
 			billEstimation = estimationService.getWaterChargeForEstimate(calcReq,masterMap, result);
 		
