@@ -216,19 +216,19 @@ public class MasterDataService {
 		} else {
 			if (WSCalculationConstant.Monthly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
-				estimationService.getMonthStartAndEndDate(billingPeriod);
+				estimationService.getMonthStartAndEndDate(billingPeriod,criteria.getBillingDate());
 			} else if (WSCalculationConstant.Quaterly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
-				estimationService.getQuarterStartAndEndDate(billingPeriod);
+				estimationService.getQuarterStartAndEndDate(billingPeriod,criteria.getBillingDate());
 			} else if (WSCalculationConstant.Yearly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
-				estimationService.getYearStartAndEndDate(billingPeriod);
+				estimationService.getYearStartAndEndDate(billingPeriod,criteria.getBillingDate());
 			} else if (WSCalculationConstant.Half_Yearly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
-				estimationService.getHalfYearStartAndEndDate(billingPeriod);
+				estimationService.getHalfYearStartAndEndDate(billingPeriod,criteria.getBillingDate());
 			} else if (WSCalculationConstant.Bi_Monthly_Billing_Period
 					.equalsIgnoreCase(master.get(WSCalculationConstant.Billing_Cycle_String).toString())) {
-				estimationService.getBiMonthStartAndEndDate(billingPeriod);
+				estimationService.getBiMonthStartAndEndDate(billingPeriod,criteria.getBillingDate());
 			}else {
 				LocalDateTime demandEndDate = LocalDateTime.now();
 				demandEndDate = setCurrentDateValueToStartingOfDay(demandEndDate);

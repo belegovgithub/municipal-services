@@ -743,7 +743,7 @@ public class DemandService {
 		String assessmentYear = estimationService.getAssessmentYear(LocalDateTime.now().minusDays(1));
 		for (String connectionNo : connectionNos) {
 			CalculationCriteria calculationCriteria = CalculationCriteria.builder().tenantId(tenantId)
-					.assessmentYear(assessmentYear).connectionNo(connectionNo).build();
+					.assessmentYear(assessmentYear).connectionNo(connectionNo).billingDate(dateObject.getTimeInMillis()).build();
 			List<CalculationCriteria> calculationCriteriaList = new ArrayList<>();
 			calculationCriteriaList.add(calculationCriteria);
 			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)

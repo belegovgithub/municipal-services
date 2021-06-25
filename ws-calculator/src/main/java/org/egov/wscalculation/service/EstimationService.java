@@ -80,7 +80,7 @@ public class EstimationService {
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map<String, List> getEstimationMap(CalculationCriteria criteria, RequestInfo requestInfo,
-			Map<String, Object> masterData) {
+			Map<String, Object> masterData,BillEstimation billEstimation) {
 		String tenantId = null != criteria.getTenantId() ? criteria.getTenantId() : requestInfo.getUserInfo().getTenantId();
 		if (criteria.getWaterConnection() == null && !StringUtils.isEmpty(criteria.getConnectionNo())) {
 			List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, criteria.getConnectionNo(), tenantId);
@@ -106,7 +106,6 @@ public class EstimationService {
 		// mDataService.setWaterConnectionMasterValues(requestInfo, tenantId,
 		// billingSlabMaster,
 		// timeBasedExemptionMasterMap);
-		BillEstimation billEstimation =new BillEstimation();
 		BigDecimal taxAmt = getWaterEstimationCharge(criteria.getWaterConnection(), criteria, billingSlabMaster, billingSlabIds,
 				requestInfo,billEstimation);
 		List<TaxHeadEstimate> taxHeadEstimates = getEstimatesForTax(taxAmt, criteria.getWaterConnection(),

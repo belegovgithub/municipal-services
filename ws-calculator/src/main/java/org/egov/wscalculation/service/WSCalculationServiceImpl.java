@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -46,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.datatype.threetenbp.deser.LocalDateDeserializer;
 import com.jayway.jsonpath.JsonPath;
 
 import lombok.extern.slf4j.Slf4j;
@@ -330,42 +332,52 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	public List<Calculation>demandGeneration(CalculationReq request, Map<String, Object> masterMap) {
 		log.info("going to  demandGeneration get calculations");
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
-		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
-			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),
-					masterMap);
+		 CalculationCriteria criteria= request.getCalculationCriteria().get(0);
+		 BillEstimation billEstimation = new BillEstimation();
+			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),					
+					masterMap,billEstimation);
 			
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
+			System.out.println(billEstimation.getWaterCharge());
+			
+			
 			Map<String, Object> billingPeriod =(Map<String, Object>) masterMap.get(WSCalculationConstant.BILLING_PERIOD);
 			billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
 			Long billingCycleStartdDate = (Long) billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
 			Long billingCycleEndDate = (Long) billingPeriod.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
-			//Get the difference between End date and activation date and based on that define the amount.
-			LocalDate billingPeriodStart = LocalDate.ofEpochDay(billingCycleStartdDate / 86400000L);		
-			LocalDate activationDate = LocalDate.now().minusDays(1);
-			int totalMonth = getBillingMonthsToCharge(billingPeriodStart, billingCycleEndDate);
+			Long activationDate = criteria.getBillingDate();
+			int totalMonth = getBillingMonthsToCharge(billingCycleStartdDate, billingCycleEndDate);
 			int balanceMonth = getBillingMonthsToCharge(activationDate, billingCycleEndDate);
+			billEstimation.setMonthsToCharge(balanceMonth);
+			
+			
 			if(estimationMap.get("estimates")!=null) {
 				List<TaxHeadEstimate> taxHeadEstimates=estimationMap.get("estimates");
 				for (TaxHeadEstimate taxHeadEstimate : taxHeadEstimates) {
 					if(taxHeadEstimate.getTaxHeadCode().equals(WSCalculationConstant.WS_CHARGE)) {
-						taxHeadEstimate.getEstimateAmount().multiply(new BigDecimal(balanceMonth)).divide(new BigDecimal(totalMonth));
+						BigDecimal finalAmount =taxHeadEstimate.getEstimateAmount().multiply(new BigDecimal(balanceMonth)).divide(new BigDecimal(totalMonth),2,2).setScale(2, 2);
+						taxHeadEstimate.setEstimateAmount(finalAmount);
+						billEstimation.setWaterCharge(finalAmount);
 					}
 				}
+				estimationMap.put("estimates", taxHeadEstimates);
 			}
 			Calculation calculation = getCalculation(request.getRequestInfo(), criteria, estimationMap, masterMap,
 					true);
 			calculations.add(calculation);
-		}
+		 
 		//demandService.generateDemand(request.getRequestInfo(), calculations, masterMap, true);
 		return calculations;
 	}
 
-	public int getBillingMonthsToCharge(LocalDate fromDate , Long billingCycleEndDate) {
-		    LocalDate billingPeriodEndDate = LocalDate.ofEpochDay(billingCycleEndDate / 86400000L);		    
-		    Period difference = Period.between(fromDate, billingPeriodEndDate);
-		    return difference.getMonths()+1; 
+	public int getBillingMonthsToCharge(Long fromDate , Long toDate) {
+		Calendar m1 = Calendar.getInstance();
+		m1.setTimeInMillis(fromDate);
+		Calendar m2 = Calendar.getInstance();
+		m2.setTimeInMillis(toDate);
+	    return  (m2.get(Calendar.YEAR)*12 + m2.get(Calendar.MONTH))- (m1.get(Calendar.YEAR)*12 + m1.get(Calendar.MONTH))+1; 
 	}
 	
 	/**
@@ -475,8 +487,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	public List<Calculation> getCalculations(CalculationReq request, Map<String, Object> masterMap) {
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
 		for (CalculationCriteria criteria : request.getCalculationCriteria()) {
+			BillEstimation billEstimation = new BillEstimation();
 			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),
-					masterMap);
+					masterMap, billEstimation);
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
