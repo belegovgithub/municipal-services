@@ -296,7 +296,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 
 					}
 
-					billEstimation.setBillAmount(billAmountForBillingPeriod);
+					billEstimation.setWaterCharge(new BigDecimal(billAmountForBillingPeriod));
 					billEstimation.setPayableBillAmount(fianlBillAmount);
 				}
 

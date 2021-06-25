@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.egov.wscalculation.constants.WSCalculationConstant;
+import org.egov.wscalculation.web.models.BillEstimation;
 import org.egov.wscalculation.web.models.BillingSlab;
 import org.egov.wscalculation.web.models.CalculationCriteria;
 import org.egov.wscalculation.web.models.Property;
@@ -105,8 +106,9 @@ public class EstimationService {
 		// mDataService.setWaterConnectionMasterValues(requestInfo, tenantId,
 		// billingSlabMaster,
 		// timeBasedExemptionMasterMap);
+		BillEstimation billEstimation =new BillEstimation();
 		BigDecimal taxAmt = getWaterEstimationCharge(criteria.getWaterConnection(), criteria, billingSlabMaster, billingSlabIds,
-				requestInfo);
+				requestInfo,billEstimation);
 		List<TaxHeadEstimate> taxHeadEstimates = getEstimatesForTax(taxAmt, criteria.getWaterConnection(),
 				timeBasedExemptionMasterMap, RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 
@@ -307,7 +309,7 @@ public class EstimationService {
 	 * @return
 	 */
 	public BigDecimal getWaterEstimationCharge(WaterConnection waterConnection, CalculationCriteria criteria, 
-			Map<String, JSONArray> billingSlabMaster, ArrayList<String> billingSlabIds, RequestInfo requestInfo) {
+			Map<String, JSONArray> billingSlabMaster, ArrayList<String> billingSlabIds, RequestInfo requestInfo,BillEstimation billEstimate) {
 		BigDecimal waterCharge = BigDecimal.ZERO;
 		if (billingSlabMaster.get(WSCalculationConstant.WC_BILLING_SLAB_MASTER) == null)
 			throw new CustomException("BILLING_SLAB_NOT_FOUND", "Billing Slab are Empty");
@@ -333,10 +335,10 @@ public class EstimationService {
 			throw new CustomException("INVALID_BILLING_SLAB",
 					"More than one billing slab found");
 		billingSlabIds.add(billingSlabs.get(0).getId());
-		
+		billEstimate.setBillingSlab(billingSlabs.get(0));
 		// WaterCharge Calculation
 		 Double  totalUOM = getUnitOfMeasurement(waterConnection, calculationAttribute, criteria,property);
-		
+		billEstimate.setTotalUOM(totalUOM);
 		BillingSlab billSlab = billingSlabs.get(0);
 		// IF calculation type is flat then take flat rate else take slab and calculate the charge
 		//For metered connection calculation on graded fee slab
@@ -395,11 +397,14 @@ public class EstimationService {
 			
 			
 		}
+		
 		//To add maintenance charge
 		if(billSlab.getMaintenanceCharge() != 0.0) {
-			waterCharge.add(new BigDecimal(billSlab.getMaintenanceCharge()));
+			BigDecimal maintainceCharge =new BigDecimal(billSlab.getMaintenanceCharge());
+			waterCharge.add(maintainceCharge);
+			billEstimate.setMaintenanceCharge(maintainceCharge);
 		}
-		
+		billEstimate.setWaterCharge(waterCharge);
 		
 		
 		

@@ -724,7 +724,7 @@ public class DemandService {
 			calculationCriteriaList.add(calculationCriteria);
 			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)
 					.requestInfo(requestInfo).isconnectionCalculation(true).build();
-			//wsCalculationProducer.push(configs.getCreateDemand(), calculationReq);
+			wsCalculationProducer.push(configs.getCreateDemand(), calculationReq);
 			 log.info("Prepared Statement" + calculationReq.toString());
 
 		}
