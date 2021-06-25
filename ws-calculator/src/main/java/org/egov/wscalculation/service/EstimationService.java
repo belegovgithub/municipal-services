@@ -66,7 +66,7 @@ public class EstimationService {
 	private WSCalculationUtil wSCalculationUtil;
 	
 	@Value("${app.timezone}")
-	private String timeZone;
+	private String timeZone="IST";
 
 	/**
 	 * Generates a List of Tax head estimates with tax head code, tax head
@@ -641,8 +641,12 @@ public class EstimationService {
 	}
 	
 	
-	public Map<String, Object> getHalfYearStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getHalfYearStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
+		
 		if(fromDateCalendar.get(Calendar.MONTH)<= Calendar.MARCH   ) {
 			fromDateCalendar.set(Calendar.MONTH, Calendar.OCTOBER);	
 			fromDateCalendar.add(Calendar.YEAR, -1);	
@@ -664,15 +668,18 @@ public class EstimationService {
 	}
 	
 	
-	public Map<String, Object> getYearStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getYearStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		if(fromDateCalendar.get(Calendar.MONTH)< 3) {
 			fromDateCalendar.add(Calendar.YEAR, -1);	
 		}
 		fromDateCalendar.set(Calendar.MONTH, Calendar.APRIL);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1); 
 		setTimeToBeginningOfDay(fromDateCalendar);
-		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));	
 		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis());
 		toDateCalendar.add(Calendar.YEAR, 1);
 		toDateCalendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -682,13 +689,17 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getQuarterStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getQuarterStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		fromDateCalendar.set(Calendar.MONTH, fromDateCalendar.get(Calendar.MONTH)/3 * 3);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
 		setTimeToBeginningOfDay(fromDateCalendar);
 		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		toDateCalendar.set(Calendar.MONTH, toDateCalendar.get(Calendar.MONTH)/3 * 3 + 2);
+		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis()); 
+		toDateCalendar.add(Calendar.MONTH,2);
 		toDateCalendar.set(Calendar.DAY_OF_MONTH, toDateCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(toDateCalendar);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, fromDateCalendar.getTimeInMillis());
@@ -696,13 +707,17 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getBiMonthStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getBiMonthStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));	
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		fromDateCalendar.set(Calendar.MONTH, fromDateCalendar.get(Calendar.MONTH)/2 * 2);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
 		setTimeToBeginningOfDay(fromDateCalendar);
 		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		toDateCalendar.set(Calendar.MONTH, toDateCalendar.get(Calendar.MONTH)/2 * 2 + 1);
+		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis());
+		toDateCalendar.add(Calendar.MONTH, 1);
 		toDateCalendar.set(Calendar.DAY_OF_MONTH, toDateCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(toDateCalendar);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, fromDateCalendar.getTimeInMillis());
@@ -710,12 +725,16 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getMonthStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getMonthStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar monthStartDate = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			monthStartDate.setTimeInMillis(billingDate[0]);
+		}
 		monthStartDate.set(Calendar.DAY_OF_MONTH, monthStartDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		setTimeToBeginningOfDay(monthStartDate);
 	    
 		Calendar monthEndDate = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		monthEndDate.setTimeInMillis(monthStartDate.getTimeInMillis());
 		monthEndDate.set(Calendar.DAY_OF_MONTH, monthEndDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(monthEndDate);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, monthStartDate.getTimeInMillis());
@@ -1010,10 +1029,17 @@ public class EstimationService {
 		Date d = new Date();	
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));		
 		cal.setTime(d);	
-		setTimeToEndofDay(cal);		
+		setTimeToEndofDay(cal);	
+		
+		Long billingDate =1640889000000l;//1633026600000l;
 		EstimationService service = new EstimationService();
-		HashMap<String, Object> billingPeriod = new HashMap<String, Object>();
-		service.getHalfYearStartAndEndDate(billingPeriod);		
+ 		HashMap<String, Object> billingPeriod = new HashMap<String, Object>();
+ 		System.out.println("Yearly "+service.getYearStartAndEndDate(billingPeriod,billingDate));
+		System.out.println("Half yearly "+service.getHalfYearStartAndEndDate(billingPeriod,billingDate));
+		System.out.println("Quaterly "+service.getQuarterStartAndEndDate(billingPeriod, billingDate));
+		System.out.println("BiMonthly "+service.getBiMonthStartAndEndDate(billingPeriod, billingDate));
+		System.out.println("Monthly "+service.getMonthStartAndEndDate(billingPeriod, billingDate));
+		 
 		//EstimationService.enclosing_method(){startingDay=1614537000000, endingDay=1619807399999}
 		 
 		

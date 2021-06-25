@@ -57,6 +57,6 @@ public class CalculationReq  {
     	
     	private String status;
     	
-
+    	private Long billingDate;
 }
 
