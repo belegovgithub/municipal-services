@@ -737,8 +737,6 @@ public class DemandService {
 		dateObject.add(Calendar.DATE, -1);
 		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
 					WSCalculationConstant.nonMeterdConnection,dateObject );
-		connectionNos.clear();
-		connectionNos.add("WS-BARE-2021-001499"); 	
 		//Assessment Year 
 		String assessmentYear = estimationService.getAssessmentYear(LocalDateTime.now().minusDays(1));
 		for (String connectionNo : connectionNos) {

@@ -12,10 +12,12 @@ import org.egov.tracer.model.CustomException;
 import org.egov.wscalculation.config.WSCalculationConfiguration;
 import org.egov.wscalculation.constants.WSCalculationConstant;
 import org.egov.wscalculation.validator.WSCalculationWorkflowValidator;
+import org.egov.wscalculation.web.models.BillEstimation;
 import org.egov.wscalculation.web.models.Calculation;
 import org.egov.wscalculation.web.models.CalculationCriteria;
 import org.egov.wscalculation.web.models.CalculationReq;
 import org.egov.wscalculation.producer.WSCalculationProducer;
+import org.egov.wscalculation.service.DemandService;
 import org.egov.wscalculation.service.MasterDataService;
 import org.egov.wscalculation.service.WSCalculationServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,10 @@ public class DemandGenerationConsumer {
 
 	@Autowired
 	private WSCalculationWorkflowValidator wsCalulationWorkflowValidator;
+	
+	@Autowired
+	private DemandService demandService;
+	
 	/**
 	 * Listen the topic for processing the batch records.
 	 * 
@@ -237,26 +243,10 @@ public class DemandGenerationConsumer {
 			}
 			
 			log.info("Calling Demand generation==");
-			List<Calculation> result  = wSCalculationServiceImpl.demandGeneration(request, masterMap);
-		
-//			Map<String,Object>calculationResult = wSCalculationServiceImpl.demandGeneration(request, masterMap);
-//			List<Calculation>result = wSCalculationServiceImpl.getCalculationObj(calculationResult);
-//			List<Calculation>finalResult = new ArrayList<Calculation>();
-//			if(calculationResult != null) {
-//				
-//				BillEstimation billEstimation = estimationService.getWaterChargeForEstimate(request,masterMap, calculationResult); // Get bill for specific period
-//				Calculation obj = result.get(0);
-//				obj.setTotalAmount(new BigDecimal(billEstimation.getPayableBillAmount()));
-//				obj.setTaxAmount(new BigDecimal(billEstimation.getPayableBillAmount()));
-//				obj.setCharge(new BigDecimal(billEstimation.getPayableBillAmount()));
-//				finalResult.add(obj);
-//				System.out.println("billEstimation  Result=="+billEstimation.toString());
-//			}			
-
-			
-			
-			
-//			log.info("Demand generated=="+finalResult.get(0).toString());
+			BillEstimation billEstimation = new BillEstimation();
+			List<Calculation> result  = wSCalculationServiceImpl.getWaterBillEstimate(request, masterMap,billEstimation);
+			demandService.generateDemand(request.getRequestInfo(), result, masterMap, true);
+ 
 			String connectionNoStrings = request.getCalculationCriteria().stream()
 					.map(criteria -> criteria.getConnectionNo()).collect(Collectors.toSet()).toString();
 			StringBuilder str = new StringBuilder("Demand generated Successfully. For records : ")

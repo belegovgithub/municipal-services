@@ -82,17 +82,20 @@ public class EstimationService {
 	public Map<String, List> getEstimationMap(CalculationCriteria criteria, RequestInfo requestInfo,
 			Map<String, Object> masterData,BillEstimation billEstimation) {
 		String tenantId = null != criteria.getTenantId() ? criteria.getTenantId() : requestInfo.getUserInfo().getTenantId();
-		if (criteria.getWaterConnection() == null && !StringUtils.isEmpty(criteria.getConnectionNo())) {
-			List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, criteria.getConnectionNo(), tenantId);
-			WaterConnection waterConnection = calculatorUtil.getWaterConnectionObject(waterConnectionList);
-			criteria.setWaterConnection(waterConnection);
-		}
-		if (criteria.getWaterConnection() == null || StringUtils.isEmpty(criteria.getConnectionNo())) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("Water Connection are not present for ")
-					.append(StringUtils.isEmpty(criteria.getConnectionNo()) ? "" : criteria.getConnectionNo())
-					.append(" connection no");
-			throw new CustomException("WATER_CONNECTION_NOT_FOUND", builder.toString());
+		
+		if(criteria.getWaterConnection() == null) {
+			if (criteria.getWaterConnection() == null && !StringUtils.isEmpty(criteria.getConnectionNo())) {
+				List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, criteria.getConnectionNo(), tenantId);
+				WaterConnection waterConnection = calculatorUtil.getWaterConnectionObject(waterConnectionList);
+				criteria.setWaterConnection(waterConnection);
+			}
+			if (criteria.getWaterConnection() == null || StringUtils.isEmpty(criteria.getConnectionNo())) {
+				StringBuilder builder = new StringBuilder();
+				builder.append("Water Connection are not present for ")
+						.append(StringUtils.isEmpty(criteria.getConnectionNo()) ? "" : criteria.getConnectionNo())
+						.append(" connection no");
+				throw new CustomException("WATER_CONNECTION_NOT_FOUND", builder.toString());
+			}
 		}
 		Map<String, JSONArray> billingSlabMaster = new HashMap<>();
 		Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
