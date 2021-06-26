@@ -1,9 +1,11 @@
 package org.egov.wscalculation.repository.builder;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
 
 import org.egov.wscalculation.config.WSCalculationConfiguration;
+import org.egov.wscalculation.service.EstimationService;
 import org.egov.wscalculation.web.models.MeterReadingSearchCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -168,9 +170,8 @@ public class WSCalculatorQueryBuilder {
 		return query.toString();
 
 	}
-	
-	
-	public String getConnectionNumberList(String tenantId, String connectionType, List<Object> preparedStatement) {
+ 
+	public String getConnectionNumberList(String tenantId, String connectionType, List<Object> preparedStatement,Calendar activationDate) {
 		StringBuilder query = new StringBuilder(connectionNoListQuery);
 		// Add connection type
 		addClauseIfRequired(preparedStatement, query);
@@ -182,6 +183,17 @@ public class WSCalculatorQueryBuilder {
 		preparedStatement.add(tenantId);
 		addClauseIfRequired(preparedStatement, query);
 		query.append(" conn.connectionno is not null");
+		if(activationDate!=null) {
+			addClauseIfRequired(preparedStatement, query);
+			query.append(" ws.connectionexecutiondate >= ? ");
+			EstimationService.setTimeToBeginningOfDay(activationDate);
+			preparedStatement.add(activationDate.getTimeInMillis());
+			addClauseIfRequired(preparedStatement, query);
+			EstimationService.setTimeToEndofDay(activationDate);
+			query.append(" ws.connectionexecutiondate <= ? ");
+			preparedStatement.add(activationDate.getTimeInMillis());
+		}
+		
 		return query.toString();
 		
 	}

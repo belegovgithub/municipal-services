@@ -26,7 +26,7 @@ public class BillEstimation {
 	
 	  
 	 @JsonProperty("billAmount")
-	 double billAmount;
+	 BigDecimal waterCharge;
 	 
 	 @JsonProperty("motorChargePayable")
 	 double motorChargePayable;
@@ -39,6 +39,12 @@ public class BillEstimation {
 	 
 	 @JsonProperty("monthsToCharge")
 	 double monthsToCharge;
+	 
+	 private String calculationAttribute;
+	 
+	 private Double  totalUOM; 
+	 
+	 private BigDecimal maintenanceCharge;
 	 
 
 }

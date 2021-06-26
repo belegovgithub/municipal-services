@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.tracer.model.CustomException;
 import org.egov.wscalculation.constants.WSCalculationConstant;
+import org.egov.wscalculation.web.models.BillEstimation;
 import org.egov.wscalculation.web.models.BillingSlab;
 import org.egov.wscalculation.web.models.CalculationCriteria;
 import org.egov.wscalculation.web.models.Property;
@@ -79,19 +80,22 @@ public class EstimationService {
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map<String, List> getEstimationMap(CalculationCriteria criteria, RequestInfo requestInfo,
-			Map<String, Object> masterData) {
+			Map<String, Object> masterData,BillEstimation billEstimation) {
 		String tenantId = null != criteria.getTenantId() ? criteria.getTenantId() : requestInfo.getUserInfo().getTenantId();
-		if (criteria.getWaterConnection() == null && !StringUtils.isEmpty(criteria.getConnectionNo())) {
-			List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, criteria.getConnectionNo(), tenantId);
-			WaterConnection waterConnection = calculatorUtil.getWaterConnectionObject(waterConnectionList);
-			criteria.setWaterConnection(waterConnection);
-		}
-		if (criteria.getWaterConnection() == null || StringUtils.isEmpty(criteria.getConnectionNo())) {
-			StringBuilder builder = new StringBuilder();
-			builder.append("Water Connection are not present for ")
-					.append(StringUtils.isEmpty(criteria.getConnectionNo()) ? "" : criteria.getConnectionNo())
-					.append(" connection no");
-			throw new CustomException("WATER_CONNECTION_NOT_FOUND", builder.toString());
+		
+		if(criteria.getWaterConnection() == null) {
+			if (criteria.getWaterConnection() == null && !StringUtils.isEmpty(criteria.getConnectionNo())) {
+				List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, criteria.getConnectionNo(), tenantId);
+				WaterConnection waterConnection = calculatorUtil.getWaterConnectionObject(waterConnectionList);
+				criteria.setWaterConnection(waterConnection);
+			}
+			if (criteria.getWaterConnection() == null || StringUtils.isEmpty(criteria.getConnectionNo())) {
+				StringBuilder builder = new StringBuilder();
+				builder.append("Water Connection are not present for ")
+						.append(StringUtils.isEmpty(criteria.getConnectionNo()) ? "" : criteria.getConnectionNo())
+						.append(" connection no");
+				throw new CustomException("WATER_CONNECTION_NOT_FOUND", builder.toString());
+			}
 		}
 		Map<String, JSONArray> billingSlabMaster = new HashMap<>();
 		Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
@@ -106,7 +110,7 @@ public class EstimationService {
 		// billingSlabMaster,
 		// timeBasedExemptionMasterMap);
 		BigDecimal taxAmt = getWaterEstimationCharge(criteria.getWaterConnection(), criteria, billingSlabMaster, billingSlabIds,
-				requestInfo);
+				requestInfo,billEstimation);
 		List<TaxHeadEstimate> taxHeadEstimates = getEstimatesForTax(taxAmt, criteria.getWaterConnection(),
 				timeBasedExemptionMasterMap, RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 
@@ -307,7 +311,7 @@ public class EstimationService {
 	 * @return
 	 */
 	public BigDecimal getWaterEstimationCharge(WaterConnection waterConnection, CalculationCriteria criteria, 
-			Map<String, JSONArray> billingSlabMaster, ArrayList<String> billingSlabIds, RequestInfo requestInfo) {
+			Map<String, JSONArray> billingSlabMaster, ArrayList<String> billingSlabIds, RequestInfo requestInfo,BillEstimation billEstimate) {
 		BigDecimal waterCharge = BigDecimal.ZERO;
 		if (billingSlabMaster.get(WSCalculationConstant.WC_BILLING_SLAB_MASTER) == null)
 			throw new CustomException("BILLING_SLAB_NOT_FOUND", "Billing Slab are Empty");
@@ -333,10 +337,10 @@ public class EstimationService {
 			throw new CustomException("INVALID_BILLING_SLAB",
 					"More than one billing slab found");
 		billingSlabIds.add(billingSlabs.get(0).getId());
-		
+		billEstimate.setBillingSlab(billingSlabs.get(0));
 		// WaterCharge Calculation
 		 Double  totalUOM = getUnitOfMeasurement(waterConnection, calculationAttribute, criteria,property);
-		
+		billEstimate.setTotalUOM(totalUOM);
 		BillingSlab billSlab = billingSlabs.get(0);
 		// IF calculation type is flat then take flat rate else take slab and calculate the charge
 		//For metered connection calculation on graded fee slab
@@ -395,11 +399,14 @@ public class EstimationService {
 			
 			
 		}
+		
 		//To add maintenance charge
 		if(billSlab.getMaintenanceCharge() != 0.0) {
-			waterCharge.add(new BigDecimal(billSlab.getMaintenanceCharge()));
+			BigDecimal maintainceCharge =new BigDecimal(billSlab.getMaintenanceCharge());
+			waterCharge.add(maintainceCharge);
+			billEstimate.setMaintenanceCharge(maintainceCharge);
 		}
-		
+		billEstimate.setWaterCharge(waterCharge);
 		
 		
 		
@@ -584,7 +591,10 @@ public class EstimationService {
 	}
 	
 	public String getAssessmentYear() {
-		LocalDateTime localDateTime = LocalDateTime.now();
+		return getAssessmentYear(LocalDateTime.now()); 
+	}
+	
+	public String getAssessmentYear(LocalDateTime localDateTime) {
 		int currentMonth = localDateTime.getMonthValue();
 		String assessmentYear;
 		if (currentMonth >= Month.APRIL.getValue()) {
@@ -633,8 +643,12 @@ public class EstimationService {
 	}
 	
 	
-	public Map<String, Object> getHalfYearStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getHalfYearStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
+		
 		if(fromDateCalendar.get(Calendar.MONTH)<= Calendar.MARCH   ) {
 			fromDateCalendar.set(Calendar.MONTH, Calendar.OCTOBER);	
 			fromDateCalendar.add(Calendar.YEAR, -1);	
@@ -656,15 +670,18 @@ public class EstimationService {
 	}
 	
 	
-	public Map<String, Object> getYearStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getYearStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		if(fromDateCalendar.get(Calendar.MONTH)< 3) {
 			fromDateCalendar.add(Calendar.YEAR, -1);	
 		}
 		fromDateCalendar.set(Calendar.MONTH, Calendar.APRIL);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1); 
 		setTimeToBeginningOfDay(fromDateCalendar);
-		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));	
 		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis());
 		toDateCalendar.add(Calendar.YEAR, 1);
 		toDateCalendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -674,13 +691,17 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getQuarterStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getQuarterStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		fromDateCalendar.set(Calendar.MONTH, fromDateCalendar.get(Calendar.MONTH)/3 * 3);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
 		setTimeToBeginningOfDay(fromDateCalendar);
 		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		toDateCalendar.set(Calendar.MONTH, toDateCalendar.get(Calendar.MONTH)/3 * 3 + 2);
+		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis()); 
+		toDateCalendar.add(Calendar.MONTH,2);
 		toDateCalendar.set(Calendar.DAY_OF_MONTH, toDateCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(toDateCalendar);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, fromDateCalendar.getTimeInMillis());
@@ -688,13 +709,17 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getBiMonthStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getBiMonthStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar fromDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));	
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			fromDateCalendar.setTimeInMillis(billingDate[0]);
+		}
 		fromDateCalendar.set(Calendar.MONTH, fromDateCalendar.get(Calendar.MONTH)/2 * 2);
 		fromDateCalendar.set(Calendar.DAY_OF_MONTH, 1);
 		setTimeToBeginningOfDay(fromDateCalendar);
 		Calendar toDateCalendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		toDateCalendar.set(Calendar.MONTH, toDateCalendar.get(Calendar.MONTH)/2 * 2 + 1);
+		toDateCalendar.setTimeInMillis(fromDateCalendar.getTimeInMillis());
+		toDateCalendar.add(Calendar.MONTH, 1);
 		toDateCalendar.set(Calendar.DAY_OF_MONTH, toDateCalendar.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(toDateCalendar);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, fromDateCalendar.getTimeInMillis());
@@ -702,12 +727,16 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	public Map<String, Object> getMonthStartAndEndDate(Map<String, Object> billingPeriod){
+	public Map<String, Object> getMonthStartAndEndDate(Map<String, Object> billingPeriod, Long... billingDate){
 		Calendar monthStartDate = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		if(billingDate!=null && billingDate.length>0 &&  billingDate[0]!=null) {
+			monthStartDate.setTimeInMillis(billingDate[0]);
+		}
 		monthStartDate.set(Calendar.DAY_OF_MONTH, monthStartDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		setTimeToBeginningOfDay(monthStartDate);
 	    
 		Calendar monthEndDate = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		monthEndDate.setTimeInMillis(monthStartDate.getTimeInMillis());
 		monthEndDate.set(Calendar.DAY_OF_MONTH, monthEndDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 		setTimeToEndofDay(monthEndDate);
 		billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, monthStartDate.getTimeInMillis());
@@ -715,14 +744,14 @@ public class EstimationService {
 		return billingPeriod;
 	}
 	
-	private static void setTimeToBeginningOfDay(Calendar calendar) {
+	public static void setTimeToBeginningOfDay(Calendar calendar) {
 	    calendar.set(Calendar.HOUR_OF_DAY, 0);
 	    calendar.set(Calendar.MINUTE, 0);
 	    calendar.set(Calendar.SECOND, 0);
 	    calendar.set(Calendar.MILLISECOND, 0);
 	}
 
-	private static void setTimeToEndofDay(Calendar calendar) {
+	public static void setTimeToEndofDay(Calendar calendar) {
 	    calendar.set(Calendar.HOUR_OF_DAY, 23);
 	    calendar.set(Calendar.MINUTE, 59);
 	    calendar.set(Calendar.SECOND, 59);
@@ -1002,10 +1031,17 @@ public class EstimationService {
 		Date d = new Date();	
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));		
 		cal.setTime(d);	
-		setTimeToEndofDay(cal);		
+		setTimeToEndofDay(cal);	
+		
+		Long billingDate =1640889000000l;//1633026600000l;
 		EstimationService service = new EstimationService();
-		HashMap<String, Object> billingPeriod = new HashMap<String, Object>();
-		service.getHalfYearStartAndEndDate(billingPeriod);		
+ 		HashMap<String, Object> billingPeriod = new HashMap<String, Object>();
+ 		System.out.println("Yearly "+service.getYearStartAndEndDate(billingPeriod,billingDate));
+		System.out.println("Half yearly "+service.getHalfYearStartAndEndDate(billingPeriod,billingDate));
+		System.out.println("Quaterly "+service.getQuarterStartAndEndDate(billingPeriod, billingDate));
+		System.out.println("BiMonthly "+service.getBiMonthStartAndEndDate(billingPeriod, billingDate));
+		System.out.println("Monthly "+service.getMonthStartAndEndDate(billingPeriod, billingDate));
+		 
 		//EstimationService.enclosing_method(){startingDay=1614537000000, endingDay=1619807399999}
 		 
 		

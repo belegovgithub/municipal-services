@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import org.egov.wscalculation.web.models.TaxPeriod;
 import org.egov.wscalculation.web.models.WaterConnection;
 import org.egov.wscalculation.web.models.WaterConnectionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -66,6 +68,9 @@ public class DemandService {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Value("${app.timezone}")
+	private String timeZone;
+	
 	@Autowired
 	private PayService payService;
 
@@ -684,42 +689,29 @@ public class DemandService {
 			Map<String, Object> billingMasterData = calculatorUtils.loadBillingFrequencyMasterData(requestInfo, tenantId);
 			if(billingMasterData!=null) {
 				if(checkDate) {
-					generateDemandForULB(billingMasterData, requestInfo, tenantId);	
+					long startDay = ((Long.parseLong(billingMasterData.get(WSCalculationConstant.Demand_Generate_Date_String).toString())) / 86400000);
+					boolean isMaching = isCurrentDateIsMatching((String) billingMasterData.get(WSCalculationConstant.Billing_Cycle_String), startDay);
+					if(isMaching) {
+						generateDemandForULB(  billingMasterData, requestInfo, tenantId, null);
+					} 
 				}else {
 					generateDemandForULB(billingMasterData, requestInfo, tenantId,connectionNos);	
 				}
-					
 			}
-			
 		}catch (Exception e) {
 			log.info("Error in generating demand for tenant  :"+ tenantId);
 		}
 		
 	}
 
-	/**
-	 * 
-	 * @param master Master MDMS Data
-	 * @param requestInfo Request Info
-	 * @param tenantId Tenant Id
-	 */
-	public void generateDemandForULB(Map<String, Object> master, RequestInfo requestInfo, String tenantId ) {
-		long startDay = ((Long.parseLong(master.get(WSCalculationConstant.Demand_Generate_Date_String).toString())) / 86400000);
-		log.info("GENERATING DEMAND FOR TENANT :"+ tenantId);
-		boolean isMaching = isCurrentDateIsMatching((String) master.get(WSCalculationConstant.Billing_Cycle_String), startDay);
-		log.info("date Matching"+ isMaching);
-		isMaching =true;
-		if(isMaching) {
-			generateDemandForULB(  master, requestInfo, tenantId, null);
-		}
-	}
+ 
 	
 	
 	public void generateDemandForULB(Map<String, Object> master, RequestInfo requestInfo, String tenantId, List<String> connectionnos) {
 		List<String> connectionNos =new ArrayList<String>();
 		if(CollectionUtils.isEmpty(connectionnos)) {
 			connectionNos = waterCalculatorDao.getConnectionsNoList(tenantId,
-					WSCalculationConstant.nonMeterdConnection);
+					WSCalculationConstant.nonMeterdConnection,null);
 		}else {
 			connectionNos.addAll(connectionnos);
 		}
@@ -733,14 +725,42 @@ public class DemandService {
 			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)
 					.requestInfo(requestInfo).isconnectionCalculation(true).build();
 			wsCalculationProducer.push(configs.getCreateDemand(), calculationReq);
-			// log.info("Prepared Statement" + calculationRes.toString());
+			 log.info("Prepared Statement" + calculationReq.toString());
 
+		}
+		 
+	}
+	
+	
+	public void generateDemandForForActivatedConn(  RequestInfo requestInfo, String tenantId,Long billingDate ) {
+		Calendar dateObject = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		dateObject.add(Calendar.DATE, -1);	
+		if(billingDate!=null) {
+			dateObject.setTimeInMillis(billingDate);
+		}
+		setTimeToBeginningOfDay(dateObject);
+		LocalDateTime localDateTime =LocalDateTime.ofInstant(dateObject.toInstant(), dateObject.getTimeZone().toZoneId());
+		
+		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
+					WSCalculationConstant.nonMeterdConnection,dateObject );
+		//Assessment Year 
+		String assessmentYear = estimationService.getAssessmentYear(localDateTime);
+		for (String connectionNo : connectionNos) {
+			CalculationCriteria calculationCriteria = CalculationCriteria.builder().tenantId(tenantId)
+					.assessmentYear(assessmentYear).connectionNo(connectionNo).billingDate(dateObject.getTimeInMillis()).build();
+			List<CalculationCriteria> calculationCriteriaList = new ArrayList<>();
+			calculationCriteriaList.add(calculationCriteria);
+			CalculationReq calculationReq = CalculationReq.builder().calculationCriteria(calculationCriteriaList)
+					.requestInfo(requestInfo).isconnectionCalculation(true).build();
+			wsCalculationProducer.push(configs.getNewModifiedConnBillTopic(), calculationReq);
+			log.info("Prepared Statement" + calculationReq.toString());
+		
 		}
 		 
 	}
 
 	private Calendar  getFiscalYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		if(billingDay.get(Calendar.MONTH)< 3) {
 			billingDay.add(Calendar.YEAR, -1);	
@@ -753,7 +773,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getQuaterlyFiscalYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/3 * 3);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -763,7 +783,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getFiscalHalfYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/6 * 6);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -773,7 +793,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getFiscalBiMonthBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
  		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/2 * 2);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -795,7 +815,7 @@ public class DemandService {
 	 * @return true if current day is for generation of demand
 	 */
 	private boolean isCurrentDateIsMatching(String billingFrequency, long dayOfMonth) {
-		Calendar currentDay = Calendar.getInstance();
+		Calendar currentDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		setTimeToBeginningOfDay(currentDay);
 		
 		if (billingFrequency.equalsIgnoreCase(WSCalculationConstant.Monthly_Billing_Period)
