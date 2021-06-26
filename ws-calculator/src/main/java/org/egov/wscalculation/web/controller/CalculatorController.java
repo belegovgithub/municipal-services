@@ -120,10 +120,10 @@ public class CalculatorController {
 	}
 	
 	@PostMapping("/_jobscheduler_new_updated_conn")
-	public void jobschedulerNewUpdated(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper ) {
+	public void jobschedulerNewUpdated(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,@RequestParam(required = false) Long  billingDate ) {
 		
  		log.info("Water billing job automated schedular started ");
-		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo());
+		wSCalculationService.generateDemandForNewModifiedConn(requestInfoWrapper.getRequestInfo(),billingDate);
  
 	}
 	

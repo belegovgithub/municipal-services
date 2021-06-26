@@ -732,13 +732,19 @@ public class DemandService {
 	}
 	
 	
-	public void generateDemandForForActivatedConn(  RequestInfo requestInfo, String tenantId ) {
+	public void generateDemandForForActivatedConn(  RequestInfo requestInfo, String tenantId,Long billingDate ) {
 		Calendar dateObject = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		dateObject.add(Calendar.DATE, -1);
+		dateObject.add(Calendar.DATE, -1);	
+		if(billingDate!=null) {
+			dateObject.setTimeInMillis(billingDate);
+		}
+		setTimeToBeginningOfDay(dateObject);
+		LocalDateTime localDateTime =LocalDateTime.ofInstant(dateObject.toInstant(), dateObject.getTimeZone().toZoneId());
+		
 		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
 					WSCalculationConstant.nonMeterdConnection,dateObject );
 		//Assessment Year 
-		String assessmentYear = estimationService.getAssessmentYear(LocalDateTime.now().minusDays(1));
+		String assessmentYear = estimationService.getAssessmentYear(localDateTime);
 		for (String connectionNo : connectionNos) {
 			CalculationCriteria calculationCriteria = CalculationCriteria.builder().tenantId(tenantId)
 					.assessmentYear(assessmentYear).connectionNo(connectionNo).billingDate(dateObject.getTimeInMillis()).build();
@@ -754,7 +760,7 @@ public class DemandService {
 	}
 
 	private Calendar  getFiscalYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		if(billingDay.get(Calendar.MONTH)< 3) {
 			billingDay.add(Calendar.YEAR, -1);	
@@ -767,7 +773,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getQuaterlyFiscalYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/3 * 3);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -777,7 +783,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getFiscalHalfYrBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
 		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/6 * 6);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -787,7 +793,7 @@ public class DemandService {
 	}
 	
 	private Calendar  getFiscalBiMonthBilingDay(Date d,int dayOfMonth) {
-		Calendar billingDay = Calendar.getInstance();
+		Calendar billingDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		billingDay.setTime(d);
  		billingDay.set(Calendar.MONTH, billingDay.get(Calendar.MONTH)/2 * 2);
 		billingDay.set(Calendar.DAY_OF_MONTH, 1);
@@ -809,7 +815,7 @@ public class DemandService {
 	 * @return true if current day is for generation of demand
 	 */
 	private boolean isCurrentDateIsMatching(String billingFrequency, long dayOfMonth) {
-		Calendar currentDay = Calendar.getInstance();
+		Calendar currentDay = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		setTimeToBeginningOfDay(currentDay);
 		
 		if (billingFrequency.equalsIgnoreCase(WSCalculationConstant.Monthly_Billing_Period)

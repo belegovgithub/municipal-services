@@ -66,7 +66,7 @@ public class EstimationService {
 	private WSCalculationUtil wSCalculationUtil;
 	
 	@Value("${app.timezone}")
-	private String timeZone="IST";
+	private String timeZone;
 
 	/**
 	 * Generates a List of Tax head estimates with tax head code, tax head

@@ -18,6 +18,6 @@ public interface WSCalculationService {
 	
 	public void checkFailedBills(RequestInfo requestInfo,Long fromDateSearch , Long toDateSearch , String tenantId, String connectionno);
 
-	public void generateDemandForNewModifiedConn(RequestInfo requestInfo);
+	public void generateDemandForNewModifiedConn(RequestInfo requestInfo,Long billingDate);
 	 
 }

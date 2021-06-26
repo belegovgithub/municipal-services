@@ -139,7 +139,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	}
 	
 	
-	public void generateDemandForNewModifiedConn(RequestInfo requestInfo) {
+	public void generateDemandForNewModifiedConn(RequestInfo requestInfo,Long billingDate) {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		LocalDateTime date = LocalDateTime.now();
 		log.info("Time schedule start for water demand generation on : " + date.format(dateTimeFormatter));
@@ -148,7 +148,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 		if (tenantIds.isEmpty())
 			return;
 		tenantIds.forEach(tenantId -> {
-			demandService.generateDemandForForActivatedConn ( requestInfo,  tenantId );
+			demandService.generateDemandForForActivatedConn ( requestInfo,  tenantId,billingDate );
 		});
 	}
 
