@@ -232,9 +232,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	}
 
 	public int getBillingMonthsToCharge(Long fromDate , Long toDate) {
-		Calendar m1 = Calendar.getInstance();
+		Calendar m1 = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		m1.setTimeInMillis(fromDate);
-		Calendar m2 = Calendar.getInstance();
+		Calendar m2 = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 		m2.setTimeInMillis(toDate);
 	    return  (m2.get(Calendar.YEAR)*12 + m2.get(Calendar.MONTH))- (m1.get(Calendar.YEAR)*12 + m1.get(Calendar.MONTH))+1; 
 	}
