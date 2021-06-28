@@ -196,7 +196,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
-			
+			log.info("Billing Estimate before calculation "+billEstimation);
 			Map<String, Object> billingPeriod =(Map<String, Object>) masterMap.get(WSCalculationConstant.BILLING_PERIOD);
 			Long billingCycleStartdDate = (Long) billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
 			Long billingCycleEndDate = (Long) billingPeriod.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
@@ -210,6 +210,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 				int balanceMonth = getBillingMonthsToCharge(activationDate, billingCycleEndDate);
 				billEstimation.setMonthsToCharge(balanceMonth);
 				
+				log.info("total month "+ totalMonth  +" balance month "+ balanceMonth);
 				
 				if(estimationMap.get("estimates")!=null) {
 					List<TaxHeadEstimate> taxHeadEstimates=estimationMap.get("estimates");
@@ -223,6 +224,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 					estimationMap.put("estimates", taxHeadEstimates);
 				}
 			}
+			log.info("Estimation updated "+  billEstimation);
 			Calculation calculation = getCalculation(request.getRequestInfo(), criteria, estimationMap, masterMap,
 					true);
 			calculations.add(calculation);
