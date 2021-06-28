@@ -34,6 +34,9 @@ public class BillEstimation {
 	 @JsonProperty("payableBillAmount")
 	 double payableBillAmount;
 	 
+	 @JsonProperty("billingDate")
+	 private Long billingDate;
+	 
 	 @JsonProperty("billingCycleEndDate")
 	 long billingCycleEndDate;
 	 

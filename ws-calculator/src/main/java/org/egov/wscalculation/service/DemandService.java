@@ -744,6 +744,7 @@ public class DemandService {
 		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
 					WSCalculationConstant.nonMeterdConnection,dateObject );
 		//Assessment Year 
+		log.info("tenantId "+tenantId +" : "+ dateObject.getTime());
 		String assessmentYear = estimationService.getAssessmentYear(localDateTime);
 		for (String connectionNo : connectionNos) {
 			CalculationCriteria calculationCriteria = CalculationCriteria.builder().tenantId(tenantId)

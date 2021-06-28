@@ -140,10 +140,6 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	
 	
 	public void generateDemandForNewModifiedConn(RequestInfo requestInfo,Long billingDate) {
-		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		LocalDateTime date = LocalDateTime.now();
-		log.info("Time schedule start for water demand generation on : " + date.format(dateTimeFormatter));
-		//demandService.generateDemand ( requestInfo,  "pb.bareilly" );
 		List<String> tenantIds = wSCalculationDao.getTenantId();
 		if (tenantIds.isEmpty())
 			return;
@@ -153,25 +149,25 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	}
 
 	public BillEstimation getBillEstimate(CalculationReq calcReq) {
-		
+		//Validate master data
+		Map<String, Object> masterMap;
+		try {
+			 masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
+		}catch (Exception e) {
+				throw new CustomException("BILLING_MASTER_DATA_NOT_FOUND", "Billing master data not available");
+		}
+		//Enrich the request data 
 		Calendar dateObject = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-				
-		    CalculationCriteria calculationCriteria = calcReq.getCalculationCriteria().get(0);
-		    calculationCriteria.setBillingDate(dateObject.getTimeInMillis());
-			calculationCriteria.setLastReading(0.0d);
-			calculationCriteria.setCurrentReading(1000.0d);
-			if(!ObjectUtils.isEmpty(calculationCriteria.getWaterConnection())) {
-				calculationCriteria.getWaterConnection().setWaterSource(calculationCriteria.getWaterConnection().getWaterSourceSubSource());
-			}
+		CalculationCriteria calculationCriteria = calcReq.getCalculationCriteria().get(0);
+		calculationCriteria.setBillingDate(dateObject.getTimeInMillis());
+		calculationCriteria.setLastReading(0.0d);
+		calculationCriteria.setCurrentReading(1000.0d);
 			
-			List<CalculationCriteria> calculationCriteriaList = new ArrayList<>();
-			calculationCriteriaList.add(calculationCriteria);
- 
-			Map<String, Object> masterMap = mDataService.loadMasterData(calcReq.getRequestInfo(), calcReq.getCalculationCriteria().get(0).getTenantId());
-			BillEstimation billEstimation = new BillEstimation();
-			getWaterBillEstimate(calcReq, masterMap,billEstimation);
-						
-		
+		List<CalculationCriteria> calculationCriteriaList = new ArrayList<>();
+		calculationCriteriaList.add(calculationCriteria);
+			
+		BillEstimation billEstimation = new BillEstimation();
+		getWaterBillEstimate(calcReq, masterMap,billEstimation);
 		return billEstimation;
 		
 	}
@@ -192,7 +188,6 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	}
 	
 	public List<Calculation> getWaterBillEstimate(CalculationReq request, Map<String, Object> masterMap,BillEstimation billEstimation ) {
-		log.info("going to  demandGeneration get calculations");
 		List<Calculation> calculations = new ArrayList<>(request.getCalculationCriteria().size());
 		 CalculationCriteria criteria= request.getCalculationCriteria().get(0);
 			Map<String, List> estimationMap = estimationService.getEstimationMap(criteria, request.getRequestInfo(),					
@@ -201,14 +196,16 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
-			System.out.println(billEstimation.getWaterCharge());
+			
+			Map<String, Object> billingPeriod =(Map<String, Object>) masterMap.get(WSCalculationConstant.BILLING_PERIOD);
+			Long billingCycleStartdDate = (Long) billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
+			Long billingCycleEndDate = (Long) billingPeriod.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
+			billEstimation.setBillingDate(billingCycleStartdDate);
+			billEstimation.setBillingCycleEndDate(billingCycleEndDate);
 			
 			if (criteria.getWaterConnection().getConnectionType().equals(WSCalculationConstant.nonMeterdConnection)) {
-				Map<String, Object> billingPeriod =(Map<String, Object>) masterMap.get(WSCalculationConstant.BILLING_PERIOD);
-				billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
-				Long billingCycleStartdDate = (Long) billingPeriod.get(WSCalculationConstant.STARTING_DATE_APPLICABLES);
-				Long billingCycleEndDate = (Long) billingPeriod.get(WSCalculationConstant.ENDING_DATE_APPLICABLES);
 				Long activationDate = criteria.getBillingDate();
+				billEstimation.setBillingDate(activationDate); 
 				int totalMonth = getBillingMonthsToCharge(billingCycleStartdDate, billingCycleEndDate);
 				int balanceMonth = getBillingMonthsToCharge(activationDate, billingCycleEndDate);
 				billEstimation.setMonthsToCharge(balanceMonth);
