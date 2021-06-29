@@ -40,7 +40,7 @@ public class BillEstimation {
 	 private Long billingDate;
 	 
 	 @JsonProperty("billingCycleEndDate")
-	 long billingCycleEndDate;
+	 Long billingCycleEndDate;
 	 
 	 @JsonProperty("monthsToCharge")
 	 double monthsToCharge;
