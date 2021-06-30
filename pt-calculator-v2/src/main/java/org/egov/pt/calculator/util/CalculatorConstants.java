@@ -84,6 +84,16 @@ public class CalculatorConstants {
 	public static final String ADHOC_REBATE_REASON_KEY = "adhocExemptionReason";
 	
 	public static final String ALLOWED_RECEIPT_STATUS = "APPROVED,REMITTED,NEW";
+	
+	public static final String PT_LIGHTING_TAX = "PT_LIGHTING_TAX";
+	
+	public static final String PT_SCAVENGING_TAX = "PT_SCAVENGING_TAX";
+	
+	public static final String PT_LIBRARY_CESS = "PT_LIBRARY_CESS";
+	
+	public static final String PT_CONSERVE_TAX = "PT_CONSERVE_TAX";
+	
+	public static final String PT_SPECIAL_CONSERVANCY_TAX = "PT_SPECIAL_CONSERVANCY_TAX";
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD_WHEN_CALUCLATING_REBATE_AND_PENALTY = Collections.unmodifiableList(Arrays
 			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX));
@@ -93,7 +103,8 @@ public class CalculatorConstants {
 
 	public static final List<String> TAXES_TO_BE_CONSIDERD = Collections.unmodifiableList(Arrays
 			.asList(PT_TAX,PT_HOUSE_TAX,PT_WATER_TAX,PT_CONSERVANCY_TAX,PT_LIGHTINING_TAX,PT_EDUCATION_TAX,PT_OWNER_EXEMPTION, PT_UNIT_USAGE_EXEMPTION
-			,PT_CONSOLIDATED_PROPERTY_TAX ,PT_SANITARY_CESS , PT_EDUCATION_CESS , PT_ADDL_WATER_TAX , PT_DRAINAGE_TAX));
+			,PT_CONSOLIDATED_PROPERTY_TAX ,PT_SANITARY_CESS , PT_EDUCATION_CESS , PT_ADDL_WATER_TAX , PT_DRAINAGE_TAX , PT_LIGHTING_TAX, PT_SCAVENGING_TAX , 
+			PT_CONSERVE_TAX, PT_LIBRARY_CESS , PT_SPECIAL_CONSERVANCY_TAX));
 	/*
 	 * these lists has to be updated with every new additional taxes which will be applied on the principle tax(PT_TAX)  
 	 */
@@ -183,6 +194,11 @@ public class CalculatorConstants {
 	public static final String DEMAND_STATUS_ACTIVE = DemandStatus.ACTIVE.toString();
 
 	public static final String OWNER_STATUS_ACTIVE = "ACTIVE";
+	
+	public static final String REBATE_ATTR = "attr";
+	
+	public static final String ARV = "ARV";
+
 
 	/*
 	 * special characters

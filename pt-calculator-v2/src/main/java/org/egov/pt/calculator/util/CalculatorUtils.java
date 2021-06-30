@@ -819,5 +819,15 @@ public class CalculatorUtils {
         return url.toString();
     }
 
+    public BigDecimal getHouseTaxAmtFromDemandForApplicablesGeneration(Demand demand) {
+        BigDecimal taxAmt = BigDecimal.ZERO;
+        for (DemandDetail detail : demand.getDemandDetails()) {
+            if (CalculatorConstants.PT_HOUSE_TAX.equalsIgnoreCase(detail.getTaxHeadMasterCode()))
+            {    
+            	taxAmt = taxAmt.add(detail.getTaxAmount());
+            }
+        }
+        return taxAmt;
+    }
 
 }

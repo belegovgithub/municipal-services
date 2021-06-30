@@ -473,18 +473,24 @@ public class DemandService {
 		List<DemandDetail> details = demand.getDemandDetails();
 		BigDecimal arvvalue = getArvValue(tenantId, demand.getConsumerCode(), requestInfoWrapper);
 		BigDecimal taxAmt = utils.getTaxAmtFromDemandForApplicablesGeneration(demand);
+		BigDecimal houseTaxAmount = utils.getHouseTaxAmtFromDemandForApplicablesGeneration(demand);
 		BigDecimal collectedPtTax = BigDecimal.ZERO;
 		BigDecimal totalCollectedAmount = BigDecimal.ZERO;
+		BigDecimal rebateAmount = BigDecimal.ZERO;
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
 			totalCollectedAmount = totalCollectedAmount.add(detail.getCollectionAmount());
 			if (CalculatorConstants.TAXES_TO_BE_CONSIDERD.contains(detail.getTaxHeadMasterCode()))
 				collectedPtTax = collectedPtTax.add(detail.getCollectionAmount());
 		}
-
-
+		Map<String, Object> rebateMaster = mDataService.getApplicableMaster(taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap.get(CalculatorConstants.REBATE_MASTER));
+		if(rebateMaster!=null  && ((String)rebateMaster.get(CalculatorConstants.REBATE_ATTR)).equalsIgnoreCase(CalculatorConstants.ARV)){
+			rebateAmount = arvvalue;
+		}
+		else
+			rebateAmount = houseTaxAmount;
 		Map<String, BigDecimal> rebatePenaltyEstimates = payService.applyPenaltyRebateAndInterest(taxAmt,collectedPtTax,
-                taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap,payments,taxPeriod,arvvalue);
+                taxPeriod.getFinancialYear(), timeBasedExmeptionMasterMap,payments,taxPeriod,rebateAmount);
 		
 		if(null == rebatePenaltyEstimates) return isCurrentDemand;
 		
