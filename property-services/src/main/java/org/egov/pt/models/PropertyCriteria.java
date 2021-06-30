@@ -55,6 +55,8 @@ public class PropertyCriteria {
 	
 	private String oldpropertyid;
 	
+	private String abasPropertyid;
+	
 	
 	
 }
