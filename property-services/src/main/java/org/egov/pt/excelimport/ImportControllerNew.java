@@ -203,7 +203,7 @@ public class ImportControllerNew {
 						Set<String> ids = new HashSet<String>();
 						ids.add(entry.getKey());
 						PropertyCriteria propertyCriteria = PropertyCriteria.builder().tenantId(tenantId)
-								.abasPropertyids(ids).build();
+								.abasPropertyids(entry.getKey()).build();
 						if (propertyService
 								.searchProperty(propertyCriteria, requestInfo)
 								.size() > 0) {

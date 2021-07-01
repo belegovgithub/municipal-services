@@ -51,7 +51,7 @@ public class PropertyCriteria {
 	
 	private String locality;
 	
-	private Set<String> abasPropertyids;
+	private String abasPropertyids;
 	
 	private String oldpropertyid;
 	
