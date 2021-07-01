@@ -162,7 +162,7 @@ public class CalculatorUtils {
         details.add(MasterDetail.builder().name(CalculatorConstants.USAGE_DETAIL_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.OWNER_TYPE_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.REBATE_MASTER).build());
-        details.add(MasterDetail.builder().name(CalculatorConstants.PENANLTY_MASTER).build());
+        //details.add(MasterDetail.builder().name(CalculatorConstants.PENANLTY_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.FIRE_CESS_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.CANCER_CESS_MASTER).build());
         details.add(MasterDetail.builder().name(CalculatorConstants.INTEREST_MASTER).build());
