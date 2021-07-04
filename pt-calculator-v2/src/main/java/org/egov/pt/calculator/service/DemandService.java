@@ -494,8 +494,6 @@ public class DemandService {
 		BigDecimal demandNotice = rebatePenaltyEstimates.get(CalculatorConstants.PT_DEMANDNOTICE_CHARGE);
 		log.info(demand.getId() +" -- "+ demand.getConsumerCode() +" : rebate "+rebate+" , penalty "+penalty+" , interest "+interest+" , demandNotice "+demandNotice);
 		DemandDetailAndCollection latestPenaltyDemandDetail,latestInterestDemandDetail,latestDemandNoticeDetail;
-System.out.println("rebate::::"+rebate);
-
 		BigDecimal oldRebate = BigDecimal.ZERO;
 		for(DemandDetail demandDetail : details) {
 			if(demandDetail.getTaxHeadMasterCode().equalsIgnoreCase(PT_TIME_REBATE)){
@@ -503,14 +501,10 @@ System.out.println("rebate::::"+rebate);
 			}
 		}
 		
-		  if(isFullPayment==null)  
-			  rebate = BigDecimal.ZERO;  
-		  else if(!isFullPayment && oldRebate.compareTo(BigDecimal.ZERO)!=0)
+		   if(isFullPayment!=null && !isFullPayment && oldRebate.compareTo(BigDecimal.ZERO)!=0)
 			  rebate = oldRebate.negate();
-		  else if(!isFullPayment)
+		  else if(isFullPayment!=null && !isFullPayment)
 			  rebate=BigDecimal.ZERO;
-		  
-		
 		if(rebate.compareTo(oldRebate)!=0){
 			if(isFullPayment!=null && !isFullPayment)
 				details.add(DemandDetail.builder().taxAmount(rebate)
@@ -594,7 +588,6 @@ System.out.println("rebate::::"+rebate);
 				totalRoundOffAmount = totalRoundOffAmount.add(detail.getTaxAmount());
 			}
 		}
-
 		/*
 		 *  An estimate object will be returned incase if there is a decimal value
 		 *  
@@ -603,10 +596,8 @@ System.out.println("rebate::::"+rebate);
 		TaxHeadEstimate roundOffEstimate = payService.roundOffDecimals(taxAmount,totalRoundOffAmount);
 
 
-
 		BigDecimal decimalRoundOff = null != roundOffEstimate
 				? roundOffEstimate.getEstimateAmount() : BigDecimal.ZERO;
-
 		if(decimalRoundOff.compareTo(BigDecimal.ZERO)!=0){
 				details.add(DemandDetail.builder().taxAmount(roundOffEstimate.getEstimateAmount())
 						.taxHeadMasterCode(roundOffEstimate.getTaxHeadCode()).demandId(demandId).tenantId(tenantId).build());
