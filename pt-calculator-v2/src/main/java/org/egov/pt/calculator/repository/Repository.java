@@ -70,8 +70,9 @@ public class Repository {
 			return (BigDecimal) jdbcTemplate.queryForObject(sql, new Object[] {id}, BigDecimal.class);
 			
 		}catch(Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			return BigDecimal.ZERO;
 		}
-		return BigDecimal.ZERO;
+		
 	}
 }
