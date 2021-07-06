@@ -94,7 +94,7 @@ public class PropertyValidator {
 		validateMasterData(request, errorMap);
 		validateMobileNumber(request, errorMap);
 		validateFields(request, errorMap);
-		if (!CollectionUtils.isEmpty(units))
+		if (!CollectionUtils.isEmpty(units) && !request.getProperty().getPropertyType().equalsIgnoreCase(PTConstants.PT_TYPE_VACANT))
 			validateUnits(request, errorMap);
 		
 		
