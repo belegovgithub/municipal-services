@@ -164,7 +164,6 @@ public class ImportControllerNewArrears {
 						}
 
 					}
-					System.out.println("taxheads::"+taxheads);
 					while (rowIterator.hasNext()) {
 						Row row = rowIterator.next();
 						if (row.getRowNum() >= 0) {
@@ -198,14 +197,15 @@ public class ImportControllerNewArrears {
 									}
 								}
 								else {
-									System.out.println(taxheads.get(index));
 									if (taxheads.get(index) != null) {
+										if(new BigDecimal(getStringVal(cellValue)).compareTo(BigDecimal.ZERO)>0) {
 										columns.setTaxHeadMasterCode(taxheads.get(index));
 										
 										columns.setTaxAmount(new BigDecimal(getStringVal(cellValue)));
 										if(taxheads.get(index).contains("ADVANCE")) 
 											columns.setTaxAmount(columns.getTaxAmount().negate());
 										columns.setCollectedAmount(BigDecimal.ZERO);
+										}
 									}
 								}
 								if (null != columns.getTaxHeadMasterCode() && !columns.getTaxHeadMasterCode().isEmpty()) {
