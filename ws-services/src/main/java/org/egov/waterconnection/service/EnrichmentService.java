@@ -66,6 +66,16 @@ public class EnrichmentService {
 		waterConnectionRequest.getWaterConnection().setAuditDetails(auditDetails);
 		waterConnectionRequest.getWaterConnection().setId(UUID.randomUUID().toString());
 		waterConnectionRequest.getWaterConnection().setStatus(StatusEnum.ACTIVE);
+		//plumber info if persent
+		
+		if (!CollectionUtils.isEmpty(waterConnectionRequest.getWaterConnection().getPlumberInfo())) {
+			waterConnectionRequest.getWaterConnection().getPlumberInfo().forEach(plumberInfo -> {
+				if (plumberInfo.getId() == null) {
+					plumberInfo.setId(UUID.randomUUID().toString());
+				}
+				plumberInfo.setAuditDetails(auditDetails);
+			});
+		}
 		//Application creation date
 		HashMap<String, Object> additionalDetail = new HashMap<>();
 		if (waterConnectionRequest.getWaterConnection().getAdditionalDetails() == null) {

@@ -177,8 +177,15 @@ public class WaterServiceImpl implements WaterService {
 	public List<WaterConnection> updateWaterConnection(WaterConnectionRequest waterConnectionRequest) {
 		if(wsUtil.isModifyConnectionRequest(waterConnectionRequest)) {
 			// Received request to update the connection for modifyConnection WF
+			if(wsUtil.isDeactivateConnectionRequest(waterConnectionRequest)) {
+				// Received request to update the connection for deactivate connection WF
+				System.out.println("Received request to update the connection for deactivate connection WF");
+				return updateWaterConnectionForDeactivateFlow(waterConnectionRequest);
+			}
+			else			
 			return updateWaterConnectionForModifyFlow(waterConnectionRequest);
 		}
+		
 		waterConnectionValidator.validateWaterConnection(waterConnectionRequest, WCConstants.UPDATE_APPLICATION);
 		mDMSValidator.validateMasterData(waterConnectionRequest,WCConstants.UPDATE_APPLICATION );
 		Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
@@ -272,6 +279,39 @@ public class WaterServiceImpl implements WaterService {
 		//check for edit and send edit notification
 		waterDaoImpl.pushForEditNotification(waterConnectionRequest);
 		enrichmentService.postForMeterReading(waterConnectionRequest, WCConstants.MODIFY_CONNECTION);
+		return Arrays.asList(waterConnectionRequest.getWaterConnection());
+	}
+	
+	private List<WaterConnection> updateWaterConnectionForDeactivateFlow(WaterConnectionRequest waterConnectionRequest) {
+		waterConnectionValidator.validateWaterConnection(waterConnectionRequest, WCConstants.DEACTIVATE_CONNECTION);
+		mDMSValidator.validateMasterData(waterConnectionRequest, WCConstants.DEACTIVATE_CONNECTION);
+		BusinessService businessService = workflowService.getBusinessService(
+				waterConnectionRequest.getWaterConnection().getTenantId(), waterConnectionRequest.getRequestInfo(),
+				config.getDeactivateWSBusinessServiceName());
+		WaterConnection searchResult = getConnectionForUpdateRequest(
+				waterConnectionRequest.getWaterConnection().getId(), waterConnectionRequest.getRequestInfo());
+		Property property = validateProperty.getOrValidateProperty(waterConnectionRequest);
+		validateProperty.validatePropertyFields(property,waterConnectionRequest.getRequestInfo());
+		String previousApplicationStatus = workflowService.getApplicationStatus(waterConnectionRequest.getRequestInfo(),
+				waterConnectionRequest.getWaterConnection().getApplicationNo(),
+				waterConnectionRequest.getWaterConnection().getTenantId(), config.getDeactivateWSBusinessServiceName());
+		enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
+		actionValidator.validateUpdateRequest(waterConnectionRequest, businessService, previousApplicationStatus,  WCConstants.DEACTIVATE_CONNECTION);
+		waterConnectionValidator.validateCalcAttr(waterConnectionRequest,searchResult);
+		enrichmentService.enrichWithCalculationAttr(waterConnectionRequest);
+		userService.updateUser(waterConnectionRequest, searchResult);
+		waterConnectionValidator.validateUpdate(waterConnectionRequest, searchResult, WCConstants.DEACTIVATE_CONNECTION);
+		
+		//call calculator service to generate the demand for one time fee
+		calculationService.calculateFeeAndGenerateDemand(waterConnectionRequest, property);
+		wfIntegrator.callWorkFlow(waterConnectionRequest, property);
+		boolean isStateUpdatable = waterServiceUtil.getStatusForUpdate(businessService, previousApplicationStatus);
+		waterDao.updateWaterConnection(waterConnectionRequest, isStateUpdatable);
+		// setting oldApplication Flag
+		markOldApplication(waterConnectionRequest);
+		//check for edit and send edit notification
+		waterDaoImpl.pushForEditNotification(waterConnectionRequest);
+		enrichmentService.postForMeterReading(waterConnectionRequest, WCConstants.DEACTIVATE_CONNECTION);
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}
 
