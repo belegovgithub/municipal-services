@@ -577,8 +577,8 @@ public class DemandService {
 		BigDecimal taxAmount = BigDecimal.ZERO;
 
 		// Collecting the taxHead master codes with the isDebit field in a Map
-		Map<String, Boolean> isTaxHeadDebitMap = mstrDataService.getTaxHeadMasterMap(requestInfoWrapper.getRequestInfo(), tenantId).stream()
-				.collect(Collectors.toMap(TaxHeadMaster::getCode, TaxHeadMaster::getIsDebit));
+		/*Map<String, Boolean> isTaxHeadDebitMap = mstrDataService.getTaxHeadMasterMap(requestInfoWrapper.getRequestInfo(), tenantId).stream()
+				.collect(Collectors.toMap(TaxHeadMaster::getCode, TaxHeadMaster::getIsDebit));*/
 
 		/*
 		 * Summing the credit amount and Debit amount in to separate variables(based on the taxhead:isdebit map) to send to roundoffDecimal method
@@ -588,10 +588,10 @@ public class DemandService {
 		for (DemandDetail detail : demand.getDemandDetails()) {
 
 			if(!detail.getTaxHeadMasterCode().equalsIgnoreCase(PT_ROUNDOFF)){
-				taxAmount = taxAmount.add(detail.getTaxAmount());
+				taxAmount = taxAmount.add(detail.getTaxAmount().subtract(detail.getCollectionAmount()));
 			}
 			else{
-				totalRoundOffAmount = totalRoundOffAmount.add(detail.getTaxAmount());
+				totalRoundOffAmount = totalRoundOffAmount.add(detail.getTaxAmount().subtract(detail.getCollectionAmount()));
 			}
 		}
 		/*
