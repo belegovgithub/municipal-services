@@ -122,6 +122,13 @@ public class ImportControllerNew {
 		taxHeadMaps.put("Additional water tax", "PT_ADDL_WATER_TAX");
 		taxHeadMaps.put("Drainage Tax", "PT_DRAINAGE_TAX");
 		taxHeadMaps.put("Lighting Tax", "PT_LIGHTING_TAX");
+		taxHeadMaps.put("Advance", "PT_ADVANCE_CARRYFORWARD");
+		taxHeadMaps.put("Interest", "PT_TIME_INTEREST");
+		taxHeadMaps.put("Demand Notice Charge", "PT_DEMANDNOTICE_CHARGE");
+		taxHeadMaps.put("Scavenging Tax", "PT_SCAVENGING_TAX");
+		taxHeadMaps.put("Library Cess", "PT_LIBRARY_CESS");
+		taxHeadMaps.put("Conservancy Tax", "PT_CONSERVE_TAX");
+		taxHeadMaps.put("Special Conservancy Tax", "PT_SPECIAL_CONSERVANCY_TAX");
 		
 		ImportReportWrapper wrapper = new ImportReportWrapper();
 		String extension = "";
