@@ -13,6 +13,7 @@ import org.egov.pt.config.PropertyConfiguration;
 import org.egov.pt.models.Demand;
 import org.egov.pt.models.DemandDetail;
 import org.egov.pt.repository.ServiceRequestRepository;
+import org.egov.pt.util.PTConstants;
 import org.egov.pt.web.contracts.DemandResponse;
 import org.egov.pt.web.contracts.RequestInfoWrapper;
 import org.egov.tracer.model.CustomException;
@@ -106,7 +107,8 @@ public class DemandValidator {
 						dmdDetail.setTaxAmount(BigDecimal.ZERO);
 					if (dmdDetail.getCollectionAmount() == null)
 						dmdDetail.setCollectionAmount(BigDecimal.ZERO);
-					demandDetailMap.put(dmdDetail.getTaxHeadMasterCode(), dmdDetail);
+					if(!dmdDetail.getTaxHeadMasterCode().equalsIgnoreCase(PTConstants.PT_ROUNDOFF) && !dmdDetail.getTaxHeadMasterCode().contains("REBATE"))
+						demandDetailMap.put(dmdDetail.getTaxHeadMasterCode(), dmdDetail);
 				}
 			}
 		}
