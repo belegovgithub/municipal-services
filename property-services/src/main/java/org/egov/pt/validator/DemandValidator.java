@@ -88,10 +88,9 @@ public class DemandValidator {
 
 		List<Demand> dbDemands = fetchDBDemandsByConsumerCode(propertyId, tenantId,requestInfo);
 		List<String> dmdIdsFromDB = dbDemands.stream().map(Demand::getId).collect(Collectors.toList());
-
-		if (!listEqualsIgnoreOrder(dmdIdsFromDB, demandIds)) {
-			throw new CustomException("INVALID_DEMAND", "The demand is missing for the property");
-		}
+//		if (!listEqualsIgnoreOrder(dmdIdsFromDB, demandIds)) {
+//			throw new CustomException("INVALID_DEMAND", "The demand is missing for the property");
+//		}
 	}
 
 	private void validateDemandDetailsForUpdate(List<Demand> demands, Map<String, String> errorMap) {
