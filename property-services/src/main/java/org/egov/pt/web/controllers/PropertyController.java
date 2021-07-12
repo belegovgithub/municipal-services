@@ -117,5 +117,16 @@ public class PropertyController {
 //				.build();
 //		return new ResponseEntity<>(response, HttpStatus.OK);
 //	}
+    
+    @PostMapping("/_searchForPdf")
+    public ResponseEntity<PropertyResponse> searchForPdf(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
+                                                   @Valid @RequestBody PropertyCriteria propertyCriteria) {
+        propertyValidator.validatePropertyCriteria(propertyCriteria, requestInfoWrapper.getRequestInfo());
+        List<Property> properties = propertyService.searchProperty(propertyCriteria,requestInfoWrapper.getRequestInfo());
+        PropertyResponse response = PropertyResponse.builder().properties(properties).responseInfo(
+                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 }
