@@ -11,6 +11,7 @@ import javax.validation.Valid;
 import org.egov.common.contract.response.ResponseInfo;
 import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
+import org.egov.pt.models.PropertySearchCriteria;
 import org.egov.pt.models.oldProperty.OldPropertyCriteria;
 import org.egov.pt.service.MigrationService;
 import org.egov.pt.service.PropertyService;
@@ -119,12 +120,13 @@ public class PropertyController {
 //	}
     
     @PostMapping("/_searchForPdf")
-    public ResponseEntity<PropertyResponse> searchForPdf(@Valid @RequestBody RequestInfoWrapper requestInfoWrapper,
-                                                   @Valid @RequestBody PropertyCriteria propertyCriteria) {
-        propertyValidator.validatePropertyCriteria(propertyCriteria, requestInfoWrapper.getRequestInfo());
-        List<Property> properties = propertyService.searchProperty(propertyCriteria,requestInfoWrapper.getRequestInfo());
+    public ResponseEntity<PropertyResponse> searchForPdf(@Valid @RequestBody PropertySearchCriteria propertySearchCriteria) {
+    	
+    	PropertyCriteria propertyCriteria = propertySearchCriteria.getPropertyCriteria();
+        propertyValidator.validatePropertyCriteria(propertyCriteria, propertySearchCriteria.getRequestInfo());
+        List<Property> properties = propertyService.searchProperty(propertyCriteria,propertySearchCriteria.getRequestInfo());
         PropertyResponse response = PropertyResponse.builder().properties(properties).responseInfo(
-                responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+                responseInfoFactory.createResponseInfoFromRequestInfo(propertySearchCriteria.getRequestInfo(), true))
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
