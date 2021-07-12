@@ -56,6 +56,7 @@ public class OpenWaterRowMapper implements ResultSetExtractor<List<WaterConnecti
                 currentWaterConnection.setConnectionExecutionDate(rs.getLong("connectionExecutionDate"));
                 currentWaterConnection.setApplicationType(rs.getString("applicationType"));
                 currentWaterConnection.setDateEffectiveFrom(rs.getLong("dateEffectiveFrom"));
+                currentWaterConnection.setDeactivationDate(rs.getLong("deactivationDate"));
                 currentWaterConnection.setUsageCategory(rs.getString("usagecategory"));
                 currentWaterConnection.setSubUsageCategory(rs.getString("subusagecategory"));
                 currentWaterConnection.setProposedUsageCategory(rs.getString("proposedusagecategory"));

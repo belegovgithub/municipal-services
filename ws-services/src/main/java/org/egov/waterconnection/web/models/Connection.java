@@ -119,6 +119,9 @@ public class Connection {
 	@JsonProperty("dateEffectiveFrom")
 	private Long dateEffectiveFrom = null;
 	
+	@JsonProperty("deactivationDate")
+	private Long deactivationDate = null;
+	
 	@JsonProperty("connectionHolders")
 	@Valid
 	private List<OwnerInfo> connectionHolders;
@@ -620,6 +623,26 @@ public class Connection {
 		this.dateEffectiveFrom = dateEffectiveFrom;
 	}
 
+	public Connection deactivationDate(Long deactivationDate) {
+		this.deactivationDate = deactivationDate;
+		return this;
+	}
+
+	/**
+	 * Get deactivationDate
+	 *
+	 * @return deactivationDate
+	 **/
+	@ApiModelProperty(readOnly = true, value = "")
+	@Valid
+	public Long getDeactivationDate() {
+		return deactivationDate;
+	}
+
+	public void setDeactivationDate(Long deactivationDate) {
+		this.deactivationDate = deactivationDate;
+	}
+
 	public Connection applicationType(String applicationType) {
 		this.applicationType = applicationType;
 		return this;
@@ -705,6 +728,7 @@ public class Connection {
 				&& Objects.equals(this.connectionHolders, connection.connectionHolders)
 				&& Objects.equals(this.applicationType, connection.applicationType)
 				&& Objects.equals(this.dateEffectiveFrom, connection.dateEffectiveFrom)
+				&& Objects.equals(this.deactivationDate, connection.deactivationDate)
 				&& Objects.equals(this.oldApplication,connection.oldApplication)
 				&& Objects.equals(this.roadTypeEst, connection.roadTypeEst)
 				&& Objects.equals(this.wsTaxHeads, connection.wsTaxHeads) 
@@ -719,7 +743,7 @@ public class Connection {
 		return Objects.hash(id, tenantId, propertyId, applicationNo, applicationStatus, status, connectionNo,
 				oldConnectionNo, documents, plumberInfo, roadType, roadCuttingArea, connectionExecutionDate,
 				connectionCategory, connectionType, additionalDetails, auditDetails, connectionHolders,
-				applicationType, dateEffectiveFrom, oldApplication, roadTypeEst, wsTaxHeads,usageCategory ,subUsageCategory,proposedUsageCategory,proposedSubUsageCategory);
+				applicationType, dateEffectiveFrom,deactivationDate, oldApplication, roadTypeEst, wsTaxHeads,usageCategory ,subUsageCategory,proposedUsageCategory,proposedSubUsageCategory);
 	}
 
 	@Override
@@ -747,6 +771,7 @@ public class Connection {
 		sb.append("    connectionHolders: ").append(toIndentedString(connectionHolders)).append("\n");
 		sb.append("    applicationType: ").append(toIndentedString(applicationType)).append("\n");
 		sb.append("	   dateEffectiveFrom: ").append(toIndentedString(dateEffectiveFrom)).append("\n");
+		sb.append("	   deactivationDate: ").append(toIndentedString(deactivationDate)).append("\n");
 		sb.append("	   oldApplication: ").append(toIndentedString(oldApplication)).append("\n");
 		sb.append("	   roadTypeEst: ").append(toIndentedString(roadTypeEst)).append("\n");
 		sb.append("	   wsTaxHeads: ").append(toIndentedString(wsTaxHeads)).append("\n");
