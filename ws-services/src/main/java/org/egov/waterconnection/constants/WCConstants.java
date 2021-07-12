@@ -180,6 +180,8 @@ public class WCConstants {
 	public static final String ADHOC_REBATE_COMMENT = "adhocRebateComment";
 
 	public static final String INITIAL_METER_READING_CONST = "initialMeterReading";
+	
+	public static final String LAST_METER_READING_CONST = "lastMeterReading";
 
 	public static final String SUBMIT_APPLICATION_CONST = "SUBMIT_APPLICATION";
 
