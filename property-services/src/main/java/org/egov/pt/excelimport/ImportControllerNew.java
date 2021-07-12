@@ -323,7 +323,7 @@ public class ImportControllerNew {
 									demandRequest.setRequestInfo(requestInfo);
 									JsonNode additionalDetails1 = mapper.convertValue(demandRequest,JsonNode.class);
 									assessment.setAdditionalDetails(additionalDetails1);
-									assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
+									//assessments = assessmentService.updateLegacyAssessments(assessmentRequest);
 								}
 								
 							}
