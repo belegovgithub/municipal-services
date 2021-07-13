@@ -24,10 +24,10 @@ public class OBMConfiguration {
     @Value("${egov.idgen.path}")
     private String idGenPath;
 
-    @Value("${egov.idgen.obmCHBookApplNum.name}")
+    @Value("${obm.chb.applno.name}")
     private String obmCHBookApplNumIdgenName;
 
-    @Value("${egov.idgen.obmCHBookApplNum.format}")
+    @Value("${obm.chb.applno.format}")
     private String obmCHBookApplNumIdgenFormat;
     
     @Value("${persister.save.obm.chb.topic}")
