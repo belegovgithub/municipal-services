@@ -82,7 +82,8 @@ public class PropertyQueryBuilder {
 			
 			+ " WHERE ";
 	
-
+	public static String UPDATE_ARV_QUERY = "UPDATE  eg_pt_unit set arv=? WHERE propertyid=? and active=?";
+			
 
 	private final String paginationWrapper = "SELECT * FROM "
 			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY plastmodifiedtime DESC, pid) offset_ FROM " + "({})" + " result) result_offset "

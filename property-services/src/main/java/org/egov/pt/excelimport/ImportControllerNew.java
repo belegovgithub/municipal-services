@@ -33,7 +33,9 @@ import org.egov.pt.models.Demand;
 import org.egov.pt.models.DemandDetail;
 import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
+import org.egov.pt.models.Unit;
 import org.egov.pt.models.User;
+import org.egov.pt.repository.PropertyRepository;
 import org.egov.pt.repository.ServiceRequestRepository;
 import org.egov.pt.service.AssessmentService;
 import org.egov.pt.service.PropertyService;
@@ -80,6 +82,9 @@ public class ImportControllerNew {
 
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private PropertyRepository repository;
 
 	@Autowired
 	private ServiceRequestRepository serviceRequestRepository;
@@ -129,6 +134,10 @@ public class ImportControllerNew {
 		taxHeadMaps.put("Library Cess", "PT_LIBRARY_CESS");
 		taxHeadMaps.put("Conservancy Tax", "PT_CONSERVE_TAX");
 		taxHeadMaps.put("Special Conservancy Tax", "PT_SPECIAL_CONSERVANCY_TAX");
+		taxHeadMaps.put("Conservancy Charges", "PT_CONCERVANCY_CHARGES");
+		taxHeadMaps.put("Record Maintenance Fees", "PT_RECORD_MAINTENANCE_FEES");
+		taxHeadMaps.put("Garbage Collection Fees", "PT_GARBAGE_COLLECTION_FEES");
+		taxHeadMaps.put("Swatch Bharat Charges", "PT_SWATCH_BHARAT_CHARGES");
 		
 		ImportReportWrapper wrapper = new ImportReportWrapper();
 		String extension = "";
@@ -350,5 +359,96 @@ public class ImportControllerNew {
 	private String getStringVal(Cell cell) {
 		return cell.getCellType() == CellType.NUMERIC ? String.valueOf((float) cell.getNumericCellValue())
 				: cell.getStringCellValue();
+	}
+	
+	
+	@RequestMapping(value = { "/_updateArv" }, method = RequestMethod.POST)
+	@PostMapping(produces = APPLICATION_JSON_UTF8_VALUE)
+	@ResponseStatus(HttpStatus.CREATED)
+	@ResponseBody
+	public ResponseEntity<ImportReportWrapper> updateArv(@RequestParam(value = "file", required = false) List<MultipartFile> files,
+			@RequestParam(value = "tenantId", required = false) String tenantId ,
+			@RequestParam(value = "RequestInfo", required = false) String req) {
+
+		RequestInfo requestInfo = null;
+		try {
+			requestInfo = mapper.readValue(req, RequestInfo.class);
+		} catch (JsonMappingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (JsonProcessingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		ImportReportWrapper wrapper = new ImportReportWrapper();
+		String extension = "";
+		Path testFile = null;
+		try {
+			if (files == null || tenantId == null)
+				throw new CustomException("EG_FILESTORE_INVALID_INPUT", "Invalid input provided");
+			for (MultipartFile file : files) {
+
+				extension = FilenameUtils.getExtension(file.getOriginalFilename()).toLowerCase();
+				if (!extension.equalsIgnoreCase("xlsx")) {
+					throw new CustomException("EG_FILESTORE_INVALID_INPUT", "Inalvid input provided for file : "
+							+ extension + ", please upload any of the allowed formats : xlsx ");
+				}
+
+				String filename = FilenameUtils.getBaseName(file.getOriginalFilename()).toLowerCase();
+				testFile = Files.createTempFile(filename, ".xlsx");
+				file.transferTo(testFile.toFile());
+				try (Workbook workbook = WorkbookFactory.create(testFile.toFile())) {
+					Sheet sheet = workbook.getSheet("ARV");
+					Iterator<Row> rowIterator = sheet.rowIterator();
+					while (rowIterator.hasNext()) {
+						Row row = rowIterator.next();
+						if (row.getRowNum() >= 0) {
+							break;
+						}
+					}
+					List<String> abaspropertyIds = new ArrayList<>();
+
+					List<Unit> units = new ArrayList<>();
+					while (rowIterator.hasNext()) {
+						Row row = rowIterator.next();
+						String abaspropertyId = "";
+						BigDecimal arv = BigDecimal.ZERO;
+							Cell cellPropertyId = row.getCell(0);
+							Cell cellArv = row.getCell(1);
+							abaspropertyId = getStringVal(cellPropertyId);
+							arv = new BigDecimal(getStringVal(cellArv));
+							
+							PropertyCriteria propertyCriteria = PropertyCriteria.builder().tenantId(tenantId)
+									.abasPropertyids(abaspropertyId).build();
+							
+							List<Property> properties = propertyService
+							.searchProperty(propertyCriteria, requestInfo);
+							if (properties.size() > 0)
+							{
+								Property property = properties.get(0);
+								Unit unit = Unit.builder().arv(arv).propertyId(property.getId()).build();
+								units.add(unit);
+								abaspropertyIds.add(abaspropertyId);
+							}
+							else {
+								wrapper.updateMaps(ImportReportWrapper.propertyNotFoundReport, abaspropertyId);
+							}
+					}
+					System.out.println("size : " + units);
+					repository.batchUpdateArv(units);
+					wrapper.updateMaps(ImportReportWrapper.successReport, String.join(",", abaspropertyIds));
+
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException("INVALID_EXCEL", "Excel data is not valid");
+		}
+		return new ResponseEntity<>(wrapper, HttpStatus.OK);
 	}
 }

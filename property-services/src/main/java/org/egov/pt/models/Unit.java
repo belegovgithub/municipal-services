@@ -70,5 +70,8 @@ public class Unit {
 	@Digits(integer = 12, fraction = 2)
 	@JsonProperty("arv")
 	private BigDecimal arv;
+	
+	@JsonProperty("propertyid")
+	private String propertyId;
 
 }

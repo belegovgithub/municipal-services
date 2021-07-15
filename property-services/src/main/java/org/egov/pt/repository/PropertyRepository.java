@@ -1,6 +1,8 @@
 
 package org.egov.pt.repository;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,9 +10,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.pt.models.AuditDetails;
 import org.egov.pt.models.OwnerInfo;
 import org.egov.pt.models.Property;
 import org.egov.pt.models.PropertyCriteria;
+import org.egov.pt.models.Unit;
 import org.egov.pt.models.user.User;
 import org.egov.pt.models.user.UserDetailResponse;
 import org.egov.pt.models.user.UserSearchRequest;
@@ -21,9 +25,11 @@ import org.egov.pt.repository.rowmapper.PropertyRowMapper;
 import org.egov.pt.service.UserService;
 import org.egov.pt.util.PropertyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import com.google.common.collect.Sets;
 import org.springframework.util.ObjectUtils;
@@ -220,6 +226,25 @@ public class PropertyRepository {
 		}
 
 		return false;
+	}
+	
+	public void batchUpdateArv(List<Unit> units) {
+
+		jdbcTemplate.batchUpdate(PropertyQueryBuilder.UPDATE_ARV_QUERY, new BatchPreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps, int rowNum) throws SQLException {
+				
+				Unit unit = units.get(rowNum);
+				ps.setBigDecimal(1, unit.getArv());
+				ps.setString(2, unit.getPropertyId());
+				ps.setBoolean(3, true);
+			}
+
+			@Override
+			public int getBatchSize() {
+				return units.size();
+			}
+		});
 	}
 
 }

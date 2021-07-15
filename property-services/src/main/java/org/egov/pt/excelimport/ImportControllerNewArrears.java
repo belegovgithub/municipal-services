@@ -131,6 +131,13 @@ public class ImportControllerNewArrears {
 		taxHeadMaps.put("Library Cess", "PT_LIBRARY_CESS");
 		taxHeadMaps.put("Conservancy Tax", "PT_CONSERVE_TAX");
 		taxHeadMaps.put("Special Conservancy Tax", "PT_SPECIAL_CONSERVANCY_TAX");
+		taxHeadMaps.put("Conservancy Charges", "PT_CONCERVANCY_CHARGES");
+		taxHeadMaps.put("Record Maintenance Fees", "PT_RECORD_MAINTENANCE_FEES");
+		taxHeadMaps.put("Garbage Collection Fees", "PT_GARBAGE_COLLECTION_FEES");
+		taxHeadMaps.put("Swatch Bharat Charges", "PT_SWATCH_BHARAT_CHARGES");
+
+
+
 
 		
 
