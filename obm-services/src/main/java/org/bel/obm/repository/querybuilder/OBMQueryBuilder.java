@@ -14,23 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class OBMQueryBuilder {
 
-	
-
 	@Autowired
 	private OBMConfiguration config;
-	
-	private final String paginationWrapper = "SELECT * FROM " +
-            "(SELECT *, DENSE_RANK() OVER (ORDER BY dtl_lastModifiedTime DESC , dtl_id) offset_ FROM " +
-            "({})" +
-            " result) result_offset " +
-            "WHERE offset_ > ? AND offset_ <= ?";
-	
+
+	private final String paginationWrapper = "SELECT * FROM "
+			+ "(SELECT *, DENSE_RANK() OVER (ORDER BY dtl_lastModifiedTime DESC , dtl_id) offset_ FROM " + "({})"
+			+ " result) result_offset " + "WHERE offset_ > ? AND offset_ <= ?";
+
 	private static final String CHBOOK_SEARCH_QUERY = "select dtl.*,bank.*,doc.* ,dtl.id as dtl_id,dtl.accountId as uuid, dtl.lastModifiedTime as dtl_lastModifiedTime,"
 			+ "dtl.createdBy as dtl_createdBy,dtl.lastModifiedBy as dtl_lastModifiedBy,dtl.createdTime as dtl_createdTime,bank.id as bank_id,"
 			+ "bank.lastModifiedTime as bank_lastModifiedTime,bank.createdBy as bank_createdBy,bank.lastModifiedBy as bank_lastModifiedBy,"
 			+ "bank.createdTime as bank_createdTime, doc.id as chb_ap_doc_id from eg_obm_chb_dtls dtl "
 			+ "left join eg_obm_chb_bank_dtls bank on  bank.chbdtlid = dtl.id left join eg_obm_chb_applicationdocument doc on doc.chbdtlid = dtl.id ";
-	
+
+	private final String CHBOOK_DELETE_APPDOC_QRY = "Delete from eg_obm_chb_applicationdocument where id IN (:ids)";
+
 	public String getCHBookDtsSearchQuery(org.bel.obm.models.SearchCriteria criteria, List<Object> preparedStmtList) {
 		StringBuilder builder = new StringBuilder(CHBOOK_SEARCH_QUERY);
 		if (criteria.getAccountId() != null) {
@@ -134,6 +132,11 @@ public class OBMQueryBuilder {
 			if (i != length - 1)
 				builder.append(",");
 		}
+		return builder.toString();
+	}
+
+	public String deleteApplDocsCHB() {
+		StringBuilder builder = new StringBuilder(CHBOOK_DELETE_APPDOC_QRY);
 		return builder.toString();
 	}
 }

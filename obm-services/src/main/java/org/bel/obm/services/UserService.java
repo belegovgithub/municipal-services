@@ -56,7 +56,7 @@ public class UserService {
 		RequestInfo requestInfo = request.getRequestInfo();
 		List<String> roles = requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 				.collect(Collectors.toList());
-		CHBookDtls chBookDtls = request.getCHBookDtls();
+		CHBookDtls chBookDtls = request.getBooking();
 		if (roles.contains("LR_CEMP")) {
 			if (chBookDtls.getUserDetails().getUuid() == null) {
 				String existingUuid = isUserPresent(chBookDtls.getUserDetails(), requestInfo, chBookDtls.getTenantId());

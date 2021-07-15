@@ -24,8 +24,8 @@ public class CHBookResponse   {
         @JsonProperty("ResponseInfo")
         private ResponseInfo responseInfo = null;
 
-        @JsonProperty("cHBookDtls")
+        @JsonProperty("booking")
     	@Valid
-    	private List<CHBookDtls> cHBookDtls = null;
+    	private List<CHBookDtls> booking = null;
 }
 

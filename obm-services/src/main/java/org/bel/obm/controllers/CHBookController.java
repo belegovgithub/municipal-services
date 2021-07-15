@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("v1/")
+@RequestMapping("/chb")
 public class CHBookController {
 
 	@Autowired
@@ -31,9 +31,8 @@ public class CHBookController {
 
 	@PostMapping("/_create")
 	public ResponseEntity<CHBookResponse> create(@RequestBody CHBookRequest cHBookRequest) {
-		System.out.println("in service");
 		CHBookDtls chBookDtls = chBookService.create(cHBookRequest);
-		CHBookResponse response = CHBookResponse.builder().cHBookDtls(Arrays.asList(chBookDtls))
+		CHBookResponse response = CHBookResponse.builder().booking(Arrays.asList(chBookDtls))
 				.responseInfo(
 						responseInfoFactory.createResponseInfoFromRequestInfo(cHBookRequest.getRequestInfo(), true))
 				.build();
@@ -44,8 +43,17 @@ public class CHBookController {
 	public ResponseEntity<CHBookResponse> search(@RequestBody RequestInfoWrapper requestInfoWrapper,
 			@ModelAttribute SearchCriteria criteria) {
 		List<CHBookDtls> chBookDtlsList = chBookService.search(criteria, requestInfoWrapper.getRequestInfo());
-		CHBookResponse response = CHBookResponse.builder().cHBookDtls(chBookDtlsList).responseInfo(
+		CHBookResponse response = CHBookResponse.builder().booking(chBookDtlsList).responseInfo(
 				responseInfoFactory.createResponseInfoFromRequestInfo(requestInfoWrapper.getRequestInfo(), true))
+				.build();
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PostMapping({ "/_update" })
+	public ResponseEntity<CHBookResponse> update(@RequestBody CHBookRequest chbRequest) {
+		CHBookDtls chBookDtls = chBookService.update(chbRequest);
+		CHBookResponse response = CHBookResponse.builder().booking(Arrays.asList(chBookDtls))
+				.responseInfo(responseInfoFactory.createResponseInfoFromRequestInfo(chbRequest.getRequestInfo(), true))
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

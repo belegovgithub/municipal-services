@@ -38,7 +38,7 @@ public class CHBookDtlsRowMapper implements ResultSetExtractor<List<CHBookDtls>>
 						.category(rs.getString("category")).applicationNumber(rs.getString("applicationnumber"))
 						.applicationDate(applicationDate).tenantId(rs.getString("tenantid"))
 						.action(rs.getString("action")).status(rs.getString("status"))
-						.businessService(OBMConstant.businessService_OBM).build();
+						.businessService(OBMConstant.businessService_OBM).workflowCode(OBMConstant.workflowCode_CHB).build();
 				chBookDtlsMap.put(id, currentCHbookDtls);
 			}
 			addChildrenToProperty(rs, currentCHbookDtls);

@@ -68,7 +68,7 @@ public class WorkflowIntegrator {
 	}
 
 	public void callWorkFlow(CHBookRequest chBookRequest) {
-		CHBookDtls chBookDtls = chBookRequest.getCHBookDtls();
+		CHBookDtls chBookDtls = chBookRequest.getBooking();
 		String wfTenantId = chBookDtls.getTenantId();
 		JSONArray array = new JSONArray();
 		JSONObject obj = new JSONObject();
@@ -127,7 +127,8 @@ public class WorkflowIntegrator {
 				idStatusMap.put(instanceContext.read(BUSINESSIDJOSNKEY), instanceContext.read(STATUSJSONKEY));
 			});
 
-			chBookRequest.getCHBookDtls().setStatus(idStatusMap.get(chBookRequest.getCHBookDtls().getApplicationNumber()));
+			chBookRequest.getBooking()
+					.setStatus(idStatusMap.get(chBookRequest.getBooking().getApplicationNumber()));
 		}
 	}
 }

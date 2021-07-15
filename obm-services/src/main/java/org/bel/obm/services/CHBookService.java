@@ -3,7 +3,9 @@ package org.bel.obm.services;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.bel.obm.models.CHBookDtls;
@@ -11,8 +13,12 @@ import org.bel.obm.models.CHBookRequest;
 import org.bel.obm.models.SearchCriteria;
 import org.bel.obm.repository.OBMRepository;
 import org.bel.obm.user.UserDetailResponse;
+import org.bel.obm.util.CommonUtils;
 import org.bel.obm.validators.CHBookValidator;
+import org.bel.obm.workflow.ActionValidator;
 import org.bel.obm.workflow.WorkflowIntegrator;
+import org.bel.obm.workflow.WorkflowService;
+import org.bel.obm.workflow.models.BusinessService;
 import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +42,15 @@ public class CHBookService {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private ActionValidator actionValidator;
+
+	@Autowired
+	private WorkflowService workflowService;
+
+	@Autowired
+	private CommonUtils util;
+
 	public CHBookDtls create(CHBookRequest request) {
 		validator.validateFields(request);
 		validator.validateBusinessService(request);
@@ -43,7 +58,7 @@ public class CHBookService {
 		userService.createUser(request);
 		repository.save(request);
 		wfIntegrator.callWorkFlow(request);
-		return request.getCHBookDtls();
+		return request.getBooking();
 	}
 
 	public List<CHBookDtls> search(SearchCriteria criteria, RequestInfo requestInfo) {
@@ -68,6 +83,40 @@ public class CHBookService {
 			chBookDtls.setUserDetails(userDetailResponse.getUser().get(0));
 			validator.validateUserwithOwnerDetail(requestInfo, chBookDtls);
 		});
+		return chBookDtlsList;
+	}
+
+	public CHBookDtls update(CHBookRequest chBookRequest) {
+		String businessServiceName = chBookRequest.getBooking().getWorkflowCode();
+		BusinessService businessService = workflowService.getBusinessService(
+				chBookRequest.getBooking().getTenantId(), chBookRequest.getRequestInfo(), businessServiceName);
+		actionValidator.validateUpdateRequest(chBookRequest, businessService);
+		enrichmentService.enrichCHBookUpdateRequest(chBookRequest, businessService);
+		List<CHBookDtls> searchResult = getCHBWithInfo(chBookRequest);
+		validator.validateUpdate(chBookRequest, searchResult);
+
+		Map<String, Boolean> idToIsStateUpdatableMap = util.getIdToIsStateUpdatableMap(businessService, searchResult);
+
+		wfIntegrator.callWorkFlow(chBookRequest);
+		enrichmentService.postStatusEnrichment(chBookRequest);
+		repository.update(chBookRequest, idToIsStateUpdatableMap);
+		return chBookRequest.getBooking();
+	}
+
+	public List<CHBookDtls> getCHBWithInfo(CHBookRequest request) {
+		SearchCriteria criteria = new SearchCriteria();
+		List<String> ids = new LinkedList<>();
+		CHBookDtls chBookDtls = request.getBooking();
+		ids.add(chBookDtls.getId());
+
+		criteria.setTenantId(chBookDtls.getTenantId());
+		criteria.setIds(ids);
+		criteria.setBusinessService(chBookDtls.getBusinessService());
+
+		List<CHBookDtls> chBookDtlsList = repository.getCHBookDts(criteria);
+
+		if (chBookDtlsList.isEmpty())
+			return Collections.emptyList();
 		return chBookDtlsList;
 	}
 }

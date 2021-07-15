@@ -33,11 +33,20 @@ public class OBMConfiguration {
     @Value("${persister.save.obm.chb.topic}")
     private String saveOBMCHbookTopic;
     
+    @Value("${persister.update.obm.chb.topic}")
+    private String updateOBMCHbookTopic;
+    
+    @Value("${persister.update.obm.chb.workflow.topic}")
+    private String updateOBMCHbookWorkflowTopic;
+    
     @Value("${workflow.context.path}")
     private String wfHost;
 
     @Value("${workflow.transition.path}")
     private String wfTransitionPath;
+    
+    @Value("${workflow.businessservice.search.path}")
+    private String wfBusinessServiceSearchPath;
     
     @Value("${egov.obm.default.limit}")
     private Integer defaultOBMLimit;

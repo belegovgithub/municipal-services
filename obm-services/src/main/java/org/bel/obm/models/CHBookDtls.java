@@ -29,7 +29,10 @@ public class CHBookDtls {
 	private Long fromDate;
     private Long toDate;
     private String purpose;
+    private String purposeDescription;
     private String category;
+    private String residentTypeId; 
+    private String timeSlotId ;
     
     private String accountId;
     private String businessService;

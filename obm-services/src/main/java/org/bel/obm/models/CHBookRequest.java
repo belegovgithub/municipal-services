@@ -19,7 +19,7 @@ public class CHBookRequest {
 	@JsonProperty("RequestInfo")
 	private RequestInfo requestInfo = null;
 
-	@JsonProperty("cHBookDtls")
-	private CHBookDtls cHBookDtls = null;
+	@JsonProperty("booking")
+	private CHBookDtls booking = null;
 
 }
