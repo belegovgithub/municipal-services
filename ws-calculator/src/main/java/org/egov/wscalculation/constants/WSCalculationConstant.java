@@ -15,12 +15,17 @@ public class WSCalculationConstant {
 	public static final String URL_PARAMS_SEPARATER = "?";
 
 	public static final String TENANT_ID_FIELD_FOR_SEARCH_URL = "tenantId=";
+	
+	public static final String WS_TENANT_ID = "tenantId";
+			
 
 	public static final String SEPARATER = "&";
 
 	public static final String SERVICE_FIELD_FOR_SEARCH_URL = "service=";
 
 	public static final String SERVICE_FIELD_VALUE_WS = "WS";
+	
+	public static final String SERVICE_FIELD_VALUE_PT = "PT";
 	
 	public static final String ONE_TIME_FEE_SERVICE_FIELD = "WS.ONE_TIME_FEE";
 
@@ -83,6 +88,8 @@ public class WSCalculationConstant {
 	public static final String WS_WATER_CESS = "WS_WATER_CESS";
 
 	public static final String WS_CHARGE = "WS_CHARGE";
+	
+	public static final String PT_WATER_TAX = "PT_WATER_TAX";
 
 	/**
 	 * data fields
@@ -157,6 +164,8 @@ public class WSCalculationConstant {
 	public static final String CALC_TYPE_FLAT = "FLAT";
 
 	public static final String ConnectionType = "connectionType";
+	
+	public static final String ConnectionType_Residential = "RESIDENTIAL";
 
 	public static final String JSONPATH_ROOT_FOR_BilingPeriod = "$.MdmsRes.ws-services-masters.billingPeriod";
 

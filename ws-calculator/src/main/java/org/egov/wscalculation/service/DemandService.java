@@ -370,7 +370,7 @@ public class DemandService {
 	 *            The RequestInfo of the incoming request
 	 * @return Lis to demands for the given consumerCode
 	 */
-	private List<Demand> searchDemand(String tenantId, Set<String> consumerCodes, Long taxPeriodFrom, Long taxPeriodTo,
+	public List<Demand> searchDemand(String tenantId, Set<String> consumerCodes, Long taxPeriodFrom, Long taxPeriodTo,
 			RequestInfo requestInfo) {
 		Object result = serviceRequestRepository.fetchResult(
 				getDemandSearchURL(tenantId, consumerCodes, taxPeriodFrom, taxPeriodTo),
