@@ -82,7 +82,8 @@ public class PropertyService {
 		enrichmentService.enrichCreateRequest(request);
 		userService.createUser(request);
 		if (config.getIsWorkflowEnabled()
-				&& !request.getProperty().getCreationReason().equals(CreationReason.DATA_UPLOAD)) {
+				&& !request.getProperty().getCreationReason().equals(CreationReason.DATA_UPLOAD)
+				&& !Source.LEGACY_RECORD.equals(request.getProperty().getSource())) {
 			wfService.updateWorkflow(request, request.getProperty().getCreationReason());
 
 		} else {
