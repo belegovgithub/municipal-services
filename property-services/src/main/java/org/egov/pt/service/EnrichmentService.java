@@ -114,7 +114,7 @@ public class EnrichmentService {
 		Boolean isWfEnabled = config.getIsWorkflowEnabled();
 		Boolean iswfStarting = propertyFromDb.getStatus().equals(Status.ACTIVE);
 
-		if (!isWfEnabled) {
+		if (!isWfEnabled || Source.LEGACY_RECORD.equals(request.getProperty().getSource())) {
 
 			property.setStatus(Status.ACTIVE);
 			property.getAddress().setId(propertyFromDb.getAddress().getId());
