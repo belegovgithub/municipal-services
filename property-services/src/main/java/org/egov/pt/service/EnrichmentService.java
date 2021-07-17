@@ -141,6 +141,15 @@ public class EnrichmentService {
 					unit.setActive(true);
 				}
 			});
+	    	property.getOwners().forEach(owner -> {
+	    	if (!CollectionUtils.isEmpty(owner.getDocuments()))
+				owner.getDocuments().forEach(doc -> {
+					if (doc.getId() == null ) {
+					doc.setId(UUID.randomUUID().toString());
+					doc.setStatus(Status.ACTIVE);
+					}
+				});
+	    	});
 				
 		Institution institute = property.getInstitution();
 		if (!ObjectUtils.isEmpty(institute) && null == institute.getId())
