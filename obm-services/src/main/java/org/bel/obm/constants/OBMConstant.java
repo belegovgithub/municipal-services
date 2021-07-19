@@ -20,4 +20,8 @@ public class OBMConstant {
 	public static final String CITIZEN_SENDBACK_ACTION = "SEND_TO_CITIZEN";
 	
 	public static final String STATUS_APPROVED  = "APPROVED";
+	
+	public static final String STATUS_REJECTED  = "REJECTED";
+	
+	public static final String STATUS_CANCELLED  = "CANCELLED";
 }

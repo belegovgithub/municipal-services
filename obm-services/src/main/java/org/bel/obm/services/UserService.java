@@ -57,7 +57,7 @@ public class UserService {
 		List<String> roles = requestInfo.getUserInfo().getRoles().stream().map(Role::getCode)
 				.collect(Collectors.toList());
 		CHBookDtls chBookDtls = request.getBooking();
-		if (roles.contains("LR_CEMP")) {
+		if (roles.contains(OBMConstant.OBM_CHB_CEMP)) {
 			if (chBookDtls.getUserDetails().getUuid() == null) {
 				String existingUuid = isUserPresent(chBookDtls.getUserDetails(), requestInfo, chBookDtls.getTenantId());
 				if (existingUuid.equalsIgnoreCase("null")) {

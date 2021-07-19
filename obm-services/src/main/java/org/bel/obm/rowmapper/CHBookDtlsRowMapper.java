@@ -34,7 +34,8 @@ public class CHBookDtlsRowMapper implements ResultSetExtractor<List<CHBookDtls>>
 						.lastModifiedTime(rs.getLong("dtl_lastModifiedTime")).build();
 				currentCHbookDtls = CHBookDtls.builder().auditDetails(auditdetails).id(id)
 						.accountId(rs.getString("uuid")).hallId(rs.getString("hallId")).purpose(rs.getString("purpose"))
-						.fromDate(rs.getLong("fromdate")).toDate(rs.getLong("todate"))
+						.purposeDescription(rs.getString("purposedescription")).timeSlotId(rs.getString("timeslotid"))
+						.residentTypeId(rs.getString("residenttypeid")).fromDate(rs.getLong("fromdate")).toDate(rs.getLong("todate"))
 						.category(rs.getString("category")).applicationNumber(rs.getString("applicationnumber"))
 						.applicationDate(applicationDate).tenantId(rs.getString("tenantid"))
 						.action(rs.getString("action")).status(rs.getString("status"))

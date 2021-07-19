@@ -1,20 +1,31 @@
 package org.bel.obm.validators;
 
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.bel.obm.constants.OBMConstant;
 import org.bel.obm.models.CHBookDtls;
 import org.bel.obm.models.CHBookRequest;
+import org.bel.obm.util.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
+import org.egov.mdms.model.MdmsCriteriaReq;
 import org.egov.tracer.model.CustomException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.jayway.jsonpath.DocumentContext;
+
 @Component
 public class CHBookValidator {
+
+	@Autowired
+	private CommonUtils util;
 
 	public void validateFields(CHBookRequest request) {
 		Map<String, String> errorMap = new HashMap<>();
@@ -103,5 +114,60 @@ public class CHBookValidator {
 					documentFileStoreIds.add(document.getFileStoreId());
 			});
 		}
+	}
+
+	public void validateAndEncrichMDMSData(CHBookRequest request) {
+		Map<String, String> errorMap = new HashMap<>();
+		try {
+
+			CHBookDtls chBookDtls = request.getBooking();
+			MdmsCriteriaReq mdmsReqCHB = util.prepareMdMsRequest(chBookDtls.getTenantId(), "CommunityHallBooking",
+					Arrays.asList("CommunityHalls"), "[?(@.hallCode == '" + chBookDtls.getHallId() + "')]",
+					request.getRequestInfo());
+			DocumentContext mdmsDataCHB = util.getAttributeValues(mdmsReqCHB);
+
+			List<String> cHBHallIds = mdmsDataCHB.read("$.MdmsRes.CommunityHallBooking.CommunityHalls.*.hallCode");
+			if (cHBHallIds.size() >= 1) {
+
+				List<HashMap<String, String>> cHBResidentTypes = mdmsDataCHB
+						.read("$.MdmsRes.CommunityHallBooking.CommunityHalls.*.residentType[?(@.type == '"
+								+ chBookDtls.getResidentTypeId() + "')]");
+				if (cHBResidentTypes.size() == 0)
+					errorMap.put("INVALID_ID", "Invalid Resident type");
+
+				List<HashMap<String, String>> cHBPurposes = mdmsDataCHB
+						.read("$.MdmsRes.CommunityHallBooking.CommunityHalls.*.purposes[?(@.purpose == '"
+								+ chBookDtls.getPurpose() + "')]");
+				if (cHBPurposes.size() == 0)
+					errorMap.put("INVALID_ID", "Invalid Purpose");
+
+				List<HashMap<String, String>> cHBCategories = mdmsDataCHB
+						.read("$.MdmsRes.CommunityHallBooking.CommunityHalls.*.specialCategories[?(@.category == '"
+								+ chBookDtls.getCategory() + "')]");
+				if (cHBCategories.size() == 0)
+					errorMap.put("INVALID_ID", "Invalid Category");
+
+				List<HashMap<String, String>> chbTimeSlotsIds = mdmsDataCHB
+						.read("$.MdmsRes.CommunityHallBooking.CommunityHalls.*.timeSlots[?(@.id == '"
+								+ chBookDtls.getTimeSlotId() + "')]");
+				if (chbTimeSlotsIds.size() == 0)
+					errorMap.put("INVALID_ID", "Invalid Timeslot id");
+				for (HashMap<String, String> record : chbTimeSlotsIds) {
+					String startTime = record.get("from");
+					String duration = record.get("duration");
+					SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+					sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+					chBookDtls.setToDate(chBookDtls.getSelectedDate() + sdf.parse(startTime).getTime()
+							+ sdf.parse(duration).getTime());
+					chBookDtls.setFromDate(chBookDtls.getSelectedDate() + sdf.parse(startTime).getTime());
+				}
+			} else
+				errorMap.put("INVALID_ID", "Invalid hall id");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new CustomException("Invalid_Data", "Invalid MDMS Data");
+		}
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
 	}
 }

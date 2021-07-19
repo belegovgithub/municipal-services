@@ -56,4 +56,10 @@ public class OBMConfiguration {
 
     @Value("${egov.obm.max.limit}")
     private Integer maxSearchLimit;    
+    
+    @Value("${egov.mdms.host}")
+    private String mdmsHost;
+
+    @Value("${egov.mdms.search.endpoint}")
+    private String mdmsEndpoint;
 }

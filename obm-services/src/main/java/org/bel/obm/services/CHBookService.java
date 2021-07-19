@@ -54,6 +54,7 @@ public class CHBookService {
 	public CHBookDtls create(CHBookRequest request) {
 		validator.validateFields(request);
 		validator.validateBusinessService(request);
+		validator.validateAndEncrichMDMSData(request);
 		enrichmentService.enrichCreateRequest(request);
 		userService.createUser(request);
 		repository.save(request);

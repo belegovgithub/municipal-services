@@ -132,7 +132,8 @@ public class CHBookEnrichmentService {
 
 	public void postStatusEnrichment(CHBookRequest request) {
 		CHBookDtls chBookDtls = request.getBooking();
-		if ((chBookDtls.getStatus() != null) && chBookDtls.getStatus().equalsIgnoreCase(OBMConstant.STATUS_APPROVED)) {
+		if ((chBookDtls.getStatus() != null) && (chBookDtls.getStatus().equalsIgnoreCase(OBMConstant.STATUS_APPROVED) || 
+				chBookDtls.getStatus().equalsIgnoreCase(OBMConstant.STATUS_REJECTED) || chBookDtls.getStatus().equalsIgnoreCase(OBMConstant.STATUS_CANCELLED))) {
 			Long time = System.currentTimeMillis();
 			chBookDtls.setApprovedDate(time);
 		}
