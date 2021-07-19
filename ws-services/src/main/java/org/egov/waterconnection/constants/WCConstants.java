@@ -232,6 +232,8 @@ public class WCConstants {
 	public static final String BILLING_CYCLE_STRING = "billingCycle";
 
 	public static final String APPROVE_CONNECTION = "APPROVE_CONNECTION";
+	
+	public static final String DEACTIVATE_FREEZE_CONNECTION = "DEACTIVATE_CONNECTION";
 
 	// Used to differentiate the type of request which is processing
 	public static final int CREATE_APPLICATION = 0;

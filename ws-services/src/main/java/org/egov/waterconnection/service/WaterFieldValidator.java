@@ -3,8 +3,12 @@ package org.egov.waterconnection.service;
 import org.egov.waterconnection.constants.WCConstants;
 import org.egov.waterconnection.web.models.ValidatorResult;
 import org.egov.waterconnection.web.models.WaterConnectionRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +16,9 @@ import java.util.Map;
 @Component
 public class WaterFieldValidator implements WaterActionValidator {
 
+	@Autowired
+	private ObjectMapper mapper;
+	
 	@Override
 	public ValidatorResult validate(WaterConnectionRequest waterConnectionRequest, int reqType) {
 		Map<String, String> errorMap = new HashMap<>();
@@ -20,6 +27,9 @@ public class WaterFieldValidator implements WaterActionValidator {
 		}
 		if(reqType == WCConstants.MODIFY_CONNECTION){
 			handleModifyConnectionRequest(waterConnectionRequest, errorMap);
+		}
+		if(reqType == WCConstants.DEACTIVATE_CONNECTION){
+			handleDeactivateConnectionRequest(waterConnectionRequest, errorMap);
 		}
 		if (!errorMap.isEmpty())
 			return new ValidatorResult(false, errorMap);
@@ -47,15 +57,33 @@ public class WaterFieldValidator implements WaterActionValidator {
 			}
 
 		}
-		/*if (WCConstants.APPROVE_CONNECTION_CONST
+		 
+	}
+	
+	private void handleDeactivateConnectionRequest(WaterConnectionRequest waterConnectionRequest,
+			Map<String, String> errorMap) {
+		if (WCConstants.DEACTIVATE_FREEZE_CONNECTION
 				.equalsIgnoreCase(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
-			if (StringUtils.isEmpty(waterConnectionRequest.getWaterConnection().getRoadType())) {
-				errorMap.put("INVALID_ROAD_TYPE", "Road type should not be empty");
+			if (StringUtils.isEmpty(waterConnectionRequest.getWaterConnection().getDeactivationDate())||
+					waterConnectionRequest.getWaterConnection().getDeactivationDate().equals(WCConstants.INVALID_CONNECTION_EXECUTION_DATE)) {
+				errorMap.put("INVALID_CONNECTION_DEACTIVATION_DATE", "Connection Deactivation date should not be empty");
 			}
-			if (waterConnectionRequest.getWaterConnection().getRoadCuttingArea() == null) {
-				errorMap.put("INVALID_ROAD_CUTTING_AREA", "Road cutting area should not be empty");
+			if (CollectionUtils.isEmpty(waterConnectionRequest.getWaterConnection().getPlumberInfo()))  {
+				errorMap.put("INVALID_PLUMBER_INFO", "Plumber Info Missing");
 			}
-		}*/
+			HashMap<String, Object> additionalDetail = mapper
+					.convertValue(waterConnectionRequest.getWaterConnection().getAdditionalDetails(), HashMap.class);
+			if(!additionalDetail.isEmpty())
+			{
+				if(StringUtils.isEmpty(additionalDetail.get(WCConstants.LAST_METER_READING_CONST)))
+				{
+					errorMap.put("INVALID_LAST_METER_READING", "Last Meter Reading Missing");
+				}
+			}else
+			{
+				errorMap.put("INVALID_ADDITIONAL_DETAILS", "Additional Details Missing");
+			}
+		}
 	}
 	
 	private void handleModifyConnectionRequest(WaterConnectionRequest waterConnectionRequest, Map<String, String> errorMap){
