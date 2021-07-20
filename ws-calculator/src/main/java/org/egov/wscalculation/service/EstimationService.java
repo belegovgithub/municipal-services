@@ -83,6 +83,8 @@ public class EstimationService {
 	
 	@Autowired
 	private MasterDataService masterDataService;
+	
+
 
 	/**
 	 * Generates a List of Tax head estimates with tax head code, tax head
@@ -122,8 +124,6 @@ public class EstimationService {
 				(JSONArray) masterData.get(WSCalculationConstant.CALCULATION_ATTRIBUTE_CONST));
 		timeBasedExemptionMasterMap.put(WSCalculationConstant.WC_WATER_CESS_MASTER,
 				(JSONArray) (masterData.getOrDefault(WSCalculationConstant.WC_WATER_CESS_MASTER, null)));
-		timeBasedExemptionMasterMap.put(WSCalculationConstant.WC_REBATE_MASTER,
-				(JSONArray) (masterData.getOrDefault(WSCalculationConstant.WC_REBATE_MASTER,null)));
 		
 		
 		// mDataService.setWaterConnectionMasterValues(requestInfo, tenantId,
@@ -294,57 +294,113 @@ public class EstimationService {
 	 * @return
 	 */
 	
-	private BigDecimal checkRebateForWaterBill(WaterConnection connection,Map<String, JSONArray> timeBasedExemptionsMasterMap, RequestInfoWrapper requestInfoWrapper) {
+	public BigDecimal checkRebateForWaterBill(WaterConnection connection,Map<String, JSONArray> timeBasedExemptionsMasterMap, RequestInfo requestInfo) {
+		
 		BigDecimal rebate = null;
+	
 		System.out.println("Check rebate can be applied or not"+connection.getUsageCategory());	
 		JSONArray rebateMaster = timeBasedExemptionsMasterMap.get(WSCalculationConstant.WC_REBATE_MASTER);
 		JSONObject rebateJsonObj = mapper.convertValue(rebateMaster.get(0), JSONObject.class);
-		String newReabteEndDate = rebateJsonObj.getAsString(WSCalculationConstant.ENDING_DATE_APPLICABLES).concat("/").concat(String.valueOf(YearMonth.now().getYear()));
-		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
-		Long currentDateAndTimeIST = calendar.getTimeInMillis();		 
-		SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
-		Date rebateEndDateInMilliSec;
+		
+		//Data from enrichment
+		JSONArray billingPeriodMaster = timeBasedExemptionsMasterMap.get(WSCalculationConstant.BILLING_PERIOD);
+		JSONObject billingPeriodJsonObj = mapper.convertValue(billingPeriodMaster.get(0), JSONObject.class);
+		Long billStartDateString = Long.parseLong(billingPeriodJsonObj.getAsString("startingDay"));
+		System.out.println("Bill start date="+billStartDateString);
+		
+		boolean applyReate = false;
+	
+		Long yearStartDate;
+		
+		//connection.setConnectionType(WSCalculationConstant.meteredConnectionType);
+		Map<String, Object> yearStartAndEndDate = new HashMap<String, Object>();
+		getYearStartAndEndDate(yearStartAndEndDate); // set start and end date to hashmap yearStartAndEndDate
+		if(connection.getConnectionType().equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {
+			System.out.println("Fetch bill of the current year"+rebateJsonObj.get(WSCalculationConstant.FROMFY_FIELD_NAME));
+			//Get demand for current financial year, current FY got from Rebate.json 
+			List<TaxPeriod> taxPeriodMaster = masterDataService.getTaxPeriodList(requestInfo, connection.getTenantId(), WSCalculationConstant.SERVICE_FIELD_VALUE_WS);
+			Optional<TaxPeriod>wsTaxPeriod = taxPeriodMaster.stream().filter(each -> each.getFinancialYear().equals(rebateJsonObj.get(WSCalculationConstant.FROMFY_FIELD_NAME))).findFirst();
+			//Find any demand is already raised for the current financial year
+			Set<String> consumerCodes = new HashSet<String>();
+			consumerCodes.add(connection.getConnectionNo());
+			System.out.println("Get present year demands=>"+connection.getConnectionNo()+"::"+wsTaxPeriod.get().getFromDate()+":"+  wsTaxPeriod.get().getToDate());
+			List<Demand> demands = demandService.searchDemandForModule(connection.getTenantId(), consumerCodes,null,null,WSCalculationConstant.SERVICE_FIELD_VALUE_WS, requestInfo);
+			
+			yearStartDate = Long.parseLong(yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES).toString());
+			System.out.println("Start Date=="+yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES));
+			
+			System.out.println("All demands===>"+demands.size());
+			
+			Demand demand = demands.stream().filter(t -> yearStartDate.compareTo(t.getTaxPeriodTo()) <= 0).findAny().orElse(null);
+			if(demand !=null) {
+				System.out.println("Some demand is raised");
+				applyReate = false;
+			}
+			
+			
+//			if(demands.size()>0) { //Already some demands raised for the connection
+//				applyReate = true;
+//				for(Demand each:demands) {
+//					System.out.println("each demand="+each.toString());
+//					//one demand with TaxPeriodFrom is >1st April and less than today's date
+//					//if(!(each.getTaxPeriodFrom().compareTo(yearStartDate)<=0)&&(each.getTaxPeriodFrom().compareTo(currentDateAndTimeIST) >0)){
+//					if(yearStartDate.compareTo(each.getTaxPeriodTo())<=0){
+//						applyReate = false;
+//						break;
+//					}
+//				}
+//			  }
+		   }
+		else {
+			//Check the billperiod start date == APRIL 1st
+			//getYearStartAndEndDate(yearStartAndEndDate); // set start and end date to hashmap yearStartAndEndDate
+			yearStartDate = Long.parseLong(yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES).toString());
+			System.out.println("Start Date=="+yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES));
+			if(billStartDateString.compareTo(yearStartDate) == 0) { //compare Billstart Date to April -1st
+				System.out.println("start date = April 1st");
+				applyReate = true;
+			}
+			
+		}
+		
+		if(applyReate && yearStartDate!=null) {
+		
 		try {
-			rebateEndDateInMilliSec = sdf1.parse(newReabteEndDate);
-			calendar.setTime(rebateEndDateInMilliSec);
-			Long rebateEndDate = calendar.getTimeInMillis();
-			System.out.println("current time="+currentDateAndTimeIST+"Rebate time="+calendar.getTimeInMillis());
-			if(currentDateAndTimeIST < rebateEndDate) {  //Check 1 - whether rebate date already passed 
-				//Get tax Period defined for PT
-		     if(connection.getUsageCategory().equalsIgnoreCase(WSCalculationConstant.ConnectionType_Residential)) { // Check 2 - Rebate only for Residential connection
-			   final String  propertyOwnershipCategory =  !StringUtils.isEmpty(connection.getPropertyOwnership()) ?connection.getPropertyOwnership() :  "HOR";
-			    if(!propertyOwnershipCategory.equalsIgnoreCase("HOR")) { //Check 3 - Rebate only for HOR
-				    	System.out.println("Property Ownership category="+propertyOwnershipCategory);
-						String financialYear = (String) rebateJsonObj.get(WSCalculationConstant.FROMFY_FIELD_NAME);
-						System.out.println("financial yer="+financialYear);
-						
-						List<TaxPeriod> taxPeriodPTMaster = masterDataService.getTaxPeriodList(requestInfoWrapper.getRequestInfo(), connection.getTenantId(), WSCalculationConstant.SERVICE_FIELD_VALUE_PT);
-						Optional<TaxPeriod>ptTaxPeriod = taxPeriodPTMaster.stream().filter(each -> each.getFinancialYear().equals(rebateJsonObj.get(WSCalculationConstant.FROMFY_FIELD_NAME))).findFirst();
+			    	//Get PT demand of previous year, for that set time to one Month less, and get FY corresponding to that
+			    	Calendar prevCal = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+			    	prevCal.setTimeInMillis(yearStartDate);
+			    	prevCal.add(Calendar.MONTH, -1); //Reduce month  by 1 this will give March 1st 
+			    	LocalDateTime localDateTime =LocalDateTime.ofInstant(prevCal.toInstant(), prevCal.getTimeZone().toZoneId());
+			    	   String prevFinYear = getAssessmentYear(localDateTime); // get Year based on March 1st 
+						List<TaxPeriod> taxPeriodPTMaster = masterDataService.getTaxPeriodList(requestInfo, connection.getTenantId(), WSCalculationConstant.SERVICE_FIELD_VALUE_PT);
+						Optional<TaxPeriod>ptTaxPeriod = taxPeriodPTMaster.stream().filter(each -> each.getFinancialYear().equals(prevFinYear)).findFirst(); // get Prev. year taxPeriod definition
 						Set<String> consumerCodes = new HashSet<String>();
 						consumerCodes.add(connection.getPropertyId());
-						configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_PT); // set to PT for demand search
-						List<Demand> demands = demandService.searchDemand(connection.getTenantId(), consumerCodes, ptTaxPeriod.get().getFromDate(),  ptTaxPeriod.get().getToDate(), requestInfoWrapper.getRequestInfo());
-						configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_WS); // set back to WS for all other operations
+						System.out.println("Prev tax paid or not?"+ptTaxPeriod.get().getFromDate()+":"+  ptTaxPeriod.get().getToDate());
+						//configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_PT); // set to PT for demand search
+						List<Demand> demands = demandService.searchDemandForModule(connection.getTenantId(), consumerCodes, ptTaxPeriod.get().getFromDate(),  ptTaxPeriod.get().getToDate(),WSCalculationConstant.SERVICE_FIELD_VALUE_PT, requestInfo);
+						//configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_WS); // set back to WS for all other operations
 						if(demands != null) {
 						  System.out.println("Got property demand="+demands.get(0).getId());
 						  if(demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny() != null) 
 								System.out.println("PT water tax=="+demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny().get().getTaxAmount());
 						 rebate =  demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny().get().getTaxAmount();
 						 System.out.println("Rebate got="+rebate);
+						 
+						 rebate = rebate.multiply(new BigDecimal(-1));
+						 
+						 System.out.println("DC-Rebate="+rebate);
 						 return rebate;
 						
 					   }	
-				
-			     }
-			
-					 
-		      }
-			}
-		}
-		 catch (ParseException e) {
+		 }
+		  catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		 }
+		
 		}
+		
 		return rebate;
 		
 	}
@@ -375,14 +431,14 @@ public class EstimationService {
 					.estimateAmount(waterCess.setScale(2, 2)).build());
 		}
 	
-		//Rebate based on last PT tax 
-		if(timeBasedExemptionsMasterMap.get(WSCalculationConstant.WC_REBATE_MASTER) != null) {
-			BigDecimal rebate = checkRebateForWaterBill(connection,timeBasedExemptionsMasterMap,requestInfoWrapper);
-			if(rebate != null)
-				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_REBATE)
-					.estimateAmount(rebate.setScale(2, 2)).build());		
-				
-		  }
+//		//Rebate based on last PT tax 
+//		if(timeBasedExemptionsMasterMap.get(WSCalculationConstant.WC_REBATE_MASTER) != null) {
+//			BigDecimal rebate = checkRebateForWaterBill(connection,timeBasedExemptionsMasterMap,requestInfoWrapper);
+//			if(rebate != null)
+//				estimates.add(TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_REBATE)
+//					.estimateAmount(rebate.setScale(2, 2)).build());		
+//				
+//		  }
 			
 		
 		
@@ -1122,6 +1178,13 @@ public class EstimationService {
 	}
 	
 	public static void main(String[] args) {
+		int i =0;
+		while(i++<20) {
+			Calendar cal =Calendar.getInstance();
+			System.out.println(cal.getTimeInMillis());
+		}
+	}
+	public static void main1(String[] args) {
 		Date d = new Date();	
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("IST"));		
 		cal.setTime(d);	

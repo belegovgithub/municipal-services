@@ -339,7 +339,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 				.taxHeadEstimates(estimates).billingSlabIds(billingSlabIds).connectionNo(criteria.getConnectionNo())
 				.applicationNO(criteria.getApplicationNo()).build();
 	}
-
+     
 	/**
 	 * 
 	 * @param request   would be calculations request
@@ -355,6 +355,48 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			ArrayList<?> billingFrequencyMap = (ArrayList<?>) masterMap
 					.get(WSCalculationConstant.Billing_Period_Master);
 			masterDataService.enrichBillingPeriod(criteria, billingFrequencyMap, masterMap);
+			
+			//Rebate based on last PT tax 
+			if(masterMap.get(WSCalculationConstant.WC_REBATE_MASTER) != null) { // Rebate master present
+				if(request.getCalculationCriteria().get(0).getWaterConnection().getUsageCategory().equalsIgnoreCase(WSCalculationConstant.ConnectionType_Residential)) {  //conn is residential
+					 final String  propertyOwnershipCategory =  !StringUtils.isEmpty(request.getCalculationCriteria().get(0).getWaterConnection().getPropertyOwnership()) ?request.getCalculationCriteria().get(0).getWaterConnection().getPropertyOwnership() :  "HOR";
+					    if(!propertyOwnershipCategory.equalsIgnoreCase("HOR")) {  // its an HOR - Go ahead for Rebate
+					    	
+					    	Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
+							timeBasedExemptionMasterMap.put(WSCalculationConstant.WC_REBATE_MASTER,
+									(JSONArray) (masterMap.getOrDefault(WSCalculationConstant.WC_REBATE_MASTER,null)));
+							
+							//Object x = masterMap.getOrDefault(WSCalculationConstant.BILLING_PERIOD,null);
+							JSONArray jsonArray = new JSONArray();
+							jsonArray.add(masterMap.getOrDefault(WSCalculationConstant.BILLING_PERIOD,null));
+							timeBasedExemptionMasterMap.put(WSCalculationConstant.BILLING_PERIOD, jsonArray);
+							
+							BigDecimal rebate = estimationService.checkRebateForWaterBill(request.getCalculationCriteria().get(0).getWaterConnection(),timeBasedExemptionMasterMap,request.getRequestInfo());
+							if(rebate != null) {
+								System.out.println("estimationMap="+estimationMap.toString());
+								List<TaxHeadEstimate> estimates = estimationMap.get("estimates");  
+								System.out.println("Present estimate="+estimates.size());
+								int endOfList = estimates.size();
+						        estimates.add(endOfList, TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_REBATE)
+										.estimateAmount(rebate.setScale(2, 2)).build());  //put rebate as last entry in list					
+								estimationMap.put("estimates", estimates);
+								
+							 }
+								
+					    }
+					
+				   }
+					
+			  }
+			
+			
+//			Non meter-- billingPeriiod from date = = 1st of april
+//			Meter case -- fetch demand, if any ddemand is there then not apply
+//			
+//		???	//Add Rebate 
+				
+			System.out.println("Came back after estimate calc="+estimationMap.toString());
+			
 			Calculation calculation = getCalculation(request.getRequestInfo(), criteria, estimationMap, masterMap,
 					true);
 			calculations.add(calculation);

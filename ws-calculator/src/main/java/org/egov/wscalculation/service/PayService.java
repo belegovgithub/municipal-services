@@ -111,11 +111,9 @@ public class PayService {
 			return Collections.emptyMap();
 		Map<String, BigDecimal> estimates = new HashMap<>();
 		BigDecimal applicablePenalty = BigDecimal.ZERO;
-	
 		JSONArray penaltyMaster = timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER);
 		if (null == penaltyMaster) {
 			estimates.put(WSCalculationConstant.WS_TIME_PENALTY, applicablePenalty.setScale(2, 2));
-			//return estimates;
 		}
 		else {
 			JSONObject penaltyJsonObj = mapper.convertValue(penaltyMaster.get(0), JSONObject.class);
