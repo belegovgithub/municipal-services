@@ -92,6 +92,8 @@ public class WaterServiceImpl implements WaterService {
 			// Validate any process Instance exists with WF
 			if(wsUtil.isDeactivateConnectionRequest(waterConnectionRequest))
 			{
+				//Repeatative code
+				//Verify the last application is approved and not deactivated appplication 
 				if (!CollectionUtils.isEmpty(previousConnectionsList)) {
 					workflowService.validateInProgressWF(previousConnectionsList, waterConnectionRequest.getRequestInfo(),
 							waterConnectionRequest.getWaterConnection().getTenantId());
@@ -104,6 +106,7 @@ public class WaterServiceImpl implements WaterService {
 					workflowService.validateInProgressWF(previousConnectionsList, waterConnectionRequest.getRequestInfo(),
 							waterConnectionRequest.getWaterConnection().getTenantId());
 				}
+			//	Verify the last application is approved 
 			reqType = WCConstants.MODIFY_CONNECTION;
 			}
 		}
@@ -127,7 +130,9 @@ public class WaterServiceImpl implements WaterService {
 			enrichmentService.legacyStatusEnrichment(waterConnectionRequest);
 		}else if (config.getIsExternalWorkFlowEnabled())
 			wfIntegrator.callWorkFlow(waterConnectionRequest, property);
+		
 		waterDao.saveWaterConnection(waterConnectionRequest);
+		//Generate Red Notice / notify citizen for 
 		//Legacy Condition 
 		if(!StringUtils.isEmpty(conn.getOldConnectionNo()) && reqType==WCConstants.CREATE_APPLICATION) {
 			enrichmentService.postForMeterReading(waterConnectionRequest,  WCConstants.LEGACY_CONNECTION);
