@@ -84,6 +84,8 @@ public class WSCalculationConstant {
 	public static final String WS_TIME_PENALTY = "WS_TIME_PENALTY";
 	
 	public static final String WS_TIME_REBATE = "WS_TIME_REBATE";
+	
+	
 
 	public static final String WS_WATER_CESS = "WS_WATER_CESS";
 

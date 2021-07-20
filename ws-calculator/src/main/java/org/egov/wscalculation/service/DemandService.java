@@ -376,7 +376,6 @@ public class DemandService {
 				getDemandSearchURL(tenantId, consumerCodes, taxPeriodFrom, taxPeriodTo),
 				RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 		try {
-			System.out.println("DC-Got demand=="+result);
 			return mapper.convertValue(result, DemandResponse.class).getDemands();
 		} catch (IllegalArgumentException e) {
 			throw new CustomException("PARSING_ERROR", "Failed to parse response from Demand Search");
@@ -390,7 +389,6 @@ public class DemandService {
 				getDemandSearchURLForModule(tenantId, consumerCodes, taxPeriodFrom, taxPeriodTo,businessService),
 				RequestInfoWrapper.builder().requestInfo(requestInfo).build());
 		try {
-			System.out.println("DC-Got demand=="+result);
 			return mapper.convertValue(result, DemandResponse.class).getDemands();
 		} catch (IllegalArgumentException e) {
 			throw new CustomException("PARSING_ERROR", "Failed to parse response from Demand Search");
@@ -534,7 +532,6 @@ public class DemandService {
 		Demand penaltyApplicableDemand = null;
 		if(sortedDemands != null ) {
 			 penaltyApplicableDemand = sortedDemands.get(0); // get latest demand
-			 System.out.println("penaltyApplicableDemand="+penaltyApplicableDemand);
 			 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
 			 Long billExpiryCheckDate = Long.sum(penaltyApplicableDemand.getTaxPeriodTo(),penaltyApplicableDemand.getBillExpiryTime());
 			 Long currentDateAndTimeIST = calendar.getTimeInMillis();
@@ -543,7 +540,6 @@ public class DemandService {
 				 penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);		
 				}
 			 else {
-				 System.out.println("Bill not expired,Meter/Non meter connection- expire demand by calling fetchbill");
 //				 if(requiredWC.getConnectionType().equalsIgnoreCase(WSCalculationConstant.nonMeterdConnection)) {
 //						System.out.println("Nonmeter connection");			
 //						penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);

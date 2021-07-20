@@ -373,9 +373,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 							
 							BigDecimal rebate = estimationService.checkRebateForWaterBill(request.getCalculationCriteria().get(0).getWaterConnection(),timeBasedExemptionMasterMap,request.getRequestInfo());
 							if(rebate != null) {
-								System.out.println("estimationMap="+estimationMap.toString());
 								List<TaxHeadEstimate> estimates = estimationMap.get("estimates");  
-								System.out.println("Present estimate="+estimates.size());
 								int endOfList = estimates.size();
 						        estimates.add(endOfList, TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_REBATE)
 										.estimateAmount(rebate.setScale(2, 2)).build());  //put rebate as last entry in list					

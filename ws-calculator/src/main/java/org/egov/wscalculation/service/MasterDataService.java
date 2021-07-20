@@ -91,7 +91,6 @@ public class MasterDataService {
 				repository.fetchResult(wSCalculationUtil.getTaxPeriodSearchUrl(tenantId, serviceFieldValue),
 						RequestInfoWrapper.builder().requestInfo(requestInfo).build()),
 				TaxPeriodResponse.class);
-		System.out.println("DC-tax period response=="+res.toString());
 		return res.getTaxPeriods();
 	}
 
