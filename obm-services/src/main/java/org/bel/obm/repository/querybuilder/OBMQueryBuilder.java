@@ -86,6 +86,21 @@ public class OBMQueryBuilder {
 				builder.append(" dtl.applicationDate <= ? ");
 				preparedStmtList.add(criteria.getToDate());
 			}
+			if (criteria.getHallId() != null) {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" dtl.hallid=? ");
+				preparedStmtList.add(criteria.getHallId());
+			}
+			if (criteria.getBookedFromDate() != null) {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" dtl.fromdate >= ? ");
+				preparedStmtList.add(criteria.getBookedFromDate());
+			}
+			if (criteria.getBookedToDate() != null) {
+				addClauseIfRequired(preparedStmtList, builder);
+				builder.append(" dtl.todate <= ? ");
+				preparedStmtList.add(criteria.getBookedToDate());
+			}
 		}
 		return addPaginationWrapper(builder.toString(), preparedStmtList, criteria);
 	}

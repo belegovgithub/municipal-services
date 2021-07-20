@@ -26,7 +26,7 @@ public class CHBookDtls {
 	@Size(max = 64)
 	private String tenantId;
 
-	private Long selectedDate;
+	private String selectedDate;
 	private Long fromDate;
     private Long toDate;
     private String purpose;

@@ -57,4 +57,10 @@ public class CHBookController {
 				.build();
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
+	
+	@PostMapping({ "/_bookedHistory" })
+	public ResponseEntity<String> bookedHistory(@RequestBody RequestInfoWrapper requestInfoWrapper, 
+			@ModelAttribute SearchCriteria criteria) {
+		return new ResponseEntity<>(chBookService.bookedHistory(criteria,requestInfoWrapper.getRequestInfo()), HttpStatus.OK);
+	}
 }

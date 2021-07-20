@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bel.obm.constants.OBMConstant;
 import org.bel.obm.models.CHBookDtls;
 import org.bel.obm.models.CHBookRequest;
 import org.bel.obm.models.SearchCriteria;
@@ -23,6 +24,10 @@ import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @Service
 public class CHBookService {
@@ -119,5 +124,24 @@ public class CHBookService {
 		if (chBookDtlsList.isEmpty())
 			return Collections.emptyList();
 		return chBookDtlsList;
+	}
+
+	public String bookedHistory(SearchCriteria criteria, RequestInfo requestInfo) {
+		List<CHBookDtls> chBookDtlsList = null;
+		validator.validateBookedHistory(criteria);
+		enrichmentService.enrichFromAndToBookedDate(criteria);
+		chBookDtlsList = repository.getCHBookDts(criteria);
+		JsonArray jsArrayBooked = new JsonArray();
+		for(CHBookDtls chBookDtls :chBookDtlsList) {
+			JsonArray jsArray = new JsonArray();
+			jsArray.add(chBookDtls.getFromDate());
+			jsArray.add(chBookDtls.getToDate());
+			jsArrayBooked.addAll(jsArray);
+		}
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.add("booked", jsArrayBooked);
+		JsonObject returnObject = new JsonObject();
+		returnObject.add("reservedSlots", jsonObject);
+		return new Gson().toJson(returnObject);
 	}
 }

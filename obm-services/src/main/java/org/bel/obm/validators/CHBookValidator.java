@@ -11,6 +11,7 @@ import java.util.TimeZone;
 import org.bel.obm.constants.OBMConstant;
 import org.bel.obm.models.CHBookDtls;
 import org.bel.obm.models.CHBookRequest;
+import org.bel.obm.models.SearchCriteria;
 import org.bel.obm.util.CommonUtils;
 import org.egov.common.contract.request.RequestInfo;
 import org.egov.mdms.model.MdmsCriteriaReq;
@@ -155,11 +156,12 @@ public class CHBookValidator {
 				for (HashMap<String, String> record : chbTimeSlotsIds) {
 					String startTime = record.get("from");
 					String duration = record.get("duration");
+					Long selectedDate = new SimpleDateFormat("dd-MM-yyyy").parse(chBookDtls.getSelectedDate()).getTime();
 					SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
 					sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-					chBookDtls.setToDate(chBookDtls.getSelectedDate() + sdf.parse(startTime).getTime()
+					chBookDtls.setToDate(selectedDate + sdf.parse(startTime).getTime()
 							+ sdf.parse(duration).getTime());
-					chBookDtls.setFromDate(chBookDtls.getSelectedDate() + sdf.parse(startTime).getTime());
+					chBookDtls.setFromDate(selectedDate + sdf.parse(startTime).getTime());
 				}
 			} else
 				errorMap.put("INVALID_ID", "Invalid hall id");
@@ -167,6 +169,16 @@ public class CHBookValidator {
 			e.printStackTrace();
 			throw new CustomException("Invalid_Data", "Invalid MDMS Data");
 		}
+		if (!errorMap.isEmpty())
+			throw new CustomException(errorMap);
+	}
+
+	public void validateBookedHistory(SearchCriteria criteria) {
+		Map<String, String> errorMap = new HashMap<>();
+		if (null == criteria.getHallId() || criteria.getHallId().isEmpty())
+			errorMap.put("NULL_HallDtl", " Hall id cannot be empty");
+		if (null == criteria.getTenantId() || criteria.getTenantId().isEmpty())
+			errorMap.put("NULL_tenant", " Tenantid id cannot be empty");
 		if (!errorMap.isEmpty())
 			throw new CustomException(errorMap);
 	}

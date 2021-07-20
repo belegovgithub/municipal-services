@@ -62,4 +62,7 @@ public class OBMConfiguration {
 
     @Value("${egov.mdms.search.endpoint}")
     private String mdmsEndpoint;
+    
+    @Value("${egov.obm.chb.allowedbookingbufferdays}")
+    private Integer allowedBookingBufferDays;
 }

@@ -78,7 +78,7 @@ public class CHBookEnrichmentService {
 	}
 
 	public void enrichSearchCriteriaWithAccountId(RequestInfo requestInfo, SearchCriteria criteria) {
-		if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase("CITIZEN")) {
+		if (criteria.isEmpty() && requestInfo.getUserInfo().getType().equalsIgnoreCase(OBMConstant.ROLE_CITIZEN)) {
 			criteria.setAccountId(requestInfo.getUserInfo().getUuid().toString());
 			criteria.setMobileNumber(requestInfo.getUserInfo().getUserName());
 			criteria.setTenantId(requestInfo.getUserInfo().getTenantId());
@@ -137,5 +137,10 @@ public class CHBookEnrichmentService {
 			Long time = System.currentTimeMillis();
 			chBookDtls.setApprovedDate(time);
 		}
+	}
+
+	public void enrichFromAndToBookedDate(SearchCriteria criteria) {
+		criteria.setBookedFromDate(System.currentTimeMillis());
+		criteria.setBookedToDate((System.currentTimeMillis()+(config.getAllowedBookingBufferDays()*24*60*60*1000)));
 	}
 }
