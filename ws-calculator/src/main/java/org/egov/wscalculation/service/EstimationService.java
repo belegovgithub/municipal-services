@@ -308,29 +308,24 @@ public class EstimationService {
 		
 		boolean applyReate = false;
 	
-		Long yearStartDate;
+		
 		
 		//connection.setConnectionType(WSCalculationConstant.meteredConnectionType);
 		Map<String, Object> yearStartAndEndDate = new HashMap<String, Object>();
 		getYearStartAndEndDate(yearStartAndEndDate); // set start and end date to hashmap yearStartAndEndDate
+		Long yearStartDate =  Long.parseLong(yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES).toString());
 		if(connection.getConnectionType().equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {
-			//Get demand for current financial year, current FY got from Rebate.json 
-			List<TaxPeriod> taxPeriodMaster = masterDataService.getTaxPeriodList(requestInfo, connection.getTenantId(), WSCalculationConstant.SERVICE_FIELD_VALUE_WS);
-			Optional<TaxPeriod>wsTaxPeriod = taxPeriodMaster.stream().filter(each -> each.getFinancialYear().equals(rebateJsonObj.get(WSCalculationConstant.FROMFY_FIELD_NAME))).findFirst();
 			//Find any demand is already raised for the current financial year
 			Set<String> consumerCodes = new HashSet<String>();
 			consumerCodes.add(connection.getConnectionNo());
 			List<Demand> demands = demandService.searchDemandForModule(connection.getTenantId(), consumerCodes,null,null,WSCalculationConstant.SERVICE_FIELD_VALUE_WS, requestInfo);
-			
-			yearStartDate = Long.parseLong(yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES).toString());
 			Demand demand = demands.stream().filter(t -> yearStartDate.compareTo(t.getTaxPeriodTo()) <= 0).findAny().orElse(null);
 			if(demand !=null) 
 				applyReate = false;
 		  }
 		else {
 			//Check the billperiod start date == APRIL 1st
-			yearStartDate = Long.parseLong(yearStartAndEndDate.get(WSCalculationConstant.STARTING_DATE_APPLICABLES).toString());
-			if(billStartDateString.compareTo(yearStartDate) == 0)  //compare Billstart Date to April -1st
+			if(billStartDateString.compareTo(yearStartDate) <= 0)  //compare Billstart Date to April -1st
 				applyReate = true;
 		}
 		
@@ -347,15 +342,15 @@ public class EstimationService {
 						Optional<TaxPeriod>ptTaxPeriod = taxPeriodPTMaster.stream().filter(each -> each.getFinancialYear().equals(prevFinYear)).findFirst(); // get Prev. year taxPeriod definition
 						Set<String> consumerCodes = new HashSet<String>();
 						consumerCodes.add(connection.getPropertyId());
-						//configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_PT); // set to PT for demand search
 						List<Demand> demands = demandService.searchDemandForModule(connection.getTenantId(), consumerCodes, ptTaxPeriod.get().getFromDate(),  ptTaxPeriod.get().getToDate(),WSCalculationConstant.SERVICE_FIELD_VALUE_PT, requestInfo);
-						//configs.setBusinessService(WSCalculationConstant.SERVICE_FIELD_VALUE_WS); // set back to WS for all other operations
 						if(demands != null) {
-						  if(demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny() != null) 
-						 rebate =  demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny().get().getTaxAmount();
-						 rebate = rebate.multiply(new BigDecimal(-1));
+						  if(demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny() != null) {
+							  //Check for collected amount vs due amount for water tax. 
+							  rebate =  demands.get(0).getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.PT_WATER_TAX)).findAny().get().getTaxAmount();
+						  }
+						 rebate = rebate.setScale(2, 2).negate();
 						 return rebate;
-						
+					   	
 					   }	
 		 }
 		  catch (Exception e) {

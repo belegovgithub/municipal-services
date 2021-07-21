@@ -360,7 +360,7 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 			if(masterMap.get(WSCalculationConstant.WC_REBATE_MASTER) != null) { // Rebate master present
 				if(request.getCalculationCriteria().get(0).getWaterConnection().getUsageCategory().equalsIgnoreCase(WSCalculationConstant.ConnectionType_Residential)) {  //conn is residential
 					 final String  propertyOwnershipCategory =  !StringUtils.isEmpty(request.getCalculationCriteria().get(0).getWaterConnection().getPropertyOwnership()) ?request.getCalculationCriteria().get(0).getWaterConnection().getPropertyOwnership() :  "HOR";
-					    if(!propertyOwnershipCategory.equalsIgnoreCase("HOR")) {  // its an HOR - Go ahead for Rebate
+					    if(propertyOwnershipCategory.equalsIgnoreCase("HOR")) {  // its an HOR - Go ahead for Rebate
 					    	
 					    	Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
 							timeBasedExemptionMasterMap.put(WSCalculationConstant.WC_REBATE_MASTER,
@@ -377,7 +377,9 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 								int endOfList = estimates.size();
 						        estimates.add(endOfList, TaxHeadEstimate.builder().taxHeadCode(WSCalculationConstant.WS_TIME_REBATE)
 										.estimateAmount(rebate.setScale(2, 2)).build());  //put rebate as last entry in list					
-								estimationMap.put("estimates", estimates);
+								//update expiry based on reabate period 
+						        //billingPeriod.put(WSCalculationConstant.Demand_Expiry_Date_String, demandExpiryDateMillis);
+						        estimationMap.put("estimates", estimates);
 								
 							 }
 								
