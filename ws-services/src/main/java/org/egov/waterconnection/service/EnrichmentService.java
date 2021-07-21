@@ -293,6 +293,22 @@ public class EnrichmentService {
 	}
 	
 	/**
+	 * Enrich fileStoreIds
+	 * 
+	 * @param waterConnectionRequest WaterConnectionRequest Object
+	 */
+	public void enrichFileStoreIdsForDeactivate(WaterConnectionRequest waterConnectionRequest) {
+		try {
+			log.info("enrichFileStoreIds" + waterConnectionRequest.getWaterConnection().getProcessInstance().getAction());
+			if (waterConnectionRequest.getWaterConnection().getApplicationStatus().equalsIgnoreCase(WCConstants.PENDING_FOR_CLERK_APPROVAL)) {
+				waterDao.enrichFileStoreIds(waterConnectionRequest);
+			}
+		} catch (Exception ex) {
+			log.debug(ex.toString());
+		}
+	}
+	
+	/**
 	 * Sets status for create request
 	 * 
 	 * @param waterConnectionRequest

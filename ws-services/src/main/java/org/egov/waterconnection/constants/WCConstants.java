@@ -82,6 +82,8 @@ public class WCConstants {
 	public static final String REJECT_REJECTED = "REJECT_REJECTED";
 
 	public static final String SEND_BACK_TO_CITIZEN_PENDING_FOR_CITIZEN_ACTION = "SEND_BACK_TO_CITIZEN_PENDING_FOR_CITIZEN_ACTION";
+	
+	public static final String PENDING_FOR_CLERK_APPROVAL = "PENDING_FOR_CLERK_APPROVAL";
 
 	public static final String SEND_BACK_FOR_DO_PENDING_FOR_DOCUMENT_VERIFICATION = "SEND_BACK_FOR_DOCUMENT_VERIFICATION_PENDING_FOR_DOCUMENT_VERIFICATION";
 
@@ -160,10 +162,14 @@ public class WCConstants {
 	public static final String DEFAULT_OBJECT_MODIFY_SMS_MSG = "WS_DEFAULT_EDIT_MODIFY_CONNECTION_SMS_MESSAGE";
 
 	public static final String DEFAULT_OBJECT_MODIFY_APP_MSG = "WS_DEFAULT_EDIT_MODIFY_CONNECTION_APP_MESSAGE";
+	
+	public static final String DEFAULT_OBJECT_DEACTIVATE_APP_MSG = "WS_DEFAULT_EDIT_DEACTIVATE_CONNECTION_APP_MESSAGE";
 
 	public static final String WS_MODIFY_SMS = "WS_MODIFY_SMS_MESSAGE";
 	
 	public static final String WS_MODIFY_IN_APP = "WS_MODIFY_IN_APP_MESSAGE";
+	
+	public static final String WS_DEACTIVATE_IN_APP = "WS_DEACTIVATE_IN_APP_MESSAGE";
 
 	public static final String IDGEN_ERROR_CONST = "IDGEN ERROR";
 
@@ -192,10 +198,14 @@ public class WCConstants {
 	public static final String ESTIMATION_FILESTORE_ID = "estimationFileStoreId";
 
 	public static final String SANCTION_LETTER_FILESTORE_ID = "sanctionFileStoreId";
+	
+	public static final String RED_NOTICE_FILESTORE_ID = "redNoticeFileStoreId";
 
 	public static final String ESTIMATION_DATE_CONST = "estimationLetterDate";
 
 	public static final String LOCALITY = "locality";
+	
+	public static final String DEACTIVATE_FREEZE_CONNECTION = "DEACTIVATE_CONNECTION";
 
 	public static final List<String> ADDITIONAL_OBJ_CONSTANT = Collections
 			.unmodifiableList(Arrays.asList(ADHOC_PENALTY, ADHOC_REBATE, ADHOC_PENALTY_REASON, ADHOC_PENALTY_COMMENT,
@@ -204,6 +214,9 @@ public class WCConstants {
 
 	public static final List<String> EDIT_NOTIFICATION_STATE = Collections
 			.unmodifiableList(Arrays.asList(ACTION_INITIATE, SUBMIT_APPLICATION_CONST, ACTION_PAY));
+	
+	public static final List<String> EDIT_NOTIFICATION_STATE_FOR_DEACTIVATION = Collections
+			.unmodifiableList(Arrays.asList(SUBMIT_APPLICATION_CONST, DEACTIVATE_FREEZE_CONNECTION));
 
 	public static final List<String> IGNORE_CLASS_ADDED = Collections.unmodifiableList(Arrays.asList("PlumberInfo"));
 
@@ -212,8 +225,14 @@ public class WCConstants {
 	public static final String PDF_APPLICATION_KEY = "ws-applicationwater";
 
 	public static final String PDF_ESTIMATION_KEY = "ws-estimationnotice";
+	
+	public static final String PDF_ESTIMATION_KEY_SW = "sw-estimationnotice";
 
 	public static final String PDF_SANCTION_KEY = "ws-sanctionletter";
+	
+	public static final String PDF_SANCTION_KEY_SW = "sw-sanctionletter";
+	
+	public static final String PDF_RED_NOTICE_KEY = "ws-red-notice";
 
 	public static final String PENDING_FOR_CONNECTION_ACTIVATION = "PENDING_FOR_CONNECTION_ACTIVATION";
 
@@ -233,7 +252,6 @@ public class WCConstants {
 
 	public static final String APPROVE_CONNECTION = "APPROVE_CONNECTION";
 	
-	public static final String DEACTIVATE_FREEZE_CONNECTION = "DEACTIVATE_CONNECTION";
 
 	// Used to differentiate the type of request which is processing
 	public static final int CREATE_APPLICATION = 0;

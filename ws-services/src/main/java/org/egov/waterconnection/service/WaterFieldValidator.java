@@ -71,18 +71,6 @@ public class WaterFieldValidator implements WaterActionValidator {
 			if (CollectionUtils.isEmpty(waterConnectionRequest.getWaterConnection().getPlumberInfo()))  {
 				errorMap.put("INVALID_PLUMBER_INFO", "Plumber Info Missing");
 			}
-			HashMap<String, Object> additionalDetail = mapper
-					.convertValue(waterConnectionRequest.getWaterConnection().getAdditionalDetails(), HashMap.class);
-			if(!additionalDetail.isEmpty())
-			{
-				if(StringUtils.isEmpty(additionalDetail.get(WCConstants.LAST_METER_READING_CONST)))
-				{
-					errorMap.put("INVALID_LAST_METER_READING", "Last Meter Reading Missing");
-				}
-			}else
-			{
-				errorMap.put("INVALID_ADDITIONAL_DETAILS", "Additional Details Missing");
-			}
 		}
 	}
 	

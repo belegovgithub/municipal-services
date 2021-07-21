@@ -127,7 +127,7 @@ public class WaterConnectionValidator {
 	 * @param searchResult water connection search result
 	 */
 	private void setFieldsFromSearch(WaterConnectionRequest request, WaterConnection searchResult, int reqType) {
-		if (reqType == WCConstants.UPDATE_APPLICATION) {
+		if (reqType == WCConstants.UPDATE_APPLICATION || reqType == WCConstants.DEACTIVATE_CONNECTION) {
 			request.getWaterConnection().setConnectionNo(searchResult.getConnectionNo());
 		}
 	}

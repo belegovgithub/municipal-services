@@ -319,7 +319,7 @@ public class WaterServicesUtil {
 	
 	public boolean isDeactivateConnectionRequest(WaterConnectionRequest waterConnectionRequest) {
 		//Use constant rather than directly checking the value
-		return  waterConnectionRequest.getWaterConnection().getApplicationType().equalsIgnoreCase("DEACTIVATE_WATER_CONNECTION") ||  waterConnectionRequest.getWaterConnection().getApplicationType().equalsIgnoreCase("FREEZE_WATER_CONNECTION");
+		return  waterConnectionRequest.getWaterConnection().getApplicationType().equalsIgnoreCase(WCConstants.DEACTIVATE_WATER_CONNECTION);
 	}
 
 

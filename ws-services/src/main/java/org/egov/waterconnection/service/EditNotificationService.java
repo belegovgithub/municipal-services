@@ -84,12 +84,17 @@ public class EditNotificationService {
 		if (  waterServicesUtil.isModifyConnectionApplication(waterConnectionRequest))  {
 			   code = WCConstants.WS_MODIFY_IN_APP;
 		}
+		if (  waterServicesUtil.isDeactivateConnectionRequest(waterConnectionRequest))  {
+			   code = WCConstants.WS_DEACTIVATE_IN_APP;
+		}
 		String message = notificationUtil.getCustomizedMsg(code, localizationMessage);
 		if (message == null) {
 			log.info("No localized message found!!, Using default message");
 			message = notificationUtil.getCustomizedMsg(DEFAULT_OBJECT_EDIT_APP_MSG, localizationMessage);
 			if(code.equalsIgnoreCase(WCConstants.WS_MODIFY_IN_APP))
 				message = notificationUtil.getCustomizedMsg(DEFAULT_OBJECT_MODIFY_APP_MSG, localizationMessage);
+			if(code.equalsIgnoreCase(WCConstants.WS_DEACTIVATE_IN_APP))
+				message = notificationUtil.getCustomizedMsg(DEFAULT_OBJECT_DEACTIVATE_APP_MSG, localizationMessage);
 		}
 		Map<String, String> mobileNumbersAndNames = new HashMap<>();
 		property.getOwners().forEach(owner -> {
