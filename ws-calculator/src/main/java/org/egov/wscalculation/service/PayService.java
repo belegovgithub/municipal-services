@@ -1,17 +1,27 @@
 package org.egov.wscalculation.service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.YearMonth;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import org.egov.wscalculation.constants.WSCalculationConstant;
 import org.egov.wscalculation.web.models.TaxHeadEstimate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 @Service
 public class PayService {
@@ -21,6 +31,13 @@ public class PayService {
 	
 	@Autowired
 	private EstimationService estimationService;
+	
+	
+	@Value("${app.timezone}")
+	private String timeZone;
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	/**
 	 * Decimal is ceiled for all the tax heads
@@ -61,14 +78,70 @@ public class PayService {
 	 * @param billingExpiryDate - Billing Expiry Date
 	 * @return estimation of time based exemption
 	 */
+	
 	public Map<String, BigDecimal> applyPenaltyRebateAndInterest(BigDecimal waterCharge,
+			String assessmentYear, Map<String, JSONArray> timeBasedExemptionMasterMap, Long billingExpiryDate) {
+
+		System.out.println("Came for pen/inter");
+		if (BigDecimal.ZERO.compareTo(waterCharge) >= 0)
+			return Collections.emptyMap();
+		Map<String, BigDecimal> estimates = new HashMap<>();
+		
+		//long currentUTC = System.currentTimeMillis();
+		
+		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+		long currentUTC = calendar.getTimeInMillis();
+		long numberOfDaysInMillis = billingExpiryDate - currentUTC;
+		
+		BigDecimal noOfDays = BigDecimal.valueOf((TimeUnit.MILLISECONDS.toDays(Math.abs(numberOfDaysInMillis))));
+		System.out.println("NO of chargeable days="+noOfDays);
+		if(BigDecimal.ONE.compareTo(noOfDays) <= 0) noOfDays = noOfDays.add(BigDecimal.ONE);
+		System.out.println("Penality=="+timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER));
+		BigDecimal penalty = getApplicablePenalty(waterCharge, noOfDays, timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER));
+		BigDecimal interest = getApplicableInterest(waterCharge, noOfDays, timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_INTEREST_MASTER));
+		estimates.put(WSCalculationConstant.WS_TIME_PENALTY, penalty.setScale(2, 2));
+		estimates.put(WSCalculationConstant.WS_TIME_INTEREST, interest.setScale(2, 2));
+		return estimates;
+	}
+	
+	//BEL implementation for CBs
+	public Map<String, BigDecimal> calculatePenaltyForWaterBill(BigDecimal waterCharge, Map<String, JSONArray> timeBasedExemptionMasterMap) {
+
+		if (BigDecimal.ZERO.compareTo(waterCharge) >= 0)
+			return Collections.emptyMap();
+		Map<String, BigDecimal> estimates = new HashMap<>();
+		BigDecimal applicablePenalty = BigDecimal.ZERO;
+	
+		JSONArray penaltyMaster = timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER);
+		if (null == penaltyMaster) {
+			estimates.put(WSCalculationConstant.WS_TIME_PENALTY, applicablePenalty.setScale(2, 2));
+			//return estimates;
+		}
+		else {
+			JSONObject penaltyJsonObj = mapper.convertValue(penaltyMaster.get(0), JSONObject.class);
+			BigDecimal rate = null != penaltyJsonObj.get(WSCalculationConstant.RATE_FIELD_NAME)
+					? BigDecimal.valueOf(((Number) penaltyJsonObj.get(WSCalculationConstant.RATE_FIELD_NAME)).doubleValue())
+					: null;
+			
+			if (rate != null)
+				applicablePenalty = waterCharge.multiply(rate.divide(WSCalculationConstant.HUNDRED));
+					
+		}	
+		estimates.put(WSCalculationConstant.WS_TIME_PENALTY, applicablePenalty.setScale(2, 2));
+		return estimates;
+	}
+	
+	
+	
+	public Map<String, BigDecimal> applyPenaltyRebateAndInterest_old(BigDecimal waterCharge,
 			String assessmentYear, Map<String, JSONArray> timeBasedExemptionMasterMap, Long billingExpiryDate) {
 
 		if (BigDecimal.ZERO.compareTo(waterCharge) >= 0)
 			return Collections.emptyMap();
 		Map<String, BigDecimal> estimates = new HashMap<>();
 		long currentUTC = System.currentTimeMillis();
-		long numberOfDaysInMillis = billingExpiryDate - currentUTC;
+		long numberOfDaysInMillis = billingExpiryDate - currentUTC;	
+		
 		BigDecimal noOfDays = BigDecimal.valueOf((TimeUnit.MILLISECONDS.toDays(Math.abs(numberOfDaysInMillis))));
 		if(BigDecimal.ONE.compareTo(noOfDays) <= 0) noOfDays = noOfDays.add(BigDecimal.ONE);
 		BigDecimal penalty = getApplicablePenalty(waterCharge, noOfDays, timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER));
@@ -104,7 +177,9 @@ public class PayService {
 	 */
 	public BigDecimal getApplicablePenalty(BigDecimal waterCharge, BigDecimal noOfDays, JSONArray config) {
 		BigDecimal applicablePenalty = BigDecimal.ZERO;
+		
 		Map<String, Object> penaltyMaster = mDService.getApplicableMaster(estimationService.getAssessmentYear(), config);
+		
 		if (null == penaltyMaster) return applicablePenalty;
 		BigDecimal daysApplicable = null != penaltyMaster.get(WSCalculationConstant.DAYA_APPLICABLE_NAME)
 				? BigDecimal.valueOf(((Number) penaltyMaster.get(WSCalculationConstant.DAYA_APPLICABLE_NAME)).intValue())
@@ -128,6 +203,7 @@ public class PayService {
 			applicablePenalty = flatAmt.compareTo(waterCharge) > 0 ? BigDecimal.ZERO : flatAmt;
 		else {
 			// rate of penalty
+			System.out.println("apply penality/regate rate="+rate+"watercharge="+waterCharge);
 			applicablePenalty = waterCharge.multiply(rate.divide(WSCalculationConstant.HUNDRED));
 		}
 		

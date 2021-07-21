@@ -91,6 +91,7 @@ public class MasterDataService {
 				repository.fetchResult(wSCalculationUtil.getTaxPeriodSearchUrl(tenantId, serviceFieldValue),
 						RequestInfoWrapper.builder().requestInfo(requestInfo).build()),
 				TaxPeriodResponse.class);
+		System.out.println("DC-tax period response=="+res.toString());
 		return res.getTaxPeriods();
 	}
 
@@ -125,11 +126,9 @@ public class MasterDataService {
 		for (Entry<String, JSONArray> entry : res.entrySet()) {
 
 			String masterName = entry.getKey();
-
-			/* Masters which need to be parsed will be contained in the list */
+					/* Masters which need to be parsed will be contained in the list */
 			if (WSCalculationConstant.WS_BILLING_SLAB_MASTERS.contains(entry.getKey()))
 				billingSlabMaster.put(masterName, entry.getValue());
-
 			/* Master not contained in list will be stored as it is */
 			timeBasedExemptionMasterMap.put(entry.getKey(), entry.getValue());
 		}
@@ -210,7 +209,7 @@ public class MasterDataService {
 		}
 		Map<String, Object> billingPeriod = new HashMap<>();
 		if (master.get(WSCalculationConstant.ConnectionType).toString()
-				.equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {
+				.equalsIgnoreCase(WSCalculationConstant.meteredConnectionType)) {   
 			billingPeriod.put(WSCalculationConstant.STARTING_DATE_APPLICABLES, criteria.getFrom());
 			billingPeriod.put(WSCalculationConstant.ENDING_DATE_APPLICABLES, criteria.getTo());
 		} else {
@@ -303,6 +302,8 @@ public class MasterDataService {
 				}
 			}
 		}
+		
+	
 		return objToBeReturned;
 	}
 

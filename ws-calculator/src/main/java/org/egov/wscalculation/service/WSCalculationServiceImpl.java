@@ -140,7 +140,10 @@ public class WSCalculationServiceImpl implements WSCalculationService {
 	
 	
 	public void generateDemandForNewModifiedConn(RequestInfo requestInfo,Long billingDate) {
-		List<String> tenantIds = wSCalculationDao.getTenantId();
+		//List<String> tenantIds = wSCalculationDao.getTenantId();
+		List<String> tenantIds = new ArrayList<String>();
+		tenantIds.add("pb.testing");
+		
 		if (tenantIds.isEmpty())
 			return;
 		tenantIds.forEach(tenantId -> {

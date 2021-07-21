@@ -2,17 +2,22 @@ package org.egov.wscalculation.service;
 
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime; 
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -56,7 +61,9 @@ import org.springframework.util.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.matcher.EqualityMatcher;
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 @Service
 @Slf4j
@@ -109,6 +116,10 @@ public class DemandService {
 
 	@Autowired
 	private WSCalculationConfiguration config;
+	
+	@Autowired
+	private CalculatorUtil calculatorUtil;
+	
 	/**
 	 * Creates or updates Demand
 	 * 
@@ -456,43 +467,71 @@ public class DemandService {
 			getBillCriteria.setAmountExpected(BigDecimal.ZERO);
 		RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
 		Map<String, JSONArray> billingSlabMaster = new HashMap<>();
-
 		Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
-		mstrDataService.setWaterConnectionMasterValues(requestInfo, getBillCriteria.getTenantId(), billingSlabMaster,
-				timeBasedExemptionMasterMap);
-
+		mstrDataService.setWaterConnectionMasterValues(requestInfo, getBillCriteria.getTenantId(), billingSlabMaster,timeBasedExemptionMasterMap);
+		
 		if (CollectionUtils.isEmpty(getBillCriteria.getConsumerCodes()))
 			getBillCriteria.setConsumerCodes(Collections.singletonList(getBillCriteria.getConnectionNumber()));
-
-		DemandResponse res = mapper.convertValue(
-				repository.fetchResult(utils.getDemandSearchUrl(getBillCriteria), requestInfoWrapper),
-				DemandResponse.class);
+		List<WaterConnection> waterConnectionList = calculatorUtil.getWaterConnection(requestInfo, getBillCriteria.getConnectionId(), getBillCriteria.getTenantId());
+		WaterConnection requiredWC = waterConnectionList.get(0);
+		DemandResponse res = mapper.convertValue(repository.fetchResult(utils.getDemandSearchUrl(getBillCriteria), requestInfoWrapper),DemandResponse.class);
+		
 		if (CollectionUtils.isEmpty(res.getDemands())) {
 			Map<String, String> map = new HashMap<>();
 			map.put(WSCalculationConstant.EMPTY_DEMAND_ERROR_CODE, WSCalculationConstant.EMPTY_DEMAND_ERROR_MESSAGE);
 			throw new CustomException(map);
 		}
-
-
+	
+		//1.Sort demand based on taxPeriodTo
+		List<Demand>sortedDemands = res.getDemands().stream()
+				  .sorted(Comparator.comparing(Demand::getTaxPeriodTo).reversed())
+				  .collect(Collectors.toList());
 		// Loop through the consumerCodes and re-calculate the time base applicable
-		Map<String, Demand> consumerCodeToDemandMap = res.getDemands().stream()
-				.collect(Collectors.toMap(Demand::getId, Function.identity()));
+		Map<String, Demand> consumerCodeToDemandMap = new HashMap<String, Demand>();
 		List<Demand> demandsToBeUpdated = new LinkedList<>();
-
 		String tenantId = getBillCriteria.getTenantId();
-
-		List<TaxPeriod> taxPeriods = mstrDataService.getTaxPeriodList(requestInfoWrapper.getRequestInfo(), tenantId, WSCalculationConstant.SERVICE_FIELD_VALUE_WS);
+		Demand penaltyApplicableDemand = null;
+		if(sortedDemands != null ) {
+			 penaltyApplicableDemand = sortedDemands.get(0); // get latest demand
+			 System.out.println("penaltyApplicableDemand="+penaltyApplicableDemand);
+			 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+			 Long billExpiryCheckDate = Long.sum(penaltyApplicableDemand.getTaxPeriodTo(),penaltyApplicableDemand.getBillExpiryTime());
+			 Long currentDateAndTimeIST = calendar.getTimeInMillis();
+			 if (billExpiryCheckDate < currentDateAndTimeIST) {
+				 //Bill expaired add penalty
+				 penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);		
+				}
+			 else {
+				 System.out.println("Bill not expired");
+				 if(requiredWC.getConnectionType().equalsIgnoreCase(WSCalculationConstant.nonMeterdConnection)) {
+						System.out.println("Nonmeter connection");			
+						penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);
+					}
+					else {
+						System.out.println("Meter connection- expire demand by calling fetchbill");
+						//================Expire the demand======================================DC-						
+					   List<Demand> demandList = new ArrayList<Demand>();
+					   demandList.add(penaltyApplicableDemand);
+					   fetchBill(demandList, requestInfo);
+			             //===============expire demand
+					penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);
+					}
+			 }
+		}
 		
-		consumerCodeToDemandMap.forEach((id, demand) ->{
+		consumerCodeToDemandMap.put(penaltyApplicableDemand.getId(), penaltyApplicableDemand);
+		consumerCodeToDemandMap.forEach((id, demand) ->{        
 			if (demand.getStatus() != null
 					&& WSCalculationConstant.DEMAND_CANCELLED_STATUS.equalsIgnoreCase(demand.getStatus().toString()))
 				throw new CustomException(WSCalculationConstant.EG_WS_INVALID_DEMAND_ERROR,
 						WSCalculationConstant.EG_WS_INVALID_DEMAND_ERROR_MSG);
-			applyTimeBasedApplicables(demand, requestInfoWrapper, timeBasedExemptionMasterMap, taxPeriods);
+			applyPenalityForWaterBill(demand,requestInfoWrapper,timeBasedExemptionMasterMap);
+			
+			//applyTimeBasedApplicables(demand, requestInfoWrapper, timeBasedExemptionMasterMap, taxPeriods);
 			addRoundOffTaxHead(tenantId, demand.getDemandDetails());
 			demandsToBeUpdated.add(demand);
 		});
-
+		
 		//Call demand update in bulk to update the interest or penalty
 		DemandRequest request = DemandRequest.builder().demands(demandsToBeUpdated).requestInfo(requestInfo).build();
 		repository.fetchResult(utils.getUpdateDemandUrl(), request);
@@ -500,6 +539,109 @@ public class DemandService {
 
 	}
 
+	
+	private Demand checkPenaltyApplicability(Demand penaltyApplicableDemand) {
+		Optional<DemandDetail> demandDetails = penaltyApplicableDemand.getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.WS_CHARGE)).findAny();
+		DemandDetail demandDetail  = demandDetails.get();
+		//Check demand generated and collected amount !=0 and PENALTY tax head is not applied to the demand till now 
+		if(demandDetail.getTaxAmount().subtract(demandDetail.getCollectionAmount()) != new BigDecimal(0.0)) { 
+			if(penaltyApplicableDemand.getDemandDetails().stream().filter(detail ->detail.getTaxHeadMasterCode().contains(WSCalculationConstant.WS_TIME_PENALTY)).findAny() != null) 
+				return penaltyApplicableDemand;
+		}		
+		return null;
+	}
+	
+
+	
+//	public List<Demand> updateDemands_V0(GetBillCriteria getBillCriteria, RequestInfoWrapper requestInfoWrapper) {
+//
+//		if (getBillCriteria.getAmountExpected() == null)
+//			getBillCriteria.setAmountExpected(BigDecimal.ZERO);
+//		RequestInfo requestInfo = requestInfoWrapper.getRequestInfo();
+//		Map<String, JSONArray> billingSlabMaster = new HashMap<>();
+//		Map<String, JSONArray> timeBasedExemptionMasterMap = new HashMap<>();
+//		mstrDataService.setWaterConnectionMasterValues(requestInfo, getBillCriteria.getTenantId(), billingSlabMaster,
+//				timeBasedExemptionMasterMap);
+//		
+//		if (CollectionUtils.isEmpty(getBillCriteria.getConsumerCodes()))
+//			getBillCriteria.setConsumerCodes(Collections.singletonList(getBillCriteria.getConnectionNumber()));
+//		
+//		DemandResponse res = mapper.convertValue(
+//				repository.fetchResult(utils.getDemandSearchUrl(getBillCriteria), requestInfoWrapper),
+//				DemandResponse.class);
+//		
+//		
+//		
+//	
+//		if (CollectionUtils.isEmpty(res.getDemands())) {
+//			Map<String, String> map = new HashMap<>();
+//			map.put(WSCalculationConstant.EMPTY_DEMAND_ERROR_CODE, WSCalculationConstant.EMPTY_DEMAND_ERROR_MESSAGE);
+//			throw new CustomException(map);
+//		}
+//		
+//		//1.Sort demand based on taxPeriodTo
+//		List<Demand>sortedDemands = res.getDemands().stream()
+//				  .sorted(Comparator.comparing(Demand::getTaxPeriodTo).reversed())
+//				  .collect(Collectors.toList());
+//	
+//		// Loop through the consumerCodes and re-calculate the time base applicable
+//		Map<String, Demand> consumerCodeToDemandMap = new HashMap<String, Demand>();
+//		
+////		Map<String, Demand> consumerCodeToDemandMap = sortedDemands.stream()
+////				.collect(Collectors.toMap(Demand::getId, Function.identity()));
+//		
+//		List<Demand> demandsToBeUpdated = new LinkedList<>();
+//		String tenantId = getBillCriteria.getTenantId();
+//		Demand penaltyApplicableDemand = null;
+//		if(sortedDemands != null ) {
+//			 penaltyApplicableDemand = sortedDemands.get(0); // get first demand
+//			 Long billExpiryCheckDate = Long.sum(penaltyApplicableDemand.getTaxPeriodTo(),penaltyApplicableDemand.getBillExpiryTime());
+//			 Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+//			 Long currentDateAndTimeIST = calendar.getTimeInMillis();
+//			if (currentDateAndTimeIST <= billExpiryCheckDate) { //current date is less than expire date,ie current demand is the active one, so take the previous demand for applying penalty				
+//				penaltyApplicableDemand =  sortedDemands.size()>1 ? sortedDemands.get(1):null;
+//				if(penaltyApplicableDemand !=null) {			
+//					penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);
+//			}				
+//			else { // current date is more than the expire date ie. the demand is already expired  so check any penalty already applied or not
+//				penaltyApplicableDemand = checkPenaltyApplicability(penaltyApplicableDemand);
+//			}
+//		  }
+//		}
+//		
+//		consumerCodeToDemandMap.put(penaltyApplicableDemand.getId(), penaltyApplicableDemand);
+//		//find latest demand
+//		//add expiry to ToPerid
+//		//if current time < updated To perid
+//		  // find the previous one  apply penalty to it
+//		//else
+//		   // apply penality to the present one
+//		    
+//		System.out.println("No of demands in hashmap="+consumerCodeToDemandMap.size());
+//		
+//		consumerCodeToDemandMap.forEach((id, demand) ->{        
+//			if (demand.getStatus() != null
+//					&& WSCalculationConstant.DEMAND_CANCELLED_STATUS.equalsIgnoreCase(demand.getStatus().toString()))
+//				throw new CustomException(WSCalculationConstant.EG_WS_INVALID_DEMAND_ERROR,
+//						WSCalculationConstant.EG_WS_INVALID_DEMAND_ERROR_MSG);
+//			applyPenalityForWaterBill(demand,requestInfoWrapper,timeBasedExemptionMasterMap);
+//			
+//			//applyRebateForWaterBill(demand,requestInfoWrapper,timeBasedExemptionMasterMap);
+//			//applyTimeBasedApplicables(demand, requestInfoWrapper, timeBasedExemptionMasterMap, taxPeriods);
+//			addRoundOffTaxHead(tenantId, demand.getDemandDetails());
+//			demandsToBeUpdated.add(demand);
+//		});
+//		
+//		//Call demand update in bulk to update the interest or penalty
+//		DemandRequest request = DemandRequest.builder().demands(demandsToBeUpdated).requestInfo(requestInfo).build();
+//		repository.fetchResult(utils.getUpdateDemandUrl(), request);
+//		return res.getDemands();
+//
+//	}
+//	
+
+	
+	
 	/**
 	 * Updates demand for the given list of calculations
 	 * 
@@ -574,92 +716,208 @@ public class DemandService {
 	 * @param taxPeriods - List of tax periods
 	 * @return Returns TRUE if successful, FALSE otherwise
 	 */
-
-	private boolean applyTimeBasedApplicables(Demand demand, RequestInfoWrapper requestInfoWrapper,
-											  Map<String, JSONArray> timeBasedExemptionMasterMap, List<TaxPeriod> taxPeriods) {
-
+	
+	private boolean applyPenalityForWaterBill(Demand demand, RequestInfoWrapper requestInfoWrapper, Map<String, JSONArray> timeBasedExemptionMasterMap) {
+		
+		
+		
 		String tenantId = demand.getTenantId();
 		String demandId = demand.getId();
-		Long expiryDate = demand.getBillExpiryTime();
-		TaxPeriod taxPeriod = taxPeriods.stream().filter(t -> demand.getTaxPeriodFrom().compareTo(t.getFromDate()) >= 0
-				&& demand.getTaxPeriodTo().compareTo(t.getToDate()) <= 0).findAny().orElse(null);
-		
-		if (taxPeriod == null) {
-			log.info("Demand Expired!! ->> Consumer Code "+ demand.getConsumerCode() +" Demand Id -->> "+ demand.getId());
-			return false;
-		}
+		//Long expiryDate = demand.getTaxPeriodTo();
 		boolean isCurrentDemand = false;
-		if (!(taxPeriod.getFromDate() <= System.currentTimeMillis()
-				&& taxPeriod.getToDate() >= System.currentTimeMillis()))
-			isCurrentDemand = true;
-		
-		if(expiryDate < System.currentTimeMillis()) {
-		BigDecimal waterChargeApplicable = BigDecimal.ZERO;
-		BigDecimal oldPenalty = BigDecimal.ZERO;
-		BigDecimal oldInterest = BigDecimal.ZERO;
-		
+//		Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+//		long currentIST = calendar.getTimeInMillis();
+//		if (!(demand.getTaxPeriodFrom() <= currentIST
+//				&& demand.getTaxPeriodTo() >= currentIST))
+//			isCurrentDemand = true;
+//		if(demand.getTaxPeriodTo() < currentIST) { 
+			//Apply penalty
+			BigDecimal waterChargeApplicable = BigDecimal.ZERO;
+			BigDecimal oldPenalty = BigDecimal.ZERO;
+			BigDecimal rebateApplied = BigDecimal.ZERO;
+			for (DemandDetail detail : demand.getDemandDetails()) {
+				if (WSCalculationConstant.TAX_APPLICABLE.contains(detail.getTaxHeadMasterCode())) {
+					//apply penalty to the remaining amount only
+					waterChargeApplicable = waterChargeApplicable.add(detail.getTaxAmount().subtract(detail.getCollectionAmount()));
+					System.out.println("water charge applicable="+waterChargeApplicable);
+				}
+				if (detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_PENALTY)) {
+					oldPenalty = oldPenalty.add(detail.getTaxAmount());
+				}
+				if(detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_REBATE)) {
+					System.out.println("Rebate is applied so check the applicabillity");
+					rebateApplied = checkRebateApplicability(detail.getTaxAmount(),timeBasedExemptionMasterMap);
+				}
 
-		for (DemandDetail detail : demand.getDemandDetails()) {
-			if (WSCalculationConstant.TAX_APPLICABLE.contains(detail.getTaxHeadMasterCode())) {
-				waterChargeApplicable = waterChargeApplicable.add(detail.getTaxAmount());
 			}
-			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_PENALTY)) {
-				oldPenalty = oldPenalty.add(detail.getTaxAmount());
-			}
-			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_INTEREST)) {
-				oldInterest = oldInterest.add(detail.getTaxAmount());
-			}
-		}
-		
-		boolean isPenaltyUpdated = false;
-		boolean isInterestUpdated = false;
-		
-		List<DemandDetail> details = demand.getDemandDetails();
+			
+			boolean isPenaltyUpdated = false;
+			List<DemandDetail> details = demand.getDemandDetails();
+			Map<String, BigDecimal> penaltyEstimates = new HashMap<String, BigDecimal>();
+			if(timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_PENANLTY_MASTER) != null)
+				penaltyEstimates = payService.calculatePenaltyForWaterBill(waterChargeApplicable,  timeBasedExemptionMasterMap);
+			
+			if (null == penaltyEstimates)
+				return isCurrentDemand;
+						
+			BigDecimal penalty = penaltyEstimates.get(WSCalculationConstant.WS_TIME_PENALTY);
+			if(penalty == null)
+				penalty = BigDecimal.ZERO;
+			DemandDetailAndCollection latestPenaltyDemandDetail;		
 
-		Map<String, BigDecimal> interestPenaltyEstimates = payService.applyPenaltyRebateAndInterest(
-				waterChargeApplicable, taxPeriod.getFinancialYear(), timeBasedExemptionMasterMap, expiryDate);
-		if (null == interestPenaltyEstimates)
+			if (penalty.compareTo(BigDecimal.ZERO) != 0) {
+				latestPenaltyDemandDetail = utils.getLatestDemandDetailByTaxHead(WSCalculationConstant.WS_TIME_PENALTY,	details);
+				if (latestPenaltyDemandDetail != null) {
+					updateTaxAmount(penalty, latestPenaltyDemandDetail);
+					isPenaltyUpdated = true;
+				}
+			}
+			if (!isPenaltyUpdated && penalty.compareTo(BigDecimal.ZERO) > 0)
+				details.add(
+						DemandDetail.builder().taxAmount(penalty.setScale(2, 2)).taxHeadMasterCode(WSCalculationConstant.WS_TIME_PENALTY)
+								.demandId(demandId).tenantId(tenantId).build());
+			
+			
+		
+			details.remove(DemandDetail.builder().taxHeadMasterCode(WSCalculationConstant.WS_TIME_REBATE).demandId(demandId).tenantId(tenantId).build());
+		
 			return isCurrentDemand;
-
-		BigDecimal penalty = interestPenaltyEstimates.get(WSCalculationConstant.WS_TIME_PENALTY);
-		BigDecimal interest = interestPenaltyEstimates.get(WSCalculationConstant.WS_TIME_INTEREST);
-		if(penalty == null)
-			penalty = BigDecimal.ZERO;
-		if(interest == null)
-			interest = BigDecimal.ZERO;
-
-		DemandDetailAndCollection latestPenaltyDemandDetail, latestInterestDemandDetail;
-
-		if (interest.compareTo(BigDecimal.ZERO) != 0) {
-			latestInterestDemandDetail = utils.getLatestDemandDetailByTaxHead(WSCalculationConstant.WS_TIME_INTEREST,
-					details);
-			if (latestInterestDemandDetail != null) {
-				updateTaxAmount(interest, latestInterestDemandDetail);
-				isInterestUpdated = true;
-			}
-		}
-
-		if (penalty.compareTo(BigDecimal.ZERO) != 0) {
-			latestPenaltyDemandDetail = utils.getLatestDemandDetailByTaxHead(WSCalculationConstant.WS_TIME_PENALTY,
-					details);
-			if (latestPenaltyDemandDetail != null) {
-				updateTaxAmount(penalty, latestPenaltyDemandDetail);
-				isPenaltyUpdated = true;
-			}
-		}
-
-		if (!isPenaltyUpdated && penalty.compareTo(BigDecimal.ZERO) > 0)
-			details.add(
-					DemandDetail.builder().taxAmount(penalty.setScale(2, 2)).taxHeadMasterCode(WSCalculationConstant.WS_TIME_PENALTY)
-							.demandId(demandId).tenantId(tenantId).build());
-		if (!isInterestUpdated && interest.compareTo(BigDecimal.ZERO) > 0)
-			details.add(
-					DemandDetail.builder().taxAmount(interest.setScale(2, 2)).taxHeadMasterCode(WSCalculationConstant.WS_TIME_INTEREST)
-							.demandId(demandId).tenantId(tenantId).build());
-		}
-
-		return isCurrentDemand;
+		
 	}
+	
+	BigDecimal checkRebateApplicability(BigDecimal rebateAmount, Map<String, JSONArray> timeBasedExemptionMasterMap ) {
+		BigDecimal applicableRebate = BigDecimal.ZERO;
+		JSONArray rebateMaster = timeBasedExemptionMasterMap.get(WSCalculationConstant.WC_REBATE_MASTER);
+		if (null == rebateMaster) {
+			return applicableRebate;
+		}
+		else {
+			JSONObject rebateObject = mapper.convertValue(rebateMaster.get(0), JSONObject.class);
+			String rebateEndDate = rebateObject.getAsString(WSCalculationConstant.ENDING_DATE_APPLICABLES);
+			String newReabteEndDate = rebateEndDate.concat("/").concat(String.valueOf(YearMonth.now().getYear()));
+			Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(timeZone));
+			Long currentDateAndTimeIST = calendar.getTimeInMillis();		 
+			//creates a formatter that parses the date in the given format
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+			Date date;
+			try {
+				date = sdf.parse(newReabteEndDate);
+				calendar.setTime(date);
+				//calendar.setTimeInMillis(timeInMillis);
+				if(currentDateAndTimeIST < calendar.getTimeInMillis()) {
+					//Rebate applied is still valid
+					applicableRebate = rebateAmount;
+				}
+				else {
+					return applicableRebate;
+				}
+				
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	
+		return applicableRebate;
+		
+	}
+	
+
+
+//	private boolean applyTimeBasedApplicables(Demand demand, RequestInfoWrapper requestInfoWrapper,
+//											  Map<String, JSONArray> timeBasedExemptionMasterMap, List<TaxPeriod> taxPeriods) {
+//
+//		
+//		String tenantId = demand.getTenantId();
+//		String demandId = demand.getId();
+//	//	Long expiryDate = demand.getBillExpiryTime();
+//		
+//		Long expiryDate = demand.getTaxPeriodTo();
+//		
+//		TaxPeriod taxPeriod = taxPeriods.stream().filter(t -> demand.getTaxPeriodFrom().compareTo(t.getFromDate()) >= 0
+//				&& demand.getTaxPeriodTo().compareTo(t.getToDate()) <= 0).findAny().orElse(null);
+//		
+//	
+//		
+//		if (taxPeriod == null) {
+//			log.info("Demand Expired!! ->> Consumer Code "+ demand.getConsumerCode() +" Demand Id -->> "+ demand.getId());
+//			return false;
+//		}
+//		else {
+//			System.out.println("DC-tax  period="+taxPeriod.toString());
+//		}
+//		boolean isCurrentDemand = false;
+//		if (!(taxPeriod.getFromDate() <= System.currentTimeMillis()
+//				&& taxPeriod.getToDate() >= System.currentTimeMillis()))
+//			isCurrentDemand = true;
+//		
+//		if(expiryDate < System.currentTimeMillis()) {  
+//		BigDecimal waterChargeApplicable = BigDecimal.ZERO;
+//		BigDecimal oldPenalty = BigDecimal.ZERO;
+//		BigDecimal oldInterest = BigDecimal.ZERO;
+//		
+//		System.out.println("DC- bill expiry date="+ new Date(expiryDate ));
+//		for (DemandDetail detail : demand.getDemandDetails()) {
+//			if (WSCalculationConstant.TAX_APPLICABLE.contains(detail.getTaxHeadMasterCode())) {
+//				waterChargeApplicable = waterChargeApplicable.add(detail.getTaxAmount());
+//			}
+//			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_PENALTY)) {
+//				oldPenalty = oldPenalty.add(detail.getTaxAmount());
+//			}
+//			if (detail.getTaxHeadMasterCode().equalsIgnoreCase(WSCalculationConstant.WS_TIME_INTEREST)) {
+//				oldInterest = oldInterest.add(detail.getTaxAmount());
+//			}
+//		}
+//		
+//		boolean isPenaltyUpdated = false;
+//		boolean isInterestUpdated = false;
+//		
+//		List<DemandDetail> details = demand.getDemandDetails();
+//
+//		Map<String, BigDecimal> interestPenaltyEstimates = payService.applyPenaltyRebateAndInterest(
+//				waterChargeApplicable, taxPeriod.getFinancialYear(), timeBasedExemptionMasterMap, expiryDate);
+//		if (null == interestPenaltyEstimates)
+//			return isCurrentDemand;
+//
+//		BigDecimal penalty = interestPenaltyEstimates.get(WSCalculationConstant.WS_TIME_PENALTY);
+//		BigDecimal interest = interestPenaltyEstimates.get(WSCalculationConstant.WS_TIME_INTEREST);
+//		if(penalty == null)
+//			penalty = BigDecimal.ZERO;
+//		if(interest == null)
+//			interest = BigDecimal.ZERO;
+//
+//		DemandDetailAndCollection latestPenaltyDemandDetail, latestInterestDemandDetail;
+//
+//		if (interest.compareTo(BigDecimal.ZERO) != 0) {
+//			latestInterestDemandDetail = utils.getLatestDemandDetailByTaxHead(WSCalculationConstant.WS_TIME_INTEREST,
+//					details);
+//			if (latestInterestDemandDetail != null) {
+//				updateTaxAmount(interest, latestInterestDemandDetail);
+//				isInterestUpdated = true;
+//			}
+//		}
+//
+//		if (penalty.compareTo(BigDecimal.ZERO) != 0) {
+//			latestPenaltyDemandDetail = utils.getLatestDemandDetailByTaxHead(WSCalculationConstant.WS_TIME_PENALTY,
+//					details);
+//			if (latestPenaltyDemandDetail != null) {
+//				updateTaxAmount(penalty, latestPenaltyDemandDetail);
+//				isPenaltyUpdated = true;
+//			}
+//		}
+//
+//		if (!isPenaltyUpdated && penalty.compareTo(BigDecimal.ZERO) > 0)
+//			details.add(
+//					DemandDetail.builder().taxAmount(penalty.setScale(2, 2)).taxHeadMasterCode(WSCalculationConstant.WS_TIME_PENALTY)
+//							.demandId(demandId).tenantId(tenantId).build());
+//		if (!isInterestUpdated && interest.compareTo(BigDecimal.ZERO) > 0)
+//			details.add(
+//					DemandDetail.builder().taxAmount(interest.setScale(2, 2)).taxHeadMasterCode(WSCalculationConstant.WS_TIME_INTEREST)
+//							.demandId(demandId).tenantId(tenantId).build());
+//		}
+//
+//		return isCurrentDemand;
+//	}
 
 	/**
 	 * Updates the amount in the latest demandDetail by adding the diff between
@@ -670,10 +928,9 @@ public class DemandService {
 	 * @param latestDetailInfo
 	 *            The latest demandDetail for the particular taxHead
 	 */
-	private void updateTaxAmount(BigDecimal newAmount, DemandDetailAndCollection latestDetailInfo) {
-		BigDecimal diff = newAmount.subtract(latestDetailInfo.getTaxAmountForTaxHead());
-		BigDecimal newTaxAmountForLatestDemandDetail = latestDetailInfo.getLatestDemandDetail().getTaxAmount()
-				.add(diff);
+	private void updateTaxAmount(BigDecimal newAmount, DemandDetailAndCollection latestDetailInfo) {		
+		BigDecimal diff = newAmount.subtract(latestDetailInfo.getTaxAmountForTaxHead()); 		
+		BigDecimal newTaxAmountForLatestDemandDetail = latestDetailInfo.getLatestDemandDetail().getTaxAmount().add(diff);
 		latestDetailInfo.getLatestDemandDetail().setTaxAmount(newTaxAmountForLatestDemandDetail);
 	}
 	
@@ -741,8 +998,12 @@ public class DemandService {
 		setTimeToBeginningOfDay(dateObject);
 		LocalDateTime localDateTime =LocalDateTime.ofInstant(dateObject.toInstant(), dateObject.getTimeZone().toZoneId());
 		
-		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
-					WSCalculationConstant.nonMeterdConnection,dateObject );
+//		List<String> connectionNos  =waterCalculatorDao.getConnectionsNoList(tenantId,
+//					WSCalculationConstant.nonMeterdConnection,dateObject );
+		
+		List<String> connectionNos  = new ArrayList<String>();
+		connectionNos.add("WS-TEST-2021-000257");
+		
 		//Assessment Year 
 		log.info("tenantId "+tenantId +" : "+ dateObject.getTime());
 		String assessmentYear = estimationService.getAssessmentYear(localDateTime);
