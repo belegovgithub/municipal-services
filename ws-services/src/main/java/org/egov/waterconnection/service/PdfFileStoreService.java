@@ -188,22 +188,15 @@ public class PdfFileStoreService {
 			// Estimation bills should be generated whenever the application comes for approval
 				//&& addDetail.getOrDefault(WCConstants.ESTIMATION_FILESTORE_ID, null) == null) {
 			addDetail.put(WCConstants.ESTIMATION_DATE_CONST, System.currentTimeMillis());
-			if(waterConnectionRequest.getWaterConnection().getConnectionNo().contains("WS"))
 			addDetail.put(WCConstants.ESTIMATION_FILESTORE_ID,
 					getFileStoreId(waterConnectionRequest, property,WCConstants.PDF_ESTIMATION_KEY));
-			else
-				addDetail.put(WCConstants.ESTIMATION_FILESTORE_ID,
-						getFileStoreId(waterConnectionRequest, property, WCConstants.PDF_ESTIMATION_KEY_SW));
+		 
 		}
 		if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()
 				.equalsIgnoreCase(WCConstants.ACTION_PAY)
-				&& addDetail.getOrDefault(WCConstants.SANCTION_LETTER_FILESTORE_ID, null) == null) {
-			if(waterConnectionRequest.getWaterConnection().getConnectionNo().contains("WS"))
+				&& addDetail.getOrDefault(WCConstants.SANCTION_LETTER_FILESTORE_ID, null) == null) { 
 			addDetail.put(WCConstants.SANCTION_LETTER_FILESTORE_ID,
 					getFileStoreId(waterConnectionRequest, property, WCConstants.PDF_SANCTION_KEY));
-			else
-				addDetail.put(WCConstants.SANCTION_LETTER_FILESTORE_ID,
-						getFileStoreId(waterConnectionRequest, property, WCConstants.PDF_SANCTION_KEY_SW));
 				
 		}
 		if (waterConnectionRequest.getWaterConnection().getProcessInstance().getAction()

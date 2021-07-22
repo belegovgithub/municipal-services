@@ -86,14 +86,6 @@ public class WaterServiceImpl implements WaterService {
 	@Override
 	public List<WaterConnection> createWaterConnection(WaterConnectionRequest waterConnectionRequest) {
 		int reqType = WCConstants.CREATE_APPLICATION;
-		if(waterConnectionRequest.getWaterConnection().getConnectionNo().contains("WS"))
-		{
-			System.out.println("water");
-		}
-		else
-		{
-			System.out.println("SW");
-		}
 		if (wsUtil.isModifyConnectionRequest(waterConnectionRequest)) {
 			List<WaterConnection> previousConnectionsList = getAllWaterApplications(waterConnectionRequest);
 			if (!CollectionUtils.isEmpty(previousConnectionsList)) {
@@ -103,9 +95,6 @@ public class WaterServiceImpl implements WaterService {
 			// Validate any process Instance exists with WF
 			if(wsUtil.isDeactivateConnectionRequest(waterConnectionRequest))
 			{
-				//Repeatative code
-				//Verify the last application is approved and not deactivated appplication 
-				
 				reqType = WCConstants.DEACTIVATE_CONNECTION;
 			}
 			else
@@ -119,15 +108,12 @@ public class WaterServiceImpl implements WaterService {
 		validateProperty.validatePropertyFields(property,waterConnectionRequest.getRequestInfo());
 		mDMSValidator.validateMasterForCreateRequest(waterConnectionRequest);
 		
-
-		
 		enrichmentService.enrichWaterConnection(waterConnectionRequest, reqType);
 		
 		userService.createUser(waterConnectionRequest);
 		
 		WaterConnection conn = waterConnectionRequest.getWaterConnection();
 		 
-		
 		//Legacy Condition 
 		if(!StringUtils.isEmpty(conn.getOldConnectionNo()) && reqType==WCConstants.CREATE_APPLICATION) {
 			wfIntegrator.callWorkFlow(waterConnectionRequest, property,config.getLegacyWSBusinessServiceName());
@@ -137,7 +123,6 @@ public class WaterServiceImpl implements WaterService {
 		if(reqType == WCConstants.DEACTIVATE_CONNECTION)
 		enrichmentService.enrichFileStoreIdsForDeactivate(waterConnectionRequest);
 		waterDao.saveWaterConnection(waterConnectionRequest);
-		//Generate Red Notice / notify citizen for 
 		//Legacy Condition 
 		if(!StringUtils.isEmpty(conn.getOldConnectionNo()) && reqType==WCConstants.CREATE_APPLICATION) {
 			enrichmentService.postForMeterReading(waterConnectionRequest,  WCConstants.LEGACY_CONNECTION);
@@ -307,20 +292,14 @@ public class WaterServiceImpl implements WaterService {
 				waterConnectionRequest.getWaterConnection().getTenantId(), config.getDeactivateWSBusinessServiceName());
 		enrichmentService.enrichUpdateWaterConnection(waterConnectionRequest);
 		actionValidator.validateUpdateRequest(waterConnectionRequest, businessService, previousApplicationStatus,  WCConstants.DEACTIVATE_CONNECTION);
-		//waterConnectionValidator.validateCalcAttr(waterConnectionRequest,searchResult);
-		//enrichmentService.enrichWithCalculationAttr(waterConnectionRequest);
-		//userService.updateUser(waterConnectionRequest, searchResult);
+		 
 		waterConnectionValidator.validateUpdate(waterConnectionRequest, searchResult, WCConstants.DEACTIVATE_CONNECTION);
 		
-		//call calculator service to generate the demand for one time fee
-		//calculationService.calculateFeeAndGenerateDemand(waterConnectionRequest, property);
 		wfIntegrator.callWorkFlow(waterConnectionRequest, property);
 		boolean isStateUpdatable = waterServiceUtil.getStatusForUpdate(businessService, previousApplicationStatus);
 		waterDao.updateWaterConnection(waterConnectionRequest, isStateUpdatable);
 		// setting oldApplication Flag
 		markOldApplication(waterConnectionRequest);
-		//check for edit and send edit notification
-		//enrichmentService.postForMeterReading(waterConnectionRequest, WCConstants.DEACTIVATE_CONNECTION);
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}
 
