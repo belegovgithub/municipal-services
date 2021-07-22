@@ -206,6 +206,8 @@ public class WCConstants {
 	public static final String LOCALITY = "locality";
 	
 	public static final String DEACTIVATE_FREEZE_CONNECTION = "DEACTIVATE_CONNECTION";
+	
+	public static final String CONNECTION_DEACTIVATED = "CONNECTION_DEACTIVATED";
 
 	public static final List<String> ADDITIONAL_OBJ_CONSTANT = Collections
 			.unmodifiableList(Arrays.asList(ADHOC_PENALTY, ADHOC_REBATE, ADHOC_PENALTY_REASON, ADHOC_PENALTY_COMMENT,
@@ -271,7 +273,7 @@ public class WCConstants {
 	public static final String MODIFIED_FINAL_STATE = "APPROVED";
 
 	public static final List<String> FINAL_CONNECTION_STATES = Collections
-			.unmodifiableList(Arrays.asList(MODIFIED_FINAL_STATE, STATUS_APPROVED));
+			.unmodifiableList(Arrays.asList(MODIFIED_FINAL_STATE, STATUS_APPROVED, CONNECTION_DEACTIVATED));
 	
 	public static final String SEARCH_TYPE_CONNECTION = "CONNECTION";
 	

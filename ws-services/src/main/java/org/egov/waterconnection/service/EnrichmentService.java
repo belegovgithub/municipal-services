@@ -409,24 +409,17 @@ public class EnrichmentService {
 						&& WCConstants.FINAL_CONNECTION_STATES.contains(connection.getApplicationStatus())) {
 					connectionHashMap.put(connection.getConnectionNo(), connection);
 				} else if (connectionHashMap.get(connection.getConnectionNo()) != null
-						&& WCConstants.FINAL_CONNECTION_STATES.contains(connection.getApplicationStatus())) {
-					if (connectionHashMap.get(connection.getConnectionNo()).getApplicationStatus()
-							.equals(connection.getApplicationStatus())) {
-						HashMap additionalDetail1 = new HashMap<>();
-						HashMap additionalDetail2 = new HashMap<>();
-						additionalDetail1 = mapper.convertValue(
-								connectionHashMap.get(connection.getConnectionNo()).getAdditionalDetails(),
-								HashMap.class);
-						additionalDetail2 = mapper.convertValue(connection.getAdditionalDetails(), HashMap.class);
-						BigDecimal creationDate1 = (BigDecimal) additionalDetail1.get(WCConstants.APP_CREATED_DATE);
-						BigDecimal creationDate2 = (BigDecimal) additionalDetail2.get(WCConstants.APP_CREATED_DATE);
-						if (creationDate1.compareTo(creationDate2) == -1) {
-							connectionHashMap.put(connection.getConnectionNo(), connection);
-						}
-					} else {
-						if (connection.getApplicationStatus().equals(WCConstants.MODIFIED_FINAL_STATE)) {
-							connectionHashMap.put(connection.getConnectionNo(), connection);
-						}
+					&& WCConstants.FINAL_CONNECTION_STATES.contains(connection.getApplicationStatus())) {
+					HashMap additionalDetail1 = new HashMap<>();
+					HashMap additionalDetail2 = new HashMap<>();
+					additionalDetail1 = mapper.convertValue(
+							connectionHashMap.get(connection.getConnectionNo()).getAdditionalDetails(),
+							HashMap.class);
+					additionalDetail2 = mapper.convertValue(connection.getAdditionalDetails(), HashMap.class);
+					BigDecimal creationDate1 = (BigDecimal) additionalDetail1.get(WCConstants.APP_CREATED_DATE);
+					BigDecimal creationDate2 = (BigDecimal) additionalDetail2.get(WCConstants.APP_CREATED_DATE);
+					if (creationDate1.compareTo(creationDate2) == -1) {
+						connectionHashMap.put(connection.getConnectionNo(), connection);
 					}
 				}
 			}
