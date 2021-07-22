@@ -225,12 +225,8 @@ public class WCConstants {
 	public static final String PDF_APPLICATION_KEY = "ws-applicationwater";
 
 	public static final String PDF_ESTIMATION_KEY = "ws-estimationnotice";
-	
-	public static final String PDF_ESTIMATION_KEY_SW = "sw-estimationnotice";
 
 	public static final String PDF_SANCTION_KEY = "ws-sanctionletter";
-	
-	public static final String PDF_SANCTION_KEY_SW = "sw-sanctionletter";
 	
 	public static final String PDF_RED_NOTICE_KEY = "ws-red-notice";
 
