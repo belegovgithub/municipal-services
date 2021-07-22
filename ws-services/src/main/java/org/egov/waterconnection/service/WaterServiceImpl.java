@@ -320,7 +320,6 @@ public class WaterServiceImpl implements WaterService {
 		// setting oldApplication Flag
 		markOldApplication(waterConnectionRequest);
 		//check for edit and send edit notification
-		waterDaoImpl.pushForEditNotificationForDeactivation(waterConnectionRequest);
 		//enrichmentService.postForMeterReading(waterConnectionRequest, WCConstants.DEACTIVATE_CONNECTION);
 		return Arrays.asList(waterConnectionRequest.getWaterConnection());
 	}

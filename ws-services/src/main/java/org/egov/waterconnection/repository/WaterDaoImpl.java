@@ -109,19 +109,6 @@ public class WaterDaoImpl implements WaterDao {
 	}
 	
 	/**
-	 * push object for edit notification for deactivation
-	 * 
-	 * @param waterConnectionRequest
-	 */
-	public void pushForEditNotificationForDeactivation(WaterConnectionRequest waterConnectionRequest) {
-		if (WCConstants.EDIT_NOTIFICATION_STATE_FOR_DEACTIVATION
-				.contains(waterConnectionRequest.getWaterConnection().getProcessInstance().getAction())) {
-			waterConnectionProducer.push(wsConfiguration.getEditNotificationTopic(), waterConnectionRequest);
-		}
-	}
-	
-	
-	/**
 	 * Enrich file store Id's
 	 * 
 	 * @param waterConnectionRequest

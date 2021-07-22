@@ -132,6 +132,9 @@ public class WorkflowNotificationService {
 		if (  waterServiceUtil.isModifyConnectionApplication(request)) {
 			reqType = WCConstants.MODIFY_CONNECTION;
 		}
+		if (  waterServiceUtil.isDeactivateConnectionRequest(request)) {
+			reqType = WCConstants.DEACTIVATE_CONNECTION;
+		}
 		String message = notificationUtil.getCustomizedMsgForInApp(request.getWaterConnection().getProcessInstance().getAction(), applicationStatus,
 				localizationMessage, reqType);
 		if (message == null) {
