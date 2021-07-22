@@ -93,7 +93,7 @@ public class CHBookEnrichmentService {
 		enrichAssignes(chBookBtls);
 		String nameOfBusinessService = chBookBtls.getBusinessService();
 		if (nameOfBusinessService == null) {
-			nameOfBusinessService = OBMConstant.businessService_OBM;
+			nameOfBusinessService = OBMConstant.businessService_CHB;
 			chBookBtls.setBusinessService(nameOfBusinessService);
 		}
 		if (workflowService.isStateUpdatable(chBookBtls.getStatus(), businessService)) {

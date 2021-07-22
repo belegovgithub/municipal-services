@@ -37,7 +37,7 @@ public class CHBookValidator {
 	}
 
 	public void validateBusinessService(CHBookRequest request) {
-		if (!request.getBooking().getBusinessService().equalsIgnoreCase(OBMConstant.businessService_OBM))
+		if (!request.getBooking().getBusinessService().equalsIgnoreCase(OBMConstant.businessService_CHB))
 			throw new CustomException("BUSINESSSERVICE_NOTMATCHING", " The business service not matching ");
 	}
 

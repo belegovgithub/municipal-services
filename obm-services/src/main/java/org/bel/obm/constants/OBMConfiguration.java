@@ -65,4 +65,10 @@ public class OBMConfiguration {
     
     @Value("${egov.obm.chb.allowedbookingbufferdays}")
     private Integer allowedBookingBufferDays;
+    
+    @Value("${egov.obm.calculator.host}")
+    private String calculatorHost;
+
+    @Value("${egov.obm.calculator.calculate.endpoint}")
+    private String calculateEndpointOBM;
 }

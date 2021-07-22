@@ -94,4 +94,11 @@ public class CommonUtils {
 			throw new CustomException("INVALID_INPUT", "Invalid Input Data");
 		}
 	}
+	
+	public StringBuilder getCalculationURI() {
+        StringBuilder uri = new StringBuilder();
+        uri.append(config.getCalculatorHost());
+        uri.append(config.getCalculateEndpointOBM());
+        return uri;
+    }
 }

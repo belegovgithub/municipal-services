@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
+import org.bel.obm.calculation.Calculation;
 import org.egov.common.contract.request.User;
 
 import lombok.AllArgsConstructor;
@@ -62,6 +63,8 @@ public class CHBookDtls {
     private BankDetails bankDetails;
     
     private String hallId;
+    
+    private Calculation calculation;
     
     public CHBookDtls addApplicationDocumentsItem(Document applicationDocumentsItem) {
         if (this.applicationDocuments == null) {

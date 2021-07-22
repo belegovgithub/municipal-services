@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OBMConstant {
 	
-	public static  final String businessService_OBM = "obm-services";
+	public static  final String businessService_CHB = "CHB";
 	
 	public static  final String workflowCode_CHB = "OBM_CHB_V1";
 	

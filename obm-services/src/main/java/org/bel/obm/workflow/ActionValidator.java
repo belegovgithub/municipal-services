@@ -38,7 +38,7 @@ public class ActionValidator {
 		Map<String, String> errorMap = new HashMap<>();
 		CHBookDtls chBookDtls = request.getBooking();
 		String namefBusinessService = chBookDtls.getBusinessService();
-		if ((namefBusinessService == null) || (namefBusinessService.equals(OBMConstant.businessService_OBM))) {
+		if ((namefBusinessService == null) || (namefBusinessService.equals(OBMConstant.businessService_CHB))) {
 			if (!workflowService.isStateUpdatable(chBookDtls.getStatus(), businessService)) {
 				if (chBookDtls.getId() == null)
 					errorMap.put("INVALID UPDATE", "Id of CH Booking cannot be null");
